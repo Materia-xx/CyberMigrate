@@ -1,0 +1,26 @@
+﻿<Window x:Class="CyberMigrate.Config"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CyberMigrate"
+        mc:Ignorable="d"
+        Title="Config"  Width="1024" Height="768" Loaded="Window_Loaded">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TreeView x:Name="treeConfig" Grid.Column="0" PreviewMouseRightButtonDown="treeConfig_PreviewMouseRightButtonDown" />
+
+        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch"/>
+
+        <DockPanel x:Name="configUIPanel" Grid.Column="2" />
+
+    </Grid>
+</Window>

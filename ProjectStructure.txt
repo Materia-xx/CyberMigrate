@@ -1,0 +1,14 @@
+CyberMigrate
+    * The main program.
+
+TaskBase
+    * Tasks should reference this project as a base class
+
+DataProvider
+    * All interaction between the database is encapsulated here
+    * Should not be referenced by tasks for the most part unless there is something specialized
+
+Dto
+    * Data transfer objects that flow back and forth between various parts of the program
+    * Probably all projects will reference this
+    * Has little to no functions itself, as much as possible this is just pure classes and properties (structure only).

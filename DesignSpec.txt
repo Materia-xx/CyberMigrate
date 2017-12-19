@@ -1,0 +1,284 @@
+
+TODO: What would be neat, to design, but maybe not implement in v1 is the ability to "attach" a running program to a task.
+      (not to a feature, though we might list all attachements in some view when looking at a feature).
+      Programs that started automatically from the "run program task" would automatically register the attachment.
+      The attachment would only be listed in the UI while the attached program is active, as soon as its PID dies, the attachment is removed.
+
+      There should be a way to label the attachment, so if you have several of the same type of program (maybe cmd.exe) then you'll be able
+      to tell them apart in the progra. Then from the UI when you clicked on the feature/task you would see that it has an attached program
+      and you could doubleclick on that attachment and the focus would shift to that program if possible. I believe that changing focus like
+      this will also change the active desktop, but need to verify.
+
+      This idea doesn't fully solve the issue of the computer rebooting and losing track of attachments. An example would be an Excel
+      spreadsheet that you are keeping track of something for a feature. More thought needs to be put into this idea, maybe it can also
+      record a way to be able to start the (attached) program if needed in the reboot situation. Though take care because a program that
+      runs as a task might only be designed to run 1 time, so we shouldn't auto-restart attached programs, and perhaps even a warning that
+      a start will happen when the user double clicks on it.. that will give them time to correct the program to make it understand that
+      the attached program does not really need to be restarted, but it is already running under a different PID that the user did manually
+      outside the scope of CyberMigrate.
+
+TODO: I would like to be able to see dependency maps represented graphically.
+      At the minimum that when you select any feature you can get 2 sets of information
+        * All items that depend on the selected feature being in a future state (all children)
+        * All items that list the item as a dependency (all parents)
+      Being able to draw out a visual graph, maybe with dot (http://www.graphviz.org/) or something that represents the dependency tree
+      Being able to click on the nodes in the graph and open up features would be even better.
+
+TODO: All tasks should have the ability to write notes in them regardless of the task type, fit this into the design of the shell form.
+
+TODO: The system should have a scheduler, and be able to create features from a template and run
+      them automatically at certain times. Like, every tue and thu at 7:00 am, or at 3 hours after I mark this task as inProgress.
+
+TODO: The program should allow a manual way to
+        * View the tasks within a feature (in all states, not just the current state) and be able to open one / work on it.
+        * Follow dependency tasks to their destination
+        * Quickly get a report of everything that depends on the feature you are looking at
+
+TODO: Features or tasks should be able to have files attached to them. Probably just features, tasks might be too granular for this.
+
+TODO: Make sure there is a way to re-assign dependency states across all features. e.g. If a system's highest state is "complete" and you've
+      been creating features that way for a while, placing dependency on the complete state, then decide that there should be a "complete+" state
+      then after creating that new state it auto-migrates all the features to that new state because you put feature template rules to do so, then
+      all of the things that depended on complete will no longer meet their dependency ? or is the dependency on everything >= complete ?
+      Should there be a way to manually update all of the old dependencies that were pointing at complete to instead now point at complete+ without
+      having to manually go through each 1 and do so ?
+      I think what this means is that yes, there will be a need to query for and update many entries at once like this. And means that 
+      dependencies should be able to be satisfied by any of multiple conditions. Which means a dependency passes if the state is either complete or
+      complete+.
+
+* Plan on using http://www.litedb.org/ for the tables / db.
+
+* Goal is to have the tool be able to run without having to run an external setups by default. (xcopy deploy and run to a base, up-to-date windows system)
+    i.e. You don't need to install SqlServer to support a database that this tool needs.
+    However you can configure tasks in the tool to interact with services/systems - this is extensibility, not a base requirement.
+
+* All of the base configurations can be edited through UIs.
+
+* Structure of things
+
+    * DataStore (Only 1 datastore at a time, technically could have multiple, but the program will only deal with 1 at a time.)
+        * Systems (Can have multiple per datastore, which have available system states)
+            * Features (Which migrate through the available system states automatically)
+                * Tasks (The units of work that must be accomplished within each system state for that state to be considered complete)
+
+* A system can be configured to have a number of system states that features in that system could potentially have.
+  An example set of system states might be:
+
+            SystemState     Priority
+            -----------     --------
+            Planning        6
+            Dev             5
+            Staging         4
+            Staging+        3
+            Production      2
+            Production+     1
+
+     The priority field provides a way to have (the many) tasks that are being shown from several different features in different
+     states (all of which are available to work on) to have a sorting order.
+     The idea is that across all tasks within the DataStore, if there is any "Production+" tasks to work on, those should be listed first.
+     i.e. Things that should be done after a rollout to production are most important.
+     This is user configurable so you can configure how the program hints at what is the highest priority task to work on.
+     It is up to the user to make sure these priorities stay balanced appropriately across all systems, and within each system.
+
+     TODO: Apply this same priority order sorting system to tasks as well (I think?). This would be a second layer of sorting within
+     each system state. e.g. A manual operation task that just supplies text based instructions may have a few task states such as
+     "Created" - Task was created from a template, "InProgress" - User is actively working on it now, "Waiting" - User is waiting on 
+     some other thing before we can continue with the task (and it's an external-other-thing that can't really be tracked iwth 
+     the "dependency" task), "Complete" - Task is done. Each of these task states should be able to be listed in the UI in the 
+     order of importance. e.g. The Waiting tasks might not be the best to list first ? yes ? no ? Who knows, but in either case
+     it should be sorted in the way that the task priorities define and these priorities should be able to be defined by the user
+     in some way.
+     TODO: I'm not sure if lettting the user define the task priorities integrates with the concept that task plugins define thier own
+     states. Also in the manual task that defines all of the above example states the user may want to add in another user defined
+     state that means something to them. The program only really needs to know which task state means "complete", so maybe this task
+     state will be reserved automatically and the task may "reserve" other task states as well, but this will not restrict the task
+     from having more extended task states. The extended states can be defined by the user in the main configuration in a section that
+     configures tasks. In this same configuration section will be the priorities for the tsk states which are fully defined by the user
+     for all tasks states. There may be a default priority order for the states in a task that get entered into the configuration 
+     when the program first runs and recognizes a new task, but beyond this point those task priorities are up to the user to manage.
+     TODO: make sure there are is a task interface added to allow tasks to describe their default states that the main program can
+     call.
+
+* System states vs Task states, auto vs manual
+
+  System states are always controlled by the program and are not available to be directly overridden by the user. Though there are
+  a number of things a user could do indirectly that would cause the SystemState to be re-calculated to what the user desired.
+
+  Task states can be auto-calculated by the task if the task type has implemented this functionality. E.g. The "dependency" task would auto-set its state to 
+  complete when the dependant feature reaches the correct system state. A vanilla task that just provided text based instructions
+  to the user may rely fully on the user to set the task state.
+
+* FeatureVars - Provides a way to store nvp settings on each feature.
+    * A task can read any feature's vars as long as it knows what feature id it wants to read.
+      This includes its own which will allow things like a task in a previous state to provide
+      data/input to a task in a later state.
+    * A task can set FeatureVars on either its feature or the master feature.
+    * FeatureVars are how I plan on implementing templating in all forms.
+    * The shared library will provide functions that tasks can call to interact with these variables:
+        * GetMasterFeatureId(int childFeatureId) - This crawls up through dependency tasks until it finds the
+          parent that has no other parent feature and returns the id of it.
+        * GetFeatureVars(int featureId) - Gets a list of nvp from the feature.
+        * GetFeatureVars(int childFeatureId, int parentFeatureId) - Gets feature vars from each feature starting
+          with the child and working its way up the dependency chain until it gets to the parent feature. 
+          When vars have the same name between 2 features, child overrides parent and a distinct list of settings
+          is returned.
+
+        * TODO: go through these functions and decide which ones should be exposed to tasks and which ones are needed
+          by the main program and not needed by tasks.
+
+        * SetFeatureVars(int featureId, Dictionary<string, ??> settings) - Allows a task to set the passed in nvp settings on the specified feature.
+          TODO: I'm not sure what should be passed for the setting type here other than object. 
+            * I would like it to be able to hold different data types, string, int, and custom structures. But not
+              sure what to do about enforcing that one task doesn't add the wrong type, or change the type of something existing.
+          TODO: because a task is supposed to only set the vars on the currenent feature or the master feature I
+            might think about a way to not pass feature id here as it allows a task to set the vars on any feature.
+            but it may not be an issue really.
+        * GetOutputVarNamesFromTask(int taskId) - Calls a task asking it for all var names that it intends to set on
+          any feature. Tasks should either set vars on their feature or on the master feature so each var returned
+          will include a mode.
+            * Self - The intention is that the var is set on the current feature.
+            * Master - The var will be set on the master feature.
+
+        * GetInputVarNamesForFeature(int featureId) - Calls all tasks in the feature asking they for the variable
+          names they will ultimately need, the task should even include names it think it might need. The function
+          digs into all child features as well recursively until it has the full list.
+          InputVars that are returned will have a mode on each one.
+            * Automatic - There is another task/feature that provides this var as output
+            * Manual - No other task indicated that it sets an output var with this name.
+                TODO: expand on the logic of how the function digs around and figures out this
+          This mode can be used to determine what variables to prompt for during a task that prompts for needed inputs.
+
+    * TODO: how would these vars make it into task titles and feature titles ?
+
+* Can configure multiple FeatureTemplates
+    * A FeatureTemplate is what is copied to make a Feature.
+    * A FeatureTemplate only applies to 1 system, so when creating a FeatureTemplate you must define what system it is for.
+        However a System can have multiple FeatureTemplates that define different SystemState "migration paths".
+
+    * A FeatureTemplates defines the rules to determine how to calculate the current feature state.
+      FeatureState calculation is done automatically by the program according to this "rules" table
+      that the user sets up. These rules are run in the order listed and the first one that matches
+      wins, with the rest being ignored.
+
+      Note: This isn't defined at the system level because there just-might be a situation later where
+      features need to move in different patterns. e.g. something that needs to progress backwards through the system.
+
+            ToState         Condition(s)
+            ---------       -----------
+
+            // These first 3 rules allow the feature to snap back to the "earliest state in the migration path" if new tasks are added.
+
+            Planning        (Any) tasks in (the Planning state) are (not complete)
+            Dev             (Any) tasks in (the Dev state) are (not complete)
+            Staging         (Any) tasks in (the Staging state) are (not complete)
+
+            // These rules provide the logic to auto-progress a feature to the next appropriate state when all tasks are complete.
+
+            Dev             (All) tasks in (the Planning state) are (complete)
+            Staging         (All) tasks in (the Dev state) are (complete)
+
+            // TODO: there needs to be some more special handling or rule conditions to handle a cancelled state.
+
+      Note that only states listed in the ToState column are states that can contain tasks. The GUI that
+      allows new tasks to be added should provide only these states as options.
+
+      When auto-state calculations run against one feature and the feature state is changed. The system should then
+      look for dependency tasks in parent features, and if those change, recalc those feature states, etc.
+
+    * Each state in the template can have a default set of (templated) tasks, or it can be left blank, or it could have "filler" tasks that are
+        meant to provide a hint on what needs to be added without adding the details of a task.
+
+* Different types of tasks can be configured in the program via managed extensibility framework (MEF)
+    e.g. each task type would be a new project which implements the required interfaces
+    * Tasks states are different than SystemStates. Task states are hardcoded within the task type itself and cannot be configured through the tool.
+    * Iterfaces planned so far
+
+        * AutoProgress() - Called on a regular basis by the main program to have tasks auto-progress their state if appropriate.
+          Note: A task that is changed to the reserved task state "complete" is considered a complete task to the program.
+          e.g. The dependency task that tracks other features may choose to check the state of another feature during this phase and if appropriate
+          mark this task as complete. Another manual type task may choose to do nothing here, letting the user completely control the task states.
+
+        * GetUI(int systemId, int featureId, int taskId) - Returns the user control that should be rendered in the main UI that represents this task item.
+          The main program will take care of setting up a directory to hold task data for the task if it has not already been done.
+          The task should hold these values (systemId, featureId, taskId) in memory for when it needs to call back to the shared library. The task does not need to cache these
+          values to the taskdata.json however as the ids will be passed every time the user requests to see the task UI.
+          Note that the state of a task should not be included in this UI, as this is provided by the main program.
+
+        TODO: do we need a callback for when the user changes the state of a task.. to let the task know ?
+
+    * A task should have access to a shared library of features meant to be used by task addins, planned features in this library are:
+
+        * GetFeatureState(int systemId, int featureid)
+            Returns the current state that the given feature is in. This is a calculation done by the main program and cannot be set.
+            Note: Needed by the "dependency" task to determine if a dependant feature has met the required state.
+
+        * SetTaskData(int systemId, int featureId, int taskId, string taskData)
+            Needs all 3 ids because I plan to store this json data in a folder structure 
+            like \systemid\featureid\taskid\taskdata.json
+            taskdata can be whatever format the task wants to store its data in. I plan on storing this data in serialized json (for the build-in tasks)
+
+        * GetTaskData(int systemId, int featureId, int taskId)
+            Returns the stored task data string from where it is stored on disk. It is up to the task to deserialize and work with this data.
+
+        * SetTaskState(int systemId, int featureId, int taskId, string state)
+            Tasks can set their own state by calling this. The main program should keep a master indexed list of the systems/features/tasks and states
+            so that queries, dependency checks or other scanning needs can be done quickly without needing to load or query the task itself.
+
+        * GetTaskState(int systemId, int featureId, int taskId)
+            Returns the current task state.
+
+    * There will be a few default Task types
+        * FreeForm - Holds free form text with no other features
+            GetUI() - Just a text box that lets you type whatever you want into. With a save button as well.
+        * FeatureDependency - The FeatureDependency task holds a reference to another Feature.
+            A FeatureDependency has 2 task states, Waiting and the reserved task state of "Complete".
+            A feature reference contains
+                * The System id
+                * An id of the feature that is referenced
+                * The trigger SystemState that the feature must be in in order for the FeatureDependency task to move to the Complete state.
+            AutoProgress() -
+                Step 1: Do the dependency check. The tool should be able to call back to the shared lib::GetFeatureState() to do this.
+                Step 2: Again call the shared lib to update the task state to complete if appropriate.
+        * ExecProgram - Runs a program, monitors the program, it's exit code can be used to determine if the task switches to the Complete state or not.
+            * Note: task should keep a log of any program console output in the task directory allocated by the main program.
+
+* UI - The UI should be able to perform queries over the features in the systems and list them.
+        Allthought the UI will be able to do queries manually, a couple of default queries will be built in.
+            Default: All features in any system that are not closed.
+                        Features that have any task(s) that can be started should be bubbled to the top of the result.
+                            Features in this group should be further sorted by the priority order
+                            The priority is manually defined (Plus the UI should allow the user move features up and down in priority)
+                                Note: This manual feature priority option would be another level of sorting in addition to SystemState and TaskState priority.
+                                      The scenario is that you have gradually built up a list of 200 features that are all currently in the SystemState of "Planned"
+                                      and you need a way to determine which one of those features should start being worked on first. There is some dependency information
+                                      that can happen here that can hint at the order of priority of features (that should be considered as well.), but in features that
+                                      do not have "dependency" tasks in them, there should still be a way to manually set the order in which to tackle them.
+                        The goal of this default query is to show the highest priority item that can be worked on next at the top of the list.
+
+            TODO: what other types of query would be useful ?
+
+        When a feature is selected in the UI it should list all of the tasks in the feature. And do so in the following 3 sections.
+            Note: This is different than TaskState priority technically, but in practice would there ever be something in the compete state in 2 of the below sections at the same time ?
+            The tasks should be listed so that it is possible for the user to determine:
+
+                * Tasks that were in a previous feature state (a state that the feature has already passed through)
+                    Place these at the bottom of the list.
+
+                * Tasks that are in the current feature state
+                    These tasks should bubble up to the top, listen in the same order they appear in the feature
+
+                * Tasks in other states (potential feature state)
+
+                TODO: I think this sorting algo may need to be redesigned to better sync with the other ideas of TaskState priorties and Feature migration rules.
+
+            There should be some visual indicator that lets the user know which group from above the task is in.
+
+        When a task is double-clicked it will call into the task class to show the UI.
+            This will cause another form window to open, a new one for each distinct task. e.g. if it is already open it should instead just change focus.
+            This will allow each task to be moved to a different desktop.
+
+            The task form GUI will have a header section added to all tasks that lets the user select the task state. This is provided by the main program (not the task UI).
+
+        TODO: UIs to configure Systems, Features and how a template becomes an instance
+        TODO: Make sure adding new tasks to a state that a feature has already completed brings that feature back to that state, and also
+                scans for anything that depended on that feature and recursively brings those features back as well.

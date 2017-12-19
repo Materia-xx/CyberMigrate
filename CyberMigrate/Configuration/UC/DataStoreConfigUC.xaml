@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="CyberMigrate.ConfigurationUC.DataStoreConfigUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CyberMigrate.ConfigurationUC"
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="300" Loaded="UserControl_Loaded">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25" />
+            <RowDefinition/>
+            <RowDefinition Height="25" />
+        </Grid.RowDefinitions>
+        <Label x:Name="lblStorePath" Content="Data Store Path" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0" />
+        
+        <TextBox x:Name="txtStorePath" Grid.Row="0" Grid.Column="1"/>
+
+        <Button x:Name="btnApply" Grid.Row="2" Grid.Column="1" Click="btnApply_Click">Apply</Button>
+    </Grid>
+</UserControl>
