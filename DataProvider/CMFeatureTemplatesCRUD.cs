@@ -13,21 +13,28 @@ namespace DataProvider
         }
 
         /// <summary>
-        /// Finds a feature template by name under the given system
+        /// Finds the first feature template by name under the given system.
+        /// There should be only 1 if the program is working correct in keeping duplicate names out
         /// </summary>
         /// <param name="featureTemplateName"></param>
         /// <param name="cmSystemId"></param>
         /// <returns></returns>
         public CMFeatureTemplate Get_ForFeatureTemplateName(string featureTemplateName, int cmSystemId)
         {
-            // mcbtodo: I don't like how this routes through getAll first, pass a lambda down instead
-            // mcbtodo: track down everywhere that uses GetAll and rewrite them... it may be nothing, it may help
-            return GetAll().FirstOrDefault(s => s.Name.Equals(featureTemplateName, System.StringComparison.OrdinalIgnoreCase));
+            // First get all within the specified system
+            var results = GetAll_ForSystem(cmSystemId);
+
+            // The filter it down to just the one in the specified name, if it exists
+            results = results.Where(f => f.Name.Equals(featureTemplateName, System.StringComparison.OrdinalIgnoreCase));
+            return results.FirstOrDefault();
         }
 
         public IEnumerable<CMFeatureTemplate> GetAll_ForSystem(int cmSystemId)
         {
-            return GetAll().Where(s => s.CMSystemId == cmSystemId);
+            Query query = Query.EQ(nameof(CMFeatureTemplate.CMSystemId), cmSystemId);
+            var results = QueryCollection(query);
+
+            return results.OrderBy(f => f.Name);
         }
     }
 }

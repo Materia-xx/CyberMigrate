@@ -13,19 +13,32 @@ namespace DataProvider
         }
 
         /// <summary>
-        /// Indicates if a system state with the given name already exists
+        /// Gets a system state within the specified system by name
         /// </summary>
         /// <param name="statemName"></param>
         /// <returns></returns>
-        public CMSystemState Get_ForStateName(string statemName)
+        public CMSystemState Get_ForStateName(string statemName, int cmSystemId)
         {
-            // mcbtodo: I don't like how this routes through getAll first, pass a lambda down instead
-            return GetAll().FirstOrDefault(s => s.Name.Equals(statemName, System.StringComparison.OrdinalIgnoreCase));
+            // First get all in the system
+            var results = GetAll_ForSystem(cmSystemId);
+
+            // Then filter it down to just the one with the name or default
+            results = results.Where(s => s.Name.Equals(statemName, System.StringComparison.OrdinalIgnoreCase));
+            return results.FirstOrDefault();
         }
 
+        /// <summary>
+        /// Get all system states that exist within the specified system.
+        /// </summary>
+        /// <param name="cmSystemId"></param>
+        /// <returns></returns>
         public IEnumerable<CMSystemState> GetAll_ForSystem(int cmSystemId)
         {
-            return GetAll().Where(s => s.CMSystemId == cmSystemId);
+            Query query = Query.EQ(nameof(CMSystemState.CMSystemId), cmSystemId);
+            var results = QueryCollection(query);
+
+            // Return with the lowest priority first. Same pattern as other places that use priority.
+            return results.OrderBy(s => s.Priority);
         }
     }
 }

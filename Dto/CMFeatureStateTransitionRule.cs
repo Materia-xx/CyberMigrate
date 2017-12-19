@@ -3,6 +3,11 @@
     public class CMFeatureStateTransitionRule : IdBasedObject
     {
         /// <summary>
+        /// Transition rules are processed in order with the first one that matches winning and the rest being ignored
+        /// </summary>
+        public int Priority { get; set; } // mcbtodo: implement this into the UI
+
+        /// <summary>
         /// The feature template that this rule is for
         /// </summary>
         public int CMFeatureTemplateId { get; set; }

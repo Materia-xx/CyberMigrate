@@ -14,7 +14,12 @@ namespace DataProvider
 
         public IEnumerable<CMFeatureStateTransitionRule> GetAll_ForFeatureTemplate(int cmFeatureTemplateId)
         {
-            return GetAll().Where(r => r.CMFeatureTemplateId == cmFeatureTemplateId);
+            Query query = Query.EQ(nameof(CMFeatureStateTransitionRule.CMFeatureTemplateId), cmFeatureTemplateId);
+            var results = QueryCollection(query);
+
+            // Always return rules so that the first one in the list that the program comes across is the winner and the rest are ignored
+            // This also has the side effect of listing them in this same order in the configuration UI.
+            return results.OrderBy(r => r.Priority);
         }
     }
 }

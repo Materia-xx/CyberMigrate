@@ -71,27 +71,8 @@ namespace CyberMigrate.ConfigurationUC
                     MessageBox.Show($"A row was found with an empty state name. This is required. Nothing has been updated.");
                     return;
                 }
-
-                // Existing states will already have the right system id, new ones won't. Just set them all.
-                cmSystemState.CMSystemId = CMSystemId;
-
-                // If the Id column is 0 then check to see if it was just removed and added with the same name
-                // instead of making it a new state.
-                if (cmSystemState.Id == 0)
-                {
-                    var existingState = Global.CmDataProvider.Instance.CMSystemStates.Instance.Get_ForStateName(cmSystemState.Name);
-                    if (existingState != null)
-                    {
-                        cmSystemState.Id = existingState.Id;
-                        MessageBox.Show($"State '{cmSystemState.Name}' was re-assigned back to the original state with this name even though the row was removed and re-added. To truly detach a state, do the removal first (then apply), then re-add (then apply again).");
-                    }
-                }
-
-                // Add a new state or allow renaming or changing of the priority
-                Global.CmDataProvider.Instance.CMSystemStates.Instance.Upsert(cmSystemState);
             }
 
-// mcbtodo: is this a duplicate loop ?
             foreach (var cmSystemState in cmSystemStates)
             {
                 // Existing states will already have the right system id, new ones won't. Just set them all.
@@ -101,7 +82,7 @@ namespace CyberMigrate.ConfigurationUC
                 // instead of making it a new state.
                 if (cmSystemState.Id == 0)
                 {
-                    var existingState = Global.CmDataProvider.Instance.CMSystemStates.Instance.Get_ForStateName(cmSystemState.Name);
+                    var existingState = Global.CmDataProvider.Instance.CMSystemStates.Instance.Get_ForStateName(cmSystemState.Name, CMSystemId);
                     if (existingState != null)
                     {
                         cmSystemState.Id = existingState.Id;

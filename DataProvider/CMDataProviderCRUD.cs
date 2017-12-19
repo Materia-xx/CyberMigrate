@@ -9,7 +9,7 @@ namespace DataProvider
     /// Provides a base of C.R.U.D. operations for a table that has a single id and no foreign keys in the CyberMigrate database.
     /// Create, Read, Update, Delete
     /// </summary>
-    public class CMDataProviderCRUD<T> where T : IdBasedObject
+    public abstract class CMDataProviderCRUD<T> where T : IdBasedObject
     {
         private string cmDatabasePath;
         private string collectionName;
@@ -20,12 +20,34 @@ namespace DataProvider
             this.collectionName = collectionName;
         }
 
-        public virtual IEnumerable<T> GetAll()
+        /// <summary>
+        /// Returns all elements of the collection.
+        /// Use <see cref="QueryCollection(Query)"/> instead if the intention is the filter the returned results.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IEnumerable<T> GetAll()
         {
             using (var db = new LiteDatabase(cmDatabasePath))
             {
                 var cmCollection = db.GetCollection<T>(collectionName);
-                return cmCollection.FindAll();
+                var results = cmCollection.FindAll();
+                return results;
+            }
+        }
+
+        /// <summary>
+        /// Runs the specified query against the collection and returns the results.
+        /// No order is applied at the base level, instead implement this in the class that inherits from this one
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        protected virtual IEnumerable<T> QueryCollection(Query query)
+        {
+            using (var db = new LiteDatabase(cmDatabasePath))
+            {
+                var cmCollection = db.GetCollection<T>(collectionName);
+                var results = cmCollection.Find(query);
+                return results;
             }
         }
 
