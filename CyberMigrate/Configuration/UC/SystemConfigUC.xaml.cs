@@ -22,7 +22,7 @@ namespace CyberMigrate.ConfigurationUC
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            var cmSystem = Global.CmDataProvider.Instance.CMSystems.Instance.Get(CMSystemId);
+            var cmSystem = Global.CmDataProvider.Value.CMSystems.Value.Get(CMSystemId);
             txtSystemName.Text = cmSystem.Name;
 
             // Don't let the grid auto-generate the columns. Because we want to instead have some of them hidden
@@ -49,16 +49,16 @@ namespace CyberMigrate.ConfigurationUC
                 });
 
             // Load all states in this system
-            var cmSystemStates = Global.CmDataProvider.Instance.CMSystemStates.Instance.GetAll_ForSystem(CMSystemId).ToList();
+            var cmSystemStates = Global.CmDataProvider.Value.CMSystemStates.Value.GetAll_ForSystem(CMSystemId).ToList();
             dataGridStates.ItemsSource = cmSystemStates;
         }
 
         private void btnApply_Click(object sender, RoutedEventArgs e)
         {
             // Update the system name
-            var cmSystem = Global.CmDataProvider.Instance.CMSystems.Instance.Get(CMSystemId);
+            var cmSystem = Global.CmDataProvider.Value.CMSystems.Value.Get(CMSystemId);
             cmSystem.Name = txtSystemName.Text;
-            Global.CmDataProvider.Instance.CMSystems.Instance.Upsert(cmSystem);
+            Global.CmDataProvider.Value.CMSystems.Value.Upsert(cmSystem);
 
             // Update the collection of system states
             List<CMSystemState> cmSystemStates = (List<CMSystemState>)dataGridStates.ItemsSource;
@@ -82,7 +82,7 @@ namespace CyberMigrate.ConfigurationUC
                 // instead of making it a new state.
                 if (cmSystemState.Id == 0)
                 {
-                    var existingState = Global.CmDataProvider.Instance.CMSystemStates.Instance.Get_ForStateName(cmSystemState.Name, CMSystemId);
+                    var existingState = Global.CmDataProvider.Value.CMSystemStates.Value.Get_ForStateName(cmSystemState.Name, CMSystemId);
                     if (existingState != null)
                     {
                         cmSystemState.Id = existingState.Id;
@@ -91,18 +91,18 @@ namespace CyberMigrate.ConfigurationUC
                 }
 
                 // Add a new state or allow renaming or changing of the priority
-                Global.CmDataProvider.Instance.CMSystemStates.Instance.Upsert(cmSystemState);
+                Global.CmDataProvider.Value.CMSystemStates.Value.Upsert(cmSystemState);
             }
 
             // Look for states that exist in the database, but not in the grid and delete them if possible
-            var cmSystemDBStates = Global.CmDataProvider.Instance.CMSystemStates.Instance.GetAll_ForSystem(CMSystemId).ToList();
+            var cmSystemDBStates = Global.CmDataProvider.Value.CMSystemStates.Value.GetAll_ForSystem(CMSystemId).ToList();
             foreach (var cmSystemState in cmSystemDBStates)
             {
                 var gridSystemState = cmSystemStates.FirstOrDefault(s => s.Id == cmSystemState.Id);
                 if (gridSystemState == null)
                 {
                     // mcbtodo: For now I am just deleting the state, but really it should check to make sure there are no refs to the state first.
-                    Global.CmDataProvider.Instance.CMSystemStates.Instance.Delete(cmSystemState.Id);
+                    Global.CmDataProvider.Value.CMSystemStates.Value.Delete(cmSystemState.Id);
                 }
             }
 

@@ -35,19 +35,19 @@ namespace CyberMigrate
             var dataStoreTreeViewItem = TreeConfiguration_AddDataStore();
 
             // If the data store path hasn't been set yet, then this is as far as we can go
-            if (string.IsNullOrWhiteSpace(Global.CmMasterDataProvider.Instance.GetOptions().DataStorePath))
+            if (string.IsNullOrWhiteSpace(Global.CmMasterDataProvider.Value.GetOptions().DataStorePath))
             {
                 return;
             }
 
             // Get all of the systems and show them as tree view items
-            var cmSystems = Global.CmDataProvider.Instance.CMSystems.Instance.GetAll();
+            var cmSystems = Global.CmDataProvider.Value.CMSystems.Value.GetAll();
             foreach (var cmSystem in cmSystems)
             {
                 var cmSystemTreeViewItem = TreeConfiguration_AddCMSystem(dataStoreTreeViewItem, cmSystem);
 
                 // Get all of the feature templates within this system and show them.
-                var cmFeatureTemplates = Global.CmDataProvider.Instance.CMFeatureTemplates.Instance.GetAll_ForSystem(cmSystem.Id);
+                var cmFeatureTemplates = Global.CmDataProvider.Value.CMFeatureTemplates.Value.GetAll_ForSystem(cmSystem.Id);
                 foreach (var cmFeatureTemplate in cmFeatureTemplates)
                 {
                     var cmFeatureTemplateTreeViewItem = TreeConfiguration_AddFeatureTemplate(cmSystemTreeViewItem, cmFeatureTemplate);
@@ -95,13 +95,13 @@ namespace CyberMigrate
                     Name = "New System"
                 };
 
-                if (Global.CmDataProvider.Instance.CMSystems.Instance.Get_ForSystemName(newCMSystem.Name) != null)
+                if (Global.CmDataProvider.Value.CMSystems.Value.Get_ForSystemName(newCMSystem.Name) != null)
                 {
                     MessageBox.Show($"A '{newCMSystem.Name}' already exists. Rename that one first.");
                     return;
                 }
 
-                if (Global.CmDataProvider.Instance.CMSystems.Instance.Upsert(newCMSystem))
+                if (Global.CmDataProvider.Value.CMSystems.Value.Upsert(newCMSystem))
                 {
                     TreeConfiguration_AddCMSystem(dataStoreTreeViewItem, newCMSystem);
                 }
@@ -123,7 +123,7 @@ namespace CyberMigrate
                 // mcbtodo: Check for any refs before deleting, do this as a callback ? e.g. how to provide a delete function that comes with the CRUD object but 
                 // mcbtodo: allow for extensibility to allow the creator to provide custom logic to indicate if an id is still referenced.
                 // mcbtodo: is there a concept of referential integrity in liteDb ?
-                Global.CmDataProvider.Instance.CMSystems.Instance.Delete(attachedTagData.Id);
+                Global.CmDataProvider.Value.CMSystems.Value.Delete(attachedTagData.Id);
                 RemoveSelectedTreeConfigItem();
             };
             return contextMenu;
@@ -166,13 +166,13 @@ namespace CyberMigrate
                     CMSystemId = cmSystem.Id
                 };
 
-                if (Global.CmDataProvider.Instance.CMFeatureTemplates.Instance.Get_ForFeatureTemplateName(newCMFeatureTemplate.Name, cmSystem.Id) != null)
+                if (Global.CmDataProvider.Value.CMFeatureTemplates.Value.Get_ForFeatureTemplateName(newCMFeatureTemplate.Name, cmSystem.Id) != null)
                 {
                     MessageBox.Show($"A '{newCMFeatureTemplate.Name}' already exists. Rename that one first.");
                     return;
                 }
 
-                if (Global.CmDataProvider.Instance.CMFeatureTemplates.Instance.Upsert(newCMFeatureTemplate))
+                if (Global.CmDataProvider.Value.CMFeatureTemplates.Value.Upsert(newCMFeatureTemplate))
                 {
                     TreeConfiguration_AddFeatureTemplate(cmSystemTreeViewItem, newCMFeatureTemplate);
                 }

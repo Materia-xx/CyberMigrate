@@ -31,7 +31,7 @@ namespace CyberMigrate.ConfigurationUC
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            var cmFeatureTemplate = Global.CmDataProvider.Instance.CMFeatureTemplates.Instance.Get(CMFeatureTemplateId);
+            var cmFeatureTemplate = Global.CmDataProvider.Value.CMFeatureTemplates.Value.Get(CMFeatureTemplateId);
             txtFeatureTemplateName.Text = cmFeatureTemplate.Name;
 
             dataGridStateTransitionRules.AutoGenerateColumns = false;
@@ -72,16 +72,16 @@ namespace CyberMigrate.ConfigurationUC
                 });
 
             // Load all state transition rules
-            var cmFeatureStateTransitionRules = Global.CmDataProvider.Instance.CMFeatureStateTransitionRules.Instance.GetAll_ForFeatureTemplate(CMFeatureTemplateId).ToList();
+            var cmFeatureStateTransitionRules = Global.CmDataProvider.Value.CMFeatureStateTransitionRules.Value.GetAll_ForFeatureTemplate(CMFeatureTemplateId).ToList();
             dataGridStateTransitionRules.ItemsSource = cmFeatureStateTransitionRules;
         }
 
         private void btnApply_Click(object sender, RoutedEventArgs e)
         {
             // Update the feature template
-            var cmFeatureTemplate = Global.CmDataProvider.Instance.CMFeatureTemplates.Instance.Get(CMFeatureTemplateId);
+            var cmFeatureTemplate = Global.CmDataProvider.Value.CMFeatureTemplates.Value.Get(CMFeatureTemplateId);
             cmFeatureTemplate.Name = txtFeatureTemplateName.Text;
-            Global.CmDataProvider.Instance.CMFeatureTemplates.Instance.Upsert(cmFeatureTemplate);
+            Global.CmDataProvider.Value.CMFeatureTemplates.Value.Upsert(cmFeatureTemplate);
 
             // Reload main treeview, this is how we handle renames
             ConfigWindow.ReLoadTreeConfiguration();

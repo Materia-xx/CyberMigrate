@@ -57,42 +57,5 @@ namespace DataProvider
                 }
             }
         }
-
-        // mcbtodo: just keeping these around for example. delete when there is other examples like this
-
-        ///// <summary>
-        ///// Adds a new data store location for the program to track. 
-        ///// A data store is a complete, isolated set of systems, features and tasks.
-        ///// </summary>
-        ///// <param name="dataStorePath"></param>
-        //public bool AddDataStore(DataStore store)
-        //{
-        //    using (var db = new LiteDatabase(programDbPath))
-        //    {
-        //        var dataStores = db.GetCollection<DataStore>("DataStores");
-
-        //        // First search for an already existing entry
-        //        var results = dataStores.Find(ds => ds.StorePath.Equals(store.StorePath, StringComparison.OrdinalIgnoreCase));
-        //        if (results.Any())
-        //        {
-        //            return false;
-        //        }
-
-        //        // Add it
-        //        dataStores.Insert(store);
-        //        return true;
-        //    }
-        //}
-
-        //public IEnumerable<DataStore> GetDataStores()
-        //{
-        //    using (var db = new LiteDatabase(programDbPath))
-        //    {
-        //        var dataStores = db.GetCollection<DataStore>("DataStores");
-
-        //        return dataStores.FindAll();
-        //    }
-        //}
-
     }
 }

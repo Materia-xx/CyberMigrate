@@ -42,7 +42,7 @@ namespace CyberMigrate
 
         private bool DataStoreOptionConfigured()
         {
-            var options = Global.CmMasterDataProvider.Instance.GetOptions();
+            var options = Global.CmMasterDataProvider.Value.GetOptions();
             if (!Directory.Exists(options.DataStorePath))
             {
                 return false;

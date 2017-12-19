@@ -1,4 +1,4 @@
-﻿using CyberMigrateCommom;
+﻿using System;
 using System.IO;
 
 namespace DataProvider
@@ -11,35 +11,36 @@ namespace DataProvider
         private string dataStoreDirectory;
         private string dataStoreDbPath;
 
-        public SingletonWrapper<CMSystemsCRUD> CMSystems { get; set; }
+        //public SingletonWrapper<CMSystemsCRUD> CMSystems { get; set; }
+        public Lazy<CMSystemsCRUD> CMSystems { get; set; }
 
-        public SingletonWrapper<CMSystemStatesCRUD> CMSystemStates { get; set; }
+        public Lazy<CMSystemStatesCRUD> CMSystemStates { get; set; }
 
-        public SingletonWrapper<CMFeatureTemplatesCRUD> CMFeatureTemplates { get; set; }
+        public Lazy<CMFeatureTemplatesCRUD> CMFeatureTemplates { get; set; }
 
-        public SingletonWrapper<CMFeatureStateTransitionRulesCRUD> CMFeatureStateTransitionRules { get; set; }
+        public Lazy<CMFeatureStateTransitionRulesCRUD> CMFeatureStateTransitionRules { get; set; }
 
         public CMDataProvider(string dataStoreDirectory)
         {
             this.dataStoreDirectory = dataStoreDirectory;
             dataStoreDbPath = Path.Combine(dataStoreDirectory, "CyberMigrate.db");
 
-            CMSystems = new SingletonWrapper<CMSystemsCRUD>(() =>
+            CMSystems = new Lazy<CMSystemsCRUD>(() =>
             {
                 return new CMSystemsCRUD(dataStoreDbPath, "Systems");
             });
 
-            CMSystemStates = new SingletonWrapper<CMSystemStatesCRUD>(() =>
+            CMSystemStates = new Lazy<CMSystemStatesCRUD>(() =>
             {
                 return new CMSystemStatesCRUD(dataStoreDbPath, "SystemStates");
             });
 
-            CMFeatureTemplates = new SingletonWrapper<CMFeatureTemplatesCRUD>(() =>
+            CMFeatureTemplates = new Lazy<CMFeatureTemplatesCRUD>(() =>
             {
                 return new CMFeatureTemplatesCRUD(dataStoreDbPath, "FeatureTemplates");
             });
 
-            CMFeatureStateTransitionRules = new SingletonWrapper<CMFeatureStateTransitionRulesCRUD>(() =>
+            CMFeatureStateTransitionRules = new Lazy<CMFeatureStateTransitionRulesCRUD>(() =>
             {
                 return new CMFeatureStateTransitionRulesCRUD(dataStoreDbPath, "FeatureStateTransitionRules");
             });

@@ -29,7 +29,7 @@ namespace CyberMigrate.ConfigurationUC
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            var options = Global.CmMasterDataProvider.Instance.GetOptions();
+            var options = Global.CmMasterDataProvider.Value.GetOptions();
             txtStorePath.Text = options.DataStorePath;
         }
 
@@ -41,10 +41,10 @@ namespace CyberMigrate.ConfigurationUC
                 return;
             }
 
-            var options = Global.CmMasterDataProvider.Instance.GetOptions();
+            var options = Global.CmMasterDataProvider.Value.GetOptions();
             options.DataStorePath = txtStorePath.Text;
 
-            Global.CmMasterDataProvider.Instance.updateOptions(options);
+            Global.CmMasterDataProvider.Value.updateOptions(options);
 
             MessageBox.Show("Updated.");
         }
