@@ -10,7 +10,6 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="160"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="5"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="25" />
@@ -18,7 +17,6 @@
             <RowDefinition/>
             <RowDefinition Height="25" />
             <RowDefinition Height="25" />
-            <RowDefinition Height="5" />
         </Grid.RowDefinitions>
         <Label x:Name="lblFeatureTemplateName" Content="Feature Template Name" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0" />
         <TextBox x:Name="txtFeatureTemplateName" Grid.Row="0" Grid.Column="1"/>
