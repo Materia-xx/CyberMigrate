@@ -139,6 +139,10 @@
       <Project>{6731a57a-4daa-48d4-b35c-b32095c85ecf}</Project>
       <Name>TaskBase</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Tasks.BuiltIn\Tasks.BuiltIn.csproj">
+      <Project>{81e40048-0749-46cf-b68b-3e26913f1064}</Project>
+      <Name>Tasks.BuiltIn</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2010
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CyberMigrate", "CyberMigrate\CyberMigrate.csproj", "{B1CEB44A-D025-48F5-AF7A-F9CDD67F5D55}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dto", "Dto\Dto.csproj", "{6ADF08EC-74F6-40D7-B4F5-634C1BA45A53}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CyberMigrateCommon", "CyberMigrateCommon\CyberMigrateCommon.csproj", "{F60428D5-EE92-4D00-8053-EAE3B6C26F54}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasks.BuiltIn", "Tasks.BuiltIn\Tasks.BuiltIn.csproj", "{81E40048-0749-46CF-B68B-3E26913F1064}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{F60428D5-EE92-4D00-8053-EAE3B6C26F54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F60428D5-EE92-4D00-8053-EAE3B6C26F54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F60428D5-EE92-4D00-8053-EAE3B6C26F54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81E40048-0749-46CF-B68B-3E26913F1064}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81E40048-0749-46CF-B68B-3E26913F1064}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81E40048-0749-46CF-B68B-3E26913F1064}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81E40048-0749-46CF-B68B-3E26913F1064}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

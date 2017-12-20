@@ -1,30 +1,19 @@
-﻿using System.Windows.Controls;
+﻿using System.ComponentModel.Composition;
+using System.Windows.Controls;
 
 namespace TaskBase
 {
     /// <summary>
     /// All tasks should inherit from this base class in order to be recognized as tasks that can be used by the program
     /// </summary>
-    public abstract class TaskBase
+    public abstract class CMTaskBase
     {
-        protected int CmSystemId;
-        protected int CmFeatureId;
-        protected int CmTaskId;
+        // mcbtodo: make sure these properties get set before they are used
+        public int CmSystemId { get; set; }
 
-        /// <summary>
-        /// The main program will take care of setting up a directory to hold task data for the task if it has not already been done.
-        /// The task base holds these values (systemId, featureId, taskId) in memory for when it needs to call back to the shared library.
-        /// The task does not need to cache these values to the taskdata.json however .
-        /// </summary>
-        /// <param name="cmSystemId"></param>
-        /// <param name="cmFeatureId"></param>
-        /// <param name="cmTaskId"></param>
-        public TaskBase(int cmSystemId, int cmFeatureId, int cmTaskId)
-        {
-            this.CmSystemId = cmSystemId;
-            this.CmFeatureId = cmFeatureId;
-            this.CmTaskId = cmTaskId;
-        }
+        public int CmFeatureId { get; set; }
+        
+        public int CmTaskId { get; set; }
 
         /// <summary>
         /// Called on a regular basis by the main program to have tasks auto-progress their state if appropriate.
