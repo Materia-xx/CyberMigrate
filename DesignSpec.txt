@@ -191,20 +191,10 @@ TODO: Make sure there is a way to re-assign dependency states across all feature
 * Different types of tasks can be configured in the program via managed extensibility framework (MEF)
     e.g. each task type would be a new project which implements the required interfaces
     * Tasks states are different than SystemStates. Task states are hardcoded within the task type itself and cannot be configured through the tool.
-    * Iterfaces planned so far
+    * See TaskBase.cs for a list of base methods available to tasks.
 
-        * AutoProgress() - Called on a regular basis by the main program to have tasks auto-progress their state if appropriate.
-          Note: A task that is changed to the reserved task state "complete" is considered a complete task to the program.
-          e.g. The dependency task that tracks other features may choose to check the state of another feature during this phase and if appropriate
-          mark this task as complete. Another manual type task may choose to do nothing here, letting the user completely control the task states.
-
-        * GetUI(int systemId, int featureId, int taskId) - Returns the user control that should be rendered in the main UI that represents this task item.
-          The main program will take care of setting up a directory to hold task data for the task if it has not already been done.
-          The task should hold these values (systemId, featureId, taskId) in memory for when it needs to call back to the shared library. The task does not need to cache these
-          values to the taskdata.json however as the ids will be passed every time the user requests to see the task UI.
-          Note that the state of a task should not be included in this UI, as this is provided by the main program.
-
-        TODO: do we need a callback for when the user changes the state of a task.. to let the task know ?
+        DONE: do we need a callback for when the user changes the state of a task.. to let the task know ?
+            Conclusion: no.. The next AutoProgress call can query this info if it needs to.
 
     * A task should have access to a shared library of features meant to be used by task addins, planned features in this library are:
 

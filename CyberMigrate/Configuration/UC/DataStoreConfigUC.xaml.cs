@@ -22,9 +22,15 @@ namespace CyberMigrate.ConfigurationUC
     /// </summary>
     public partial class DataStoreConfigUC : UserControl
     {
-        public DataStoreConfigUC()
+        public Config ConfigWindow { get; set; }
+
+        public CMDataStore cmDataStore;
+
+        public DataStoreConfigUC(Config configWindow, CMDataStore cmDataStore)
         {
             InitializeComponent();
+            this.cmDataStore = cmDataStore;
+            this.ConfigWindow = configWindow;
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)

@@ -20,5 +20,15 @@ namespace DataProvider
             // This also has the side effect of listing them in this same order in the configuration UI.
             return results.OrderBy(r => r.Priority);
         }
+
+        public void DeleteAll_ForFeatureTemplate(int cmFeatureTemplateId)
+        {
+            var results = GetAll_ForFeatureTemplate(cmFeatureTemplateId);
+
+            foreach (var rule in results)
+            {
+                base.Delete(rule.Id);
+            }
+        }
     }
 }

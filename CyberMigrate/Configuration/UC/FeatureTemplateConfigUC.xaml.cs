@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dto;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,68 +21,167 @@ namespace CyberMigrate.ConfigurationUC
     /// </summary>
     public partial class FeatureTemplateConfigUC : UserControl
     {
-        public int CMFeatureTemplateId { get; set; }
+        private CMFeatureTemplate cmFeatureTemplate;
 
-        public Config ConfigWindow { get; set; }
+        private Config ConfigWindow { get; set; }
 
-        public FeatureTemplateConfigUC()
+        private List<BoolBasedComboBoxEntry> ConditionAllAnyChoices { get; set; }
+
+        private List<BoolBasedComboBoxEntry> ConditionAreCompleteChoices { get; set; }
+
+        public FeatureTemplateConfigUC(Config configWindow, CMFeatureTemplate cmFeatureTemplate)
         {
             InitializeComponent();
+            this.cmFeatureTemplate = cmFeatureTemplate;
+            this.ConfigWindow = configWindow;
+        }
+
+        private class BoolBasedComboBoxEntry
+        {
+            public BoolBasedComboBoxEntry(bool value, string name)
+            {
+                this.Value = value;
+                this.Name = name;
+            }
+
+            public bool Value { get; private set; }
+            public string Name { get; private set; }
+        }
+
+        private List<CMSystemState> CurrentSystemStates { get; set; }
+
+        /// <summary>
+        /// Load the lists that will be displayed as dropdown choices in the state transitions datagrid
+        /// </summary>
+        private void LoadComboBoxClasses()
+        {
+            ConditionAllAnyChoices = new List<BoolBasedComboBoxEntry>()
+            {
+                new BoolBasedComboBoxEntry(true, "All"),
+                new BoolBasedComboBoxEntry(false, "Any")
+            };
+
+            ConditionAreCompleteChoices = new List<BoolBasedComboBoxEntry>()
+            {
+                new BoolBasedComboBoxEntry(true, "Are complete"),
+                new BoolBasedComboBoxEntry(false, "Are not complete")
+            };
+
+            CurrentSystemStates = Global.CmDataProvider.Value.CMSystemStates.Value.GetAll_ForSystem(cmFeatureTemplate.CMSystemId).ToList();
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            var cmFeatureTemplate = Global.CmDataProvider.Value.CMFeatureTemplates.Value.Get(CMFeatureTemplateId);
+            LoadComboBoxClasses();
+
             txtFeatureTemplateName.Text = cmFeatureTemplate.Name;
 
             dataGridStateTransitionRules.AutoGenerateColumns = false;
             dataGridStateTransitionRules.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = "Id",
-                    Binding = new Binding("Id"),
+                    Header = nameof(CMFeatureStateTransitionRule.Id),
+                    Binding = new Binding(nameof(CMFeatureStateTransitionRule.Id)),
                     Visibility = Visibility.Collapsed // Only meant to keep track of ids.
                 });
             dataGridStateTransitionRules.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = "If (all / any) tasks",
-                    Binding = new Binding("ConditionAllTasks"),
-                    Width = 150
+                    Header = nameof(CMFeatureStateTransitionRule.CMFeatureTemplateId),
+                    Binding = new Binding(nameof(CMFeatureStateTransitionRule.CMFeatureTemplateId)),
+                    Visibility = Visibility.Collapsed // Only meant to keep track of ids.
                 });
             dataGridStateTransitionRules.Columns.Add(
                 new DataGridTextColumn()
+                {
+                    Header = nameof(CMFeatureStateTransitionRule.Priority),
+                    Binding = new Binding(nameof(CMFeatureStateTransitionRule.Priority)),
+                });
+            dataGridStateTransitionRules.Columns.Add(
+                new DataGridComboBoxColumn()
+                {
+                    Header = "If (all / any) tasks",
+                    ItemsSource = ConditionAllAnyChoices,
+
+                    // Where to store the selected value
+                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRule.ConditionAllTasks)),
+
+                    // Instructions on how to interact with the "lookup" list
+                    SelectedValuePath = nameof(BoolBasedComboBoxEntry.Value),
+                    DisplayMemberPath = nameof(BoolBasedComboBoxEntry.Name),
+                    Width = 150
+                });
+            dataGridStateTransitionRules.Columns.Add(
+                new DataGridComboBoxColumn()
                 {
                     Header = "In state",
-                    Binding = new Binding("ConditionQuerySystemStateId"),
-                    Width = 100
+                    ItemsSource = CurrentSystemStates,
+
+                    // Where to store the selected value
+                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRule.ConditionQuerySystemStateId)),
+
+                    // Instructions on how to interact with the "lookup" list
+                    SelectedValuePath = nameof(CMSystemState.Id),
+                    DisplayMemberPath = nameof(CMSystemState.Name),
+                    Width = 200
                 });
+
             dataGridStateTransitionRules.Columns.Add(
-                new DataGridTextColumn()
+                new DataGridComboBoxColumn()
                 {
-                    Header = "Are",  // Are complete, or Are not complete
-                    Binding = new Binding("ConditionTaskComplete"),
-                    Width = 100
+                    Header = "Are ...",
+                    ItemsSource = ConditionAreCompleteChoices,
+
+                    // Where to store the selected value
+                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRule.ConditionTaskComplete)),
+
+                    // Instructions on how to interact with the "lookup" list
+                    SelectedValuePath = nameof(BoolBasedComboBoxEntry.Value),
+                    DisplayMemberPath = nameof(BoolBasedComboBoxEntry.Name),
+                    Width = 150
                 });
             dataGridStateTransitionRules.Columns.Add(
-                new DataGridTextColumn()
+                new DataGridComboBoxColumn()
                 {
                     Header = "Then move to state",
-                    Binding = new Binding("ToCMSystemStateId"),
-                    Width = 150
+                    ItemsSource = CurrentSystemStates,
+
+                    // Where to store the selected value
+                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRule.ToCMSystemStateId)),
+
+                    // Instructions on how to interact with the "lookup" list
+                    SelectedValuePath = nameof(CMSystemState.Id),
+                    DisplayMemberPath = nameof(CMSystemState.Name),
+                    Width = 200
                 });
 
             // Load all state transition rules
-            var cmFeatureStateTransitionRules = Global.CmDataProvider.Value.CMFeatureStateTransitionRules.Value.GetAll_ForFeatureTemplate(CMFeatureTemplateId).ToList();
+            var cmFeatureStateTransitionRules = Global.CmDataProvider.Value.CMFeatureStateTransitionRules.Value.GetAll_ForFeatureTemplate(cmFeatureTemplate.Id).ToList();
             dataGridStateTransitionRules.ItemsSource = cmFeatureStateTransitionRules;
         }
 
         private void btnApply_Click(object sender, RoutedEventArgs e)
         {
-            // Update the feature template
-            var cmFeatureTemplate = Global.CmDataProvider.Value.CMFeatureTemplates.Value.Get(CMFeatureTemplateId);
-            cmFeatureTemplate.Name = txtFeatureTemplateName.Text;
-            Global.CmDataProvider.Value.CMFeatureTemplates.Value.Upsert(cmFeatureTemplate);
+            // Update the feature template. Load it first from the db first just in case it has been updated elsewhere.
+            var cmFeatureTemplateDb = Global.CmDataProvider.Value.CMFeatureTemplates.Value.Get(cmFeatureTemplate.Id);
+            cmFeatureTemplateDb.Name = txtFeatureTemplateName.Text;
+            Global.CmDataProvider.Value.CMFeatureTemplates.Value.Upsert(cmFeatureTemplateDb);
+
+            // Update the collection of transition rules to be what is currently displayed in the data grid
+            List<CMFeatureStateTransitionRule> stateTransitionRules = (List<CMFeatureStateTransitionRule>)dataGridStateTransitionRules.ItemsSource;
+
+            // First nuke all existing transition rules.
+            // Nothing references these directly, and won't AFAIK so this should be ok.
+            Global.CmDataProvider.Value.CMFeatureStateTransitionRules.Value.DeleteAll_ForFeatureTemplate(cmFeatureTemplate.Id);
+
+            // Add the new ones now shown in the grid
+            foreach (var rule in stateTransitionRules)
+            {
+                rule.CMFeatureTemplateId = cmFeatureTemplate.Id; // Make sure the rules are connected to the correct feature template
+                Global.CmDataProvider.Value.CMFeatureStateTransitionRules.Value.Upsert(rule);
+            }
+
+            MessageBox.Show("Updated");
 
             // Reload main treeview, this is how we handle renames
             ConfigWindow.ReLoadTreeConfiguration();

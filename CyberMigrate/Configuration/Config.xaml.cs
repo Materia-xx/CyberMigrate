@@ -12,11 +12,30 @@ namespace CyberMigrate
     /// </summary>
     public partial class Config : Window
     {
-        private class TreeViewTagBase
+        /// <summary>
+        /// Attached to nodes in the configuration tree view. Used to store information such as the Dto that each node represents
+        /// </summary>
+        private class ConfigTreeViewTag
         {
-            public string TypeName { get; set; }
+            public ConfigTreeViewTag(IdBasedObject dto)
+            {
+                this.Dto = dto;
+            }
 
-            public int Id { get; set; }
+            public IdBasedObject Dto { get; private set; }
+
+            public string DtoTypeName
+            {
+                get
+                {
+                    if (Dto == null)
+                    {
+                        return string.Empty;
+                    }
+                    return Dto.GetType().Name;
+                }
+            }
+
         }
 
         public Config()
@@ -62,10 +81,7 @@ namespace CyberMigrate
             var dataStoreTreeViewItem = new TreeViewItem()
             {
                 Header = "Data Store",
-                Tag = new TreeViewTagBase()
-                {
-                    TypeName = "DataStore"
-                }
+                Tag = new ConfigTreeViewTag(new CMDataStore()), // mcbtodo: there isn't currently an instance of cmDataStore availalble for this. Instead expose a Get function somewhere to get it.
             };
             treeConfig.Items.Add(dataStoreTreeViewItem);
 
@@ -114,16 +130,19 @@ namespace CyberMigrate
             contextMenu.Items.Add(deleteSystemMenu);
             deleteSystemMenu.Click += (sender, e) =>
             {
-                var attachedTagData = GetSelectedTreeItemTagBase();
-                if (attachedTagData == null)
+                var selectedTreeViewTag = GetSelectedConfigTreeViewTag();
+
+                if (selectedTreeViewTag?.Dto == null || !(selectedTreeViewTag?.Dto is CMSystem))
                 {
                     return;
                 }
 
+                var selectedCMSystemDto = selectedTreeViewTag.Dto as CMSystem;
+
                 // mcbtodo: Check for any refs before deleting, do this as a callback ? e.g. how to provide a delete function that comes with the CRUD object but 
                 // mcbtodo: allow for extensibility to allow the creator to provide custom logic to indicate if an id is still referenced.
                 // mcbtodo: is there a concept of referential integrity in liteDb ?
-                Global.CmDataProvider.Value.CMSystems.Value.Delete(attachedTagData.Id);
+                Global.CmDataProvider.Value.CMSystems.Value.Delete(selectedCMSystemDto.Id);
                 RemoveSelectedTreeConfigItem();
             };
             return contextMenu;
@@ -133,13 +152,8 @@ namespace CyberMigrate
         {
             var cmSystemTreeViewItem = new TreeViewItem()
             {
-                Header = cmSystem.Name
-            };
-
-            cmSystemTreeViewItem.Tag = new TreeViewTagBase()
-            {
-                TypeName = "System",
-                Id = cmSystem.Id
+                Header = cmSystem.Name,
+                Tag = new ConfigTreeViewTag(cmSystem)
             };
 
             parentTreeViewItem.Items.Add(cmSystemTreeViewItem);
@@ -185,13 +199,8 @@ namespace CyberMigrate
         {
             var cmFeatureTemplateTreeViewItem = new TreeViewItem()
             {
-                Header = cmFeatureTemplate.Name
-            };
-
-            cmFeatureTemplateTreeViewItem.Tag = new TreeViewTagBase()
-            {
-                TypeName = "FeatureTemplate",
-                Id = cmFeatureTemplate.Id
+                Header = cmFeatureTemplate.Name,
+                Tag = new ConfigTreeViewTag(cmFeatureTemplate)
             };
 
             parentTreeViewItem.Items.Add(cmFeatureTemplateTreeViewItem);
@@ -231,51 +240,49 @@ namespace CyberMigrate
             parentItem.Items.Remove(selectedItem);
         }
 
-        private TreeViewTagBase GetSelectedTreeItemTagBase()
+        /// <summary>
+        /// Gets the currently selected TreeView tag item.
+        /// </summary>
+        /// <returns></returns>
+        private ConfigTreeViewTag GetSelectedConfigTreeViewTag()
         {
             var selectedNode = treeConfig.SelectedItem;
             if (selectedNode == null || !(selectedNode is TreeViewItem))
             {
-                return null;
+                return default(ConfigTreeViewTag);
             }
 
             var selectedTreeViewItem = (selectedNode as TreeViewItem);
-            var attachedTagObject = selectedTreeViewItem.Tag;
-            if (attachedTagObject == null || !(attachedTagObject is TreeViewTagBase))
+            if (selectedTreeViewItem?.Tag == null)
             {
-                return null;
+                return default(ConfigTreeViewTag);
             }
 
-            var attachedTagData = (attachedTagObject as TreeViewTagBase);
-            return attachedTagData;
+            return selectedTreeViewItem.Tag as ConfigTreeViewTag;
         }
 
         private void TreeConfiguration_NodeSelected(object sender, RoutedEventArgs e)
         {
             configUIPanel.Children.Clear(); // mcbtodo: check to see if there are any unsaved changes before doing this.
 
-            var attachedTagData = GetSelectedTreeItemTagBase();
-            if (attachedTagData == null)
+            var attachedTag = GetSelectedConfigTreeViewTag();
+            if (attachedTag?.Dto == null)
             {
                 return;
             }
 
-            switch (attachedTagData.TypeName)
+            switch (attachedTag.DtoTypeName)
             {
-                case "DataStore":
-                    var dataStoreConfigUc = new DataStoreConfigUC();
+                case nameof(CMDataStore):
+                    var dataStoreConfigUc = new DataStoreConfigUC(this, attachedTag.Dto as CMDataStore);
                     configUIPanel.Children.Add(dataStoreConfigUc);
                     break;
-                case "System":
-                    var systemConfigUc = new SystemConfigUC();
-                    systemConfigUc.CMSystemId = attachedTagData.Id;
-                    systemConfigUc.ConfigWindow = this;
+                case nameof(CMSystem):
+                    var systemConfigUc = new SystemConfigUC(this, attachedTag.Dto as CMSystem);
                     configUIPanel.Children.Add(systemConfigUc);
                     break;
-                case "FeatureTemplate":
-                    var featureTemplateConfigUc = new FeatureTemplateConfigUC();
-                    featureTemplateConfigUc.CMFeatureTemplateId = attachedTagData.Id;
-                    featureTemplateConfigUc.ConfigWindow = this;
+                case nameof(CMFeatureTemplate):
+                    var featureTemplateConfigUc = new FeatureTemplateConfigUC(this, attachedTag.Dto as CMFeatureTemplate);
                     configUIPanel.Children.Add(featureTemplateConfigUc);
                     break;
                 default:

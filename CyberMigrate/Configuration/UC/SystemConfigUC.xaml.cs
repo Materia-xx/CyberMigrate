@@ -12,17 +12,19 @@ namespace CyberMigrate.ConfigurationUC
     /// </summary>
     public partial class SystemConfigUC : UserControl
     {
-        public int CMSystemId { get; set; }
         public Config ConfigWindow { get; set; }
 
-        public SystemConfigUC()
+        public CMSystem cmSystem;
+
+        public SystemConfigUC(Config configWindow, CMSystem cmSystem)
         {
             InitializeComponent();
+            this.cmSystem = cmSystem;
+            this.ConfigWindow = configWindow;
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            var cmSystem = Global.CmDataProvider.Value.CMSystems.Value.Get(CMSystemId);
             txtSystemName.Text = cmSystem.Name;
 
             // Don't let the grid auto-generate the columns. Because we want to instead have some of them hidden
@@ -30,33 +32,33 @@ namespace CyberMigrate.ConfigurationUC
             dataGridStates.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = "Id",
-                    Binding = new Binding("Id"),
+                    Header = nameof(CMSystemState.Id),
+                    Binding = new Binding(nameof(CMSystemState.Id)),
                     Visibility = Visibility.Collapsed // Only meant to keep track of ids.
                 });
             dataGridStates.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = "Priority",
-                    Binding = new Binding("Priority")
+                    Header = nameof(CMSystemState.Priority),
+                    Binding = new Binding(nameof(CMSystemState.Priority))
                 });
             dataGridStates.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = "Name",
-                    Binding = new Binding("Name"),
+                    Header = nameof(CMSystemState.Name),
+                    Binding = new Binding(nameof(CMSystemState.Name)),
                     Width = 200
                 });
 
             // Load all states in this system
-            var cmSystemStates = Global.CmDataProvider.Value.CMSystemStates.Value.GetAll_ForSystem(CMSystemId).ToList();
+            var cmSystemStates = Global.CmDataProvider.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id).ToList();
             dataGridStates.ItemsSource = cmSystemStates;
         }
 
         private void btnApply_Click(object sender, RoutedEventArgs e)
         {
-            // Update the system name
-            var cmSystem = Global.CmDataProvider.Value.CMSystems.Value.Get(CMSystemId);
+            // Update the system name. Load it from the db first just in case anything changed elsewhere.
+            var cmSystemDb = Global.CmDataProvider.Value.CMSystems.Value.Get(cmSystem.Id);
             cmSystem.Name = txtSystemName.Text;
             Global.CmDataProvider.Value.CMSystems.Value.Upsert(cmSystem);
 
@@ -76,13 +78,13 @@ namespace CyberMigrate.ConfigurationUC
             foreach (var cmSystemState in cmSystemStates)
             {
                 // Existing states will already have the right system id, new ones won't. Just set them all.
-                cmSystemState.CMSystemId = CMSystemId;
+                cmSystemState.CMSystemId = cmSystemDb.Id;
 
                 // If the Id column is 0 then check to see if it was just removed and added with the same name
                 // instead of making it a new state.
                 if (cmSystemState.Id == 0)
                 {
-                    var existingState = Global.CmDataProvider.Value.CMSystemStates.Value.Get_ForStateName(cmSystemState.Name, CMSystemId);
+                    var existingState = Global.CmDataProvider.Value.CMSystemStates.Value.Get_ForStateName(cmSystemState.Name, cmSystemDb.Id);
                     if (existingState != null)
                     {
                         cmSystemState.Id = existingState.Id;
@@ -95,7 +97,7 @@ namespace CyberMigrate.ConfigurationUC
             }
 
             // Look for states that exist in the database, but not in the grid and delete them if possible
-            var cmSystemDBStates = Global.CmDataProvider.Value.CMSystemStates.Value.GetAll_ForSystem(CMSystemId).ToList();
+            var cmSystemDBStates = Global.CmDataProvider.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystemDb.Id).ToList();
             foreach (var cmSystemState in cmSystemDBStates)
             {
                 var gridSystemState = cmSystemStates.FirstOrDefault(s => s.Id == cmSystemState.Id);
