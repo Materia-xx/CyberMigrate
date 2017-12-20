@@ -43,13 +43,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CMDataProvider.cs" />
-    <Compile Include="CMDataProviderCRUD.cs" />
+    <Compile Include="CMDataProviderDataStore.cs" />
+    <Compile Include="CMDataProviderCRUDBase.cs" />
     <Compile Include="CMDataProviderMaster.cs" />
     <Compile Include="CMFeatureStateTransitionRulesCRUD.cs" />
     <Compile Include="CMFeaturesCRUD.cs" />
     <Compile Include="CMSystemStatesCRUD.cs" />
     <Compile Include="CMSystemsCRUD.cs" />
+    <Compile Include="CMDataProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

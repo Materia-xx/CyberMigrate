@@ -1,18 +1,10 @@
-﻿using Dto;
-using System;
+﻿using DataProvider;
+using Dto;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace CyberMigrate.ConfigurationUC
 {
@@ -67,7 +59,7 @@ namespace CyberMigrate.ConfigurationUC
                 new BoolBasedComboBoxEntry(false, "Are not complete")
             };
 
-            CurrentSystemStates = Global.CmDataProvider.Value.CMSystemStates.Value.GetAll_ForSystem(cmFeatureTemplate.CMSystemId).ToList();
+            CurrentSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmFeatureTemplate.CMSystemId).ToList();
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -156,34 +148,38 @@ namespace CyberMigrate.ConfigurationUC
                 });
 
             // Load all state transition rules
-            var cmFeatureStateTransitionRules = Global.CmDataProvider.Value.CMFeatureStateTransitionRules.Value.GetAll_ForFeatureTemplate(cmFeatureTemplate.Id).ToList();
+            var cmFeatureStateTransitionRules = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.GetAll_ForFeatureTemplate(cmFeatureTemplate.Id).ToList();
             dataGridStateTransitionRules.ItemsSource = cmFeatureStateTransitionRules;
         }
 
         private void btnApply_Click(object sender, RoutedEventArgs e)
         {
             // Update the feature template. Load it first from the db first just in case it has been updated elsewhere.
-            var cmFeatureTemplateDb = Global.CmDataProvider.Value.CMFeatures.Value.Get(cmFeatureTemplate.Id);
+            var cmFeatureTemplateDb = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(cmFeatureTemplate.Id);
             cmFeatureTemplateDb.Name = txtFeatureTemplateName.Text;
-            Global.CmDataProvider.Value.CMFeatures.Value.Upsert(cmFeatureTemplateDb);
+            CMDataProvider.DataStore.Value.CMFeatures.Value.Upsert(cmFeatureTemplateDb);
 
             // Update the collection of transition rules to be what is currently displayed in the data grid
             List<CMFeatureStateTransitionRuleDto> stateTransitionRules = (List<CMFeatureStateTransitionRuleDto>)dataGridStateTransitionRules.ItemsSource;
 
+            // mcbtodo: before we nuke the existing rules, first go through them and determine if there are any task templates in the states that would
+            // mcbtodo: be deleted and if so, deny the operation and let the user know that they should first remove the task templates.
+
             // First nuke all existing transition rules.
             // Nothing references these directly, and won't AFAIK so this should be ok.
-            Global.CmDataProvider.Value.CMFeatureStateTransitionRules.Value.DeleteAll_ForFeatureTemplate(cmFeatureTemplate.Id);
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.DeleteAll_ForFeatureTemplate(cmFeatureTemplate.Id);
 
             // Add the new ones now shown in the grid
             foreach (var rule in stateTransitionRules)
             {
                 rule.CMFeatureId = cmFeatureTemplate.Id; // Make sure the rules are connected to the correct feature template
-                Global.CmDataProvider.Value.CMFeatureStateTransitionRules.Value.Upsert(rule);
+                CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.Upsert(rule);
             }
 
             MessageBox.Show("Updated");
 
             // Reload main treeview, this is how we handle renames
+            // It also takes care of assuring the correct system states are listed under the feature template
             ConfigWindow.ReLoadTreeConfiguration();
         }
     }

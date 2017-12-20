@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using DataProvider;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -27,7 +28,7 @@ namespace CyberMigrate
 
         private bool DataStoreOptionConfigured()
         {
-            var options = Global.CmMasterDataProvider.Value.GetOptions();
+            var options = CMDataProvider.Master.Value.GetOptions();
             if (!Directory.Exists(options.DataStorePath))
             {
                 return false;

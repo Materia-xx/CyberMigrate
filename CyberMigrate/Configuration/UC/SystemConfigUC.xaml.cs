@@ -1,4 +1,5 @@
-﻿using Dto;
+﻿using DataProvider;
+using Dto;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -51,16 +52,16 @@ namespace CyberMigrate.ConfigurationUC
                 });
 
             // Load all states in this system
-            var cmSystemStates = Global.CmDataProvider.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id).ToList();
+            var cmSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id).ToList();
             dataGridStates.ItemsSource = cmSystemStates;
         }
 
         private void btnApply_Click(object sender, RoutedEventArgs e)
         {
             // Update the system name. Load it from the db first just in case anything changed elsewhere.
-            var cmSystemDb = Global.CmDataProvider.Value.CMSystems.Value.Get(cmSystem.Id);
+            var cmSystemDb = CMDataProvider.DataStore.Value.CMSystems.Value.Get(cmSystem.Id);
             cmSystem.Name = txtSystemName.Text;
-            Global.CmDataProvider.Value.CMSystems.Value.Upsert(cmSystem);
+            CMDataProvider.DataStore.Value.CMSystems.Value.Upsert(cmSystem);
 
             // Update the collection of system states
             List<CMSystemStateDto> cmSystemStates = (List<CMSystemStateDto>)dataGridStates.ItemsSource;
@@ -84,7 +85,7 @@ namespace CyberMigrate.ConfigurationUC
                 // instead of making it a new state.
                 if (cmSystemState.Id == 0)
                 {
-                    var existingState = Global.CmDataProvider.Value.CMSystemStates.Value.Get_ForStateName(cmSystemState.Name, cmSystemDb.Id);
+                    var existingState = CMDataProvider.DataStore.Value.CMSystemStates.Value.Get_ForStateName(cmSystemState.Name, cmSystemDb.Id);
                     if (existingState != null)
                     {
                         cmSystemState.Id = existingState.Id;
@@ -93,18 +94,18 @@ namespace CyberMigrate.ConfigurationUC
                 }
 
                 // Add a new state or allow renaming or changing of the priority
-                Global.CmDataProvider.Value.CMSystemStates.Value.Upsert(cmSystemState);
+                CMDataProvider.DataStore.Value.CMSystemStates.Value.Upsert(cmSystemState);
             }
 
             // Look for states that exist in the database, but not in the grid and delete them if possible
-            var cmSystemDBStates = Global.CmDataProvider.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystemDb.Id).ToList();
+            var cmSystemDBStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystemDb.Id).ToList();
             foreach (var cmSystemState in cmSystemDBStates)
             {
                 var gridSystemState = cmSystemStates.FirstOrDefault(s => s.Id == cmSystemState.Id);
                 if (gridSystemState == null)
                 {
                     // mcbtodo: For now I am just deleting the state, but really it should check to make sure there are no refs to the state first.
-                    Global.CmDataProvider.Value.CMSystemStates.Value.Delete(cmSystemState.Id);
+                    CMDataProvider.DataStore.Value.CMSystemStates.Value.Delete(cmSystemState.Id);
                 }
             }
 

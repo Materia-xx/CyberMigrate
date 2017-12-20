@@ -9,12 +9,12 @@ namespace DataProvider
     /// Provides a base of C.R.U.D. operations for a table that has a single id and no foreign keys in the CyberMigrate database.
     /// Create, Read, Update, Delete
     /// </summary>
-    public abstract class CMDataProviderCRUD<T> where T : IdBasedObject
+    public abstract class CMDataProviderCRUDBase<T> where T : IdBasedObject
     {
         private string cmDatabasePath;
         private string collectionName;
 
-        public CMDataProviderCRUD(string cmDatabasePath, string collectionName)
+        public CMDataProviderCRUDBase(string cmDatabasePath, string collectionName)
         {
             this.cmDatabasePath = cmDatabasePath;
             this.collectionName = collectionName;

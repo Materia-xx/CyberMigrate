@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace DataProvider
 {
-    public class CMFeaturesCRUD : CMDataProviderCRUD<CMFeatureDto>
+    public class CMFeaturesCRUD : CMDataProviderCRUDBase<CMFeatureDto>
     {
         public CMFeaturesCRUD(string dataStoreDbPath, string collectionName) : base(dataStoreDbPath, collectionName)
         {

@@ -90,7 +90,6 @@
     <Compile Include="Configuration\UC\SystemConfigUC.xaml.cs">
       <DependentUpon>SystemConfigUC.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Global.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

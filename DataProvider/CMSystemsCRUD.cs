@@ -8,7 +8,7 @@ namespace DataProvider
     /// <summary>
     /// Provides additional functions for interacting with the Systems table that are not provided in the base CRUD class
     /// </summary>
-    public class CMSystemsCRUD : CMDataProviderCRUD<CMSystemDto>
+    public class CMSystemsCRUD : CMDataProviderCRUDBase<CMSystemDto>
     {
         public CMSystemsCRUD(string dataStoreDbPath, string collectionName) : base(dataStoreDbPath, collectionName)
         {

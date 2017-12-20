@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace DataProvider
 {
-    public class CMSystemStatesCRUD : CMDataProviderCRUD<CMSystemStateDto>
+    public class CMSystemStatesCRUD : CMDataProviderCRUDBase<CMSystemStateDto>
     {
         public CMSystemStatesCRUD(string dataStoreDbPath, string collectionName) : base(dataStoreDbPath, collectionName)
         {
@@ -38,6 +38,36 @@ namespace DataProvider
 
             // Return with the lowest priority first. Same pattern as other places that use priority.
             return results.OrderBy(s => s.Priority);
+        }
+
+        /// <summary>
+        /// Get all system states that are possible for the specified feature template
+        /// </summary>
+        /// <param name="cmSystemId"></param>
+        /// <returns></returns>
+        public IEnumerable<CMSystemStateDto> GetAll_ForFeatureTemplate(int cmFeatureId)
+        {
+            var validStates = new List<CMSystemStateDto>();
+
+            var transitionRules = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.GetAll_ForFeatureTemplate(cmFeatureId);
+
+            foreach (var rule in transitionRules)
+            {
+                if (validStates.Any(s => s.Id == rule.ToCMSystemStateId))
+                {
+                    // The state is already in our list, no need to add duplicates
+                    continue;
+                }
+
+                // Get the state
+                var state = CMDataProvider.DataStore.Value.CMSystemStates.Value.Get(rule.ToCMSystemStateId);
+                if (state != null)
+                {
+                    validStates.Add(state);
+                }
+            }
+
+            return validStates;
         }
     }
 }

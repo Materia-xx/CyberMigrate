@@ -1,49 +1,21 @@
-﻿using System;
-using System.IO;
+﻿using DataProvider;
+using Dto;
+using System;
 
 namespace DataProvider
 {
-    /// <summary>
-    /// A data provider that interacts with the CyberMigrate data store database.
-    /// </summary>
-    public class CMDataProvider
+    public static class CMDataProvider
     {
-        private string dataStoreDirectory;
-        private string dataStoreDbPath;
-
-        //public SingletonWrapper<CMSystemsCRUD> CMSystems { get; set; }
-        public Lazy<CMSystemsCRUD> CMSystems { get; set; }
-
-        public Lazy<CMSystemStatesCRUD> CMSystemStates { get; set; }
-
-        public Lazy<CMFeaturesCRUD> CMFeatures { get; set; }
-
-        public Lazy<CMFeatureStateTransitionRulesCRUD> CMFeatureStateTransitionRules { get; set; }
-
-        public CMDataProvider(string dataStoreDirectory)
+        public static Lazy<CMDataProviderMaster> Master = new Lazy<CMDataProviderMaster>(() =>
         {
-            this.dataStoreDirectory = dataStoreDirectory;
-            dataStoreDbPath = Path.Combine(dataStoreDirectory, "CyberMigrate.db");
+            return new CMDataProviderMaster();
+        });
 
-            CMSystems = new Lazy<CMSystemsCRUD>(() =>
-            {
-                return new CMSystemsCRUD(dataStoreDbPath, "Systems");
-            });
-
-            CMSystemStates = new Lazy<CMSystemStatesCRUD>(() =>
-            {
-                return new CMSystemStatesCRUD(dataStoreDbPath, "SystemStates");
-            });
-
-            CMFeatures = new Lazy<CMFeaturesCRUD>(() =>
-            {
-                return new CMFeaturesCRUD(dataStoreDbPath, "Features");
-            });
-
-            CMFeatureStateTransitionRules = new Lazy<CMFeatureStateTransitionRulesCRUD>(() =>
-            {
-                return new CMFeatureStateTransitionRulesCRUD(dataStoreDbPath, "FeatureStateTransitionRules");
-            });
-        }
+        public static Lazy<CMDataProviderDataStore> DataStore = new Lazy<CMDataProviderDataStore>(() =>
+        {
+            // Note this assumes that the data store path is already set up. The program should not access this field until it vierifies this is the case.
+            var options = Master.Value.GetOptions();
+            return new CMDataProviderDataStore(options.DataStorePath);
+        });
     }
 }

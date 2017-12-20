@@ -1,4 +1,5 @@
-﻿using Dto;
+﻿using DataProvider;
+using Dto;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,7 +36,7 @@ namespace CyberMigrate.ConfigurationUC
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            var options = Global.CmMasterDataProvider.Value.GetOptions();
+            var options = CMDataProvider.Master.Value.GetOptions();
             txtStorePath.Text = options.DataStorePath;
         }
 
@@ -47,10 +48,10 @@ namespace CyberMigrate.ConfigurationUC
                 return;
             }
 
-            var options = Global.CmMasterDataProvider.Value.GetOptions();
+            var options = CMDataProvider.Master.Value.GetOptions();
             options.DataStorePath = txtStorePath.Text;
 
-            Global.CmMasterDataProvider.Value.updateOptions(options);
+            CMDataProvider.Master.Value.updateOptions(options);
 
             MessageBox.Show("Updated.");
         }

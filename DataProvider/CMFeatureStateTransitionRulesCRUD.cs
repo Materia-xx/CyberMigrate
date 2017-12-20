@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace DataProvider
 {
-    public class CMFeatureStateTransitionRulesCRUD : CMDataProviderCRUD<CMFeatureStateTransitionRuleDto>
+    public class CMFeatureStateTransitionRulesCRUD : CMDataProviderCRUDBase<CMFeatureStateTransitionRuleDto>
     {
         public CMFeatureStateTransitionRulesCRUD(string dataStoreDbPath, string collectionName) : base(dataStoreDbPath, collectionName)
         {
@@ -13,6 +13,14 @@ namespace DataProvider
 
         public IEnumerable<CMFeatureStateTransitionRuleDto> GetAll_ForFeatureTemplate(int cmFeatureId)
         {
+            var featureTemplate = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(cmFeatureId);
+
+            // If the feature doesn't exist or it isn't a template then don't even look at the available state transition rules
+            if (featureTemplate == null || featureTemplate.IsTemplate == false)
+            {
+                return default(IEnumerable<CMFeatureStateTransitionRuleDto>);
+            }
+
             Query query = Query.EQ(nameof(CMFeatureStateTransitionRuleDto.CMFeatureId), cmFeatureId);
             var results = QueryCollection(query);
 
