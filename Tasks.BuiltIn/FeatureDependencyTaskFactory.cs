@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Windows.Controls;
 using TaskBase;
 
 namespace Tasks.BuiltIn
@@ -19,6 +20,12 @@ namespace Tasks.BuiltIn
             featureTask.CmFeatureId = cmFeatureId;
             featureTask.CmTaskId = cmTaskId;
             return featureTask;
+        }
+
+        public override UserControl GetConfigurationUI()
+        {
+            var configUI = new FeatureDependencyTaskFactoryUC();
+            return configUI;
         }
     }
 }

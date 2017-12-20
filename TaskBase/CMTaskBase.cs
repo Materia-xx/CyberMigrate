@@ -29,8 +29,5 @@ namespace TaskBase
         /// </summary>
         /// <returns></returns>
         public abstract UserControl GetUI();
-
-
-        // mcbtodo: create another function to get the UI that is meant to configure the task. This UI will show up in the config screen.
     }
 }

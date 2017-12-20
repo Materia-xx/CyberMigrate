@@ -5,6 +5,7 @@ using System.ComponentModel.Composition.Hosting;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Windows.Controls;
 
 namespace TaskBase
 {
@@ -80,5 +81,23 @@ namespace TaskBase
             var createdTask = supportingFactories.First().CreateTask(cmSystemId, cmFeatureId, cmTaskId);
             return createdTask;
         }
+
+        public UserControl GetConfigUI(string taskFactoryName)
+        {
+            var matchingFactories = TaskFactories.Where(f => f.GetType().Name.Equals(taskFactoryName, StringComparison.OrdinalIgnoreCase));
+
+            if (!matchingFactories.Any())
+            {
+                throw new InvalidOperationException($"Unable to create a config UI for '{taskFactoryName}'. The task factory was not found.");
+            }
+            else if (matchingFactories.Count() > 1)
+            {
+                throw new InvalidOperationException($"Unable to create a config UI for '{taskFactoryName}'. There are more than 1 task factories with this name.");
+            }
+
+            var configUI = matchingFactories.First().GetConfigurationUI();
+            return configUI;
+        }
+
     }
 }

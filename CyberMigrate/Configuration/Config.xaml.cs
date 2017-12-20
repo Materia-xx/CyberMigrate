@@ -4,6 +4,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using TaskBase;
 
 namespace CyberMigrate
 {
@@ -35,7 +36,12 @@ namespace CyberMigrate
                     return Dto.GetType().Name;
                 }
             }
+        }
 
+        // special case for task factories to keep track of which tree view node is showing the UI for each task factory
+        private class CMTaskFactoryDto : IdBasedObject // mcbtodo: put this in the dto class anyway ?
+        {
+            public string TaskFactoryName { get; set; }
         }
 
         public Config()
@@ -72,7 +78,58 @@ namespace CyberMigrate
                     var cmFeatureTemplateTreeViewItem = TreeConfiguration_AddFeatureTemplate(cmSystemTreeViewItem, cmFeatureTemplate);
                 }
             }
+
             dataStoreTreeViewItem.ExpandSubtree();
+
+
+            // Add the task factories node and UIs to configure each factory
+            var taskFactoriesTreeViewItem =  TreeConfiguration_AddTaskFactories();
+
+            foreach (var taskFactory in TaskFactoriesCatalog.Instance.TaskFactories)
+            {
+                var cmTaskFactoryDto = new CMTaskFactoryDto()
+                {
+                    TaskFactoryName = taskFactory.GetType().Name
+                };
+
+                var taskFactoryTreeViewItem = TreeConfiguration_AddTaskFactory(taskFactoriesTreeViewItem, cmTaskFactoryDto);
+            }
+
+            taskFactoriesTreeViewItem.ExpandSubtree();
+        }
+
+        private TreeViewItem TreeConfiguration_AddTaskFactory(TreeViewItem taskFactoriesTreeViewItem, CMTaskFactoryDto cmTaskFactoryDto)
+        {
+            var taskFactoryTreeViewItem = new TreeViewItem()
+            {
+                Header = cmTaskFactoryDto.TaskFactoryName,
+                Tag = new ConfigTreeViewTag(cmTaskFactoryDto),
+            };
+            taskFactoriesTreeViewItem.Items.Add(taskFactoryTreeViewItem);
+
+            // Add the context menu
+            taskFactoryTreeViewItem.ContextMenu = new ContextMenu(); // There is no context menu actions currently for task factories
+
+            taskFactoryTreeViewItem.Selected += TreeConfiguration_NodeSelected;
+
+            return taskFactoryTreeViewItem;
+        }
+
+        private TreeViewItem TreeConfiguration_AddTaskFactories()
+        {
+            var taskFactoriesTreeViewItem = new TreeViewItem()
+            {
+                Header = "Task Factories",
+                Tag = null, // There is no tag here because there is no need to show any UI at this level.
+            };
+            treeConfig.Items.Add(taskFactoriesTreeViewItem);
+
+            // Add the context menu
+            taskFactoriesTreeViewItem.ContextMenu = new ContextMenu(); // There is no context menu actions currently for task factories
+
+            taskFactoriesTreeViewItem.Selected += TreeConfiguration_NodeSelected; // Still keep the onSelected event so the UI can clear what may be there when selected
+
+            return taskFactoriesTreeViewItem;
         }
 
         private TreeViewItem TreeConfiguration_AddDataStore()
@@ -284,6 +341,11 @@ namespace CyberMigrate
                 case nameof(CMFeatureTemplate):
                     var featureTemplateConfigUc = new FeatureTemplateConfigUC(this, attachedTag.Dto as CMFeatureTemplate);
                     configUIPanel.Children.Add(featureTemplateConfigUc);
+                    break;
+                case nameof(CMTaskFactoryDto):
+                    var dto = attachedTag.Dto as CMTaskFactoryDto;
+                    var taskFactoryUc = TaskFactoriesCatalog.Instance.GetConfigUI(dto.TaskFactoryName);
+                    configUIPanel.Children.Add(taskFactoryUc);
                     break;
                 default:
                     break;
