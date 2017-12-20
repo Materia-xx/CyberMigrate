@@ -21,7 +21,7 @@ namespace CyberMigrate.ConfigurationUC
     /// </summary>
     public partial class FeatureTemplateConfigUC : UserControl
     {
-        private CMFeatureTemplate cmFeatureTemplate;
+        private CMFeatureTemplateDto cmFeatureTemplate;
 
         private Config ConfigWindow { get; set; }
 
@@ -29,7 +29,7 @@ namespace CyberMigrate.ConfigurationUC
 
         private List<BoolBasedComboBoxEntry> ConditionAreCompleteChoices { get; set; }
 
-        public FeatureTemplateConfigUC(Config configWindow, CMFeatureTemplate cmFeatureTemplate)
+        public FeatureTemplateConfigUC(Config configWindow, CMFeatureTemplateDto cmFeatureTemplate)
         {
             InitializeComponent();
             this.cmFeatureTemplate = cmFeatureTemplate;
@@ -48,7 +48,7 @@ namespace CyberMigrate.ConfigurationUC
             public string Name { get; private set; }
         }
 
-        private List<CMSystemState> CurrentSystemStates { get; set; }
+        private List<CMSystemStateDto> CurrentSystemStates { get; set; }
 
         /// <summary>
         /// Load the lists that will be displayed as dropdown choices in the state transitions datagrid
@@ -80,22 +80,22 @@ namespace CyberMigrate.ConfigurationUC
             dataGridStateTransitionRules.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = nameof(CMFeatureStateTransitionRule.Id),
-                    Binding = new Binding(nameof(CMFeatureStateTransitionRule.Id)),
+                    Header = nameof(CMFeatureStateTransitionRuleDto.Id),
+                    Binding = new Binding(nameof(CMFeatureStateTransitionRuleDto.Id)),
                     Visibility = Visibility.Collapsed // Only meant to keep track of ids.
                 });
             dataGridStateTransitionRules.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = nameof(CMFeatureStateTransitionRule.CMFeatureTemplateId),
-                    Binding = new Binding(nameof(CMFeatureStateTransitionRule.CMFeatureTemplateId)),
+                    Header = nameof(CMFeatureStateTransitionRuleDto.CMFeatureTemplateId),
+                    Binding = new Binding(nameof(CMFeatureStateTransitionRuleDto.CMFeatureTemplateId)),
                     Visibility = Visibility.Collapsed // Only meant to keep track of ids.
                 });
             dataGridStateTransitionRules.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = nameof(CMFeatureStateTransitionRule.Priority),
-                    Binding = new Binding(nameof(CMFeatureStateTransitionRule.Priority)),
+                    Header = nameof(CMFeatureStateTransitionRuleDto.Priority),
+                    Binding = new Binding(nameof(CMFeatureStateTransitionRuleDto.Priority)),
                 });
             dataGridStateTransitionRules.Columns.Add(
                 new DataGridComboBoxColumn()
@@ -104,7 +104,7 @@ namespace CyberMigrate.ConfigurationUC
                     ItemsSource = ConditionAllAnyChoices,
 
                     // Where to store the selected value
-                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRule.ConditionAllTasks)),
+                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.ConditionAllTasks)),
 
                     // Instructions on how to interact with the "lookup" list
                     SelectedValuePath = nameof(BoolBasedComboBoxEntry.Value),
@@ -118,11 +118,11 @@ namespace CyberMigrate.ConfigurationUC
                     ItemsSource = CurrentSystemStates,
 
                     // Where to store the selected value
-                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRule.ConditionQuerySystemStateId)),
+                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.ConditionQuerySystemStateId)),
 
                     // Instructions on how to interact with the "lookup" list
-                    SelectedValuePath = nameof(CMSystemState.Id),
-                    DisplayMemberPath = nameof(CMSystemState.Name),
+                    SelectedValuePath = nameof(CMSystemStateDto.Id),
+                    DisplayMemberPath = nameof(CMSystemStateDto.Name),
                     Width = 200
                 });
 
@@ -133,7 +133,7 @@ namespace CyberMigrate.ConfigurationUC
                     ItemsSource = ConditionAreCompleteChoices,
 
                     // Where to store the selected value
-                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRule.ConditionTaskComplete)),
+                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.ConditionTaskComplete)),
 
                     // Instructions on how to interact with the "lookup" list
                     SelectedValuePath = nameof(BoolBasedComboBoxEntry.Value),
@@ -147,11 +147,11 @@ namespace CyberMigrate.ConfigurationUC
                     ItemsSource = CurrentSystemStates,
 
                     // Where to store the selected value
-                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRule.ToCMSystemStateId)),
+                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.ToCMSystemStateId)),
 
                     // Instructions on how to interact with the "lookup" list
-                    SelectedValuePath = nameof(CMSystemState.Id),
-                    DisplayMemberPath = nameof(CMSystemState.Name),
+                    SelectedValuePath = nameof(CMSystemStateDto.Id),
+                    DisplayMemberPath = nameof(CMSystemStateDto.Name),
                     Width = 200
                 });
 
@@ -168,7 +168,7 @@ namespace CyberMigrate.ConfigurationUC
             Global.CmDataProvider.Value.CMFeatureTemplates.Value.Upsert(cmFeatureTemplateDb);
 
             // Update the collection of transition rules to be what is currently displayed in the data grid
-            List<CMFeatureStateTransitionRule> stateTransitionRules = (List<CMFeatureStateTransitionRule>)dataGridStateTransitionRules.ItemsSource;
+            List<CMFeatureStateTransitionRuleDto> stateTransitionRules = (List<CMFeatureStateTransitionRuleDto>)dataGridStateTransitionRules.ItemsSource;
 
             // First nuke all existing transition rules.
             // Nothing references these directly, and won't AFAIK so this should be ok.

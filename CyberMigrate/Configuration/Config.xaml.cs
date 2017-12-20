@@ -138,7 +138,7 @@ namespace CyberMigrate
             var dataStoreTreeViewItem = new TreeViewItem()
             {
                 Header = "Data Store",
-                Tag = new ConfigTreeViewTag(new CMDataStore()), // mcbtodo: there isn't currently an instance of cmDataStore availalble for this. Instead expose a Get function somewhere to get it.
+                Tag = new ConfigTreeViewTag(new CMDataStoreDto()), // mcbtodo: there isn't currently an instance of cmDataStore availalble for this. Instead expose a Get function somewhere to get it.
             };
             treeConfig.Items.Add(dataStoreTreeViewItem);
 
@@ -163,7 +163,7 @@ namespace CyberMigrate
             contextMenu.Items.Add(addNewSystemMenu);
             addNewSystemMenu.Click += (sender, e) =>
             {
-                var newCMSystem = new CMSystem()
+                var newCMSystem = new CMSystemDto()
                 {
                     Name = "New System"
                 };
@@ -189,12 +189,12 @@ namespace CyberMigrate
             {
                 var selectedTreeViewTag = GetSelectedConfigTreeViewTag();
 
-                if (selectedTreeViewTag?.Dto == null || !(selectedTreeViewTag?.Dto is CMSystem))
+                if (selectedTreeViewTag?.Dto == null || !(selectedTreeViewTag?.Dto is CMSystemDto))
                 {
                     return;
                 }
 
-                var selectedCMSystemDto = selectedTreeViewTag.Dto as CMSystem;
+                var selectedCMSystemDto = selectedTreeViewTag.Dto as CMSystemDto;
 
                 // mcbtodo: Check for any refs before deleting, do this as a callback ? e.g. how to provide a delete function that comes with the CRUD object but 
                 // mcbtodo: allow for extensibility to allow the creator to provide custom logic to indicate if an id is still referenced.
@@ -205,7 +205,7 @@ namespace CyberMigrate
             return contextMenu;
         }
 
-        private TreeViewItem TreeConfiguration_AddCMSystem(TreeViewItem parentTreeViewItem, CMSystem cmSystem)
+        private TreeViewItem TreeConfiguration_AddCMSystem(TreeViewItem parentTreeViewItem, CMSystemDto cmSystem)
         {
             var cmSystemTreeViewItem = new TreeViewItem()
             {
@@ -220,7 +220,7 @@ namespace CyberMigrate
             return cmSystemTreeViewItem;
         }
 
-        private ContextMenu GetContextMenu_CMSystem(TreeViewItem cmSystemTreeViewItem, CMSystem cmSystem)
+        private ContextMenu GetContextMenu_CMSystem(TreeViewItem cmSystemTreeViewItem, CMSystemDto cmSystem)
         {
             var contextMenu = new ContextMenu();
 
@@ -231,7 +231,7 @@ namespace CyberMigrate
             contextMenu.Items.Add(addNewFeatureTemplate);
             addNewFeatureTemplate.Click += (sender, e) =>
             {
-                var newCMFeatureTemplate = new CMFeatureTemplate()
+                var newCMFeatureTemplate = new CMFeatureTemplateDto()
                 {
                     Name = "New Feature Template",
                     CMSystemId = cmSystem.Id
@@ -252,7 +252,7 @@ namespace CyberMigrate
             return contextMenu;
         }
 
-        private TreeViewItem TreeConfiguration_AddFeatureTemplate(TreeViewItem parentTreeViewItem, CMFeatureTemplate cmFeatureTemplate)
+        private TreeViewItem TreeConfiguration_AddFeatureTemplate(TreeViewItem parentTreeViewItem, CMFeatureTemplateDto cmFeatureTemplate)
         {
             var cmFeatureTemplateTreeViewItem = new TreeViewItem()
             {
@@ -330,16 +330,16 @@ namespace CyberMigrate
 
             switch (attachedTag.DtoTypeName)
             {
-                case nameof(CMDataStore):
-                    var dataStoreConfigUc = new DataStoreConfigUC(this, attachedTag.Dto as CMDataStore);
+                case nameof(CMDataStoreDto):
+                    var dataStoreConfigUc = new DataStoreConfigUC(this, attachedTag.Dto as CMDataStoreDto);
                     configUIPanel.Children.Add(dataStoreConfigUc);
                     break;
-                case nameof(CMSystem):
-                    var systemConfigUc = new SystemConfigUC(this, attachedTag.Dto as CMSystem);
+                case nameof(CMSystemDto):
+                    var systemConfigUc = new SystemConfigUC(this, attachedTag.Dto as CMSystemDto);
                     configUIPanel.Children.Add(systemConfigUc);
                     break;
-                case nameof(CMFeatureTemplate):
-                    var featureTemplateConfigUc = new FeatureTemplateConfigUC(this, attachedTag.Dto as CMFeatureTemplate);
+                case nameof(CMFeatureTemplateDto):
+                    var featureTemplateConfigUc = new FeatureTemplateConfigUC(this, attachedTag.Dto as CMFeatureTemplateDto);
                     configUIPanel.Children.Add(featureTemplateConfigUc);
                     break;
                 case nameof(CMTaskFactoryDto):

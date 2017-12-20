@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace DataProvider
 {
-    public class CMFeatureTemplatesCRUD : CMDataProviderCRUD<CMFeatureTemplate>
+    public class CMFeatureTemplatesCRUD : CMDataProviderCRUD<CMFeatureTemplateDto>
     {
         public CMFeatureTemplatesCRUD(string dataStoreDbPath, string collectionName) : base(dataStoreDbPath, collectionName)
         {
@@ -18,7 +18,7 @@ namespace DataProvider
         /// <param name="featureTemplateName"></param>
         /// <param name="cmSystemId"></param>
         /// <returns></returns>
-        public CMFeatureTemplate Get_ForFeatureTemplateName(string featureTemplateName, int cmSystemId)
+        public CMFeatureTemplateDto Get_ForFeatureTemplateName(string featureTemplateName, int cmSystemId)
         {
             // First get all within the specified system
             var results = GetAll_ForSystem(cmSystemId);
@@ -28,9 +28,9 @@ namespace DataProvider
             return results.FirstOrDefault();
         }
 
-        public IEnumerable<CMFeatureTemplate> GetAll_ForSystem(int cmSystemId)
+        public IEnumerable<CMFeatureTemplateDto> GetAll_ForSystem(int cmSystemId)
         {
-            Query query = Query.EQ(nameof(CMFeatureTemplate.CMSystemId), cmSystemId);
+            Query query = Query.EQ(nameof(CMFeatureTemplateDto.CMSystemId), cmSystemId);
             var results = QueryCollection(query);
 
             return results.OrderBy(f => f.Name);

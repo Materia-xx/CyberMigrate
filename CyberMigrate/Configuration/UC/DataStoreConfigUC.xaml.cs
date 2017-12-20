@@ -24,9 +24,9 @@ namespace CyberMigrate.ConfigurationUC
     {
         public Config ConfigWindow { get; set; }
 
-        public CMDataStore cmDataStore;
+        public CMDataStoreDto cmDataStore;
 
-        public DataStoreConfigUC(Config configWindow, CMDataStore cmDataStore)
+        public DataStoreConfigUC(Config configWindow, CMDataStoreDto cmDataStore)
         {
             InitializeComponent();
             this.cmDataStore = cmDataStore;

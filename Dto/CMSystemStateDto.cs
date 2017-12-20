@@ -1,6 +1,6 @@
 ﻿namespace Dto
 {
-    public class CMSystemState : IdBasedObject
+    public class CMSystemStateDto : IdBasedObject
     {
         public int CMSystemId { get; set; }
         public string Name { get; set; }

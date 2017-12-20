@@ -1,6 +1,6 @@
 ﻿namespace Dto
 {
-    public class CMDataStore : IdBasedObject
+    public class CMDataStoreDto : IdBasedObject
     {
         /// <summary>
         /// The directory location on disk where the data resides

@@ -40,14 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CMFeatureStateTransitionRule.cs" />
-    <Compile Include="CMOptions.cs" />
-    <Compile Include="CMDataStore.cs" />
-    <Compile Include="CMFeatureTemplate.cs" />
-    <Compile Include="CMSystemState.cs" />
+    <Compile Include="CMFeatureStateTransitionRuleDto.cs" />
+    <Compile Include="CMOptionsDto.cs" />
+    <Compile Include="CMDataStoreDto.cs" />
+    <Compile Include="CMFeatureTemplateDto.cs" />
+    <Compile Include="CMSystemStateDto.cs" />
     <Compile Include="IdBasedObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CMSystem.cs" />
+    <Compile Include="CMSystemDto.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

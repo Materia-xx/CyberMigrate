@@ -14,9 +14,9 @@ namespace CyberMigrate.ConfigurationUC
     {
         public Config ConfigWindow { get; set; }
 
-        public CMSystem cmSystem;
+        public CMSystemDto cmSystem;
 
-        public SystemConfigUC(Config configWindow, CMSystem cmSystem)
+        public SystemConfigUC(Config configWindow, CMSystemDto cmSystem)
         {
             InitializeComponent();
             this.cmSystem = cmSystem;
@@ -32,21 +32,21 @@ namespace CyberMigrate.ConfigurationUC
             dataGridStates.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = nameof(CMSystemState.Id),
-                    Binding = new Binding(nameof(CMSystemState.Id)),
+                    Header = nameof(CMSystemStateDto.Id),
+                    Binding = new Binding(nameof(CMSystemStateDto.Id)),
                     Visibility = Visibility.Collapsed // Only meant to keep track of ids.
                 });
             dataGridStates.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = nameof(CMSystemState.Priority),
-                    Binding = new Binding(nameof(CMSystemState.Priority))
+                    Header = nameof(CMSystemStateDto.Priority),
+                    Binding = new Binding(nameof(CMSystemStateDto.Priority))
                 });
             dataGridStates.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = nameof(CMSystemState.Name),
-                    Binding = new Binding(nameof(CMSystemState.Name)),
+                    Header = nameof(CMSystemStateDto.Name),
+                    Binding = new Binding(nameof(CMSystemStateDto.Name)),
                     Width = 200
                 });
 
@@ -63,7 +63,7 @@ namespace CyberMigrate.ConfigurationUC
             Global.CmDataProvider.Value.CMSystems.Value.Upsert(cmSystem);
 
             // Update the collection of system states
-            List<CMSystemState> cmSystemStates = (List<CMSystemState>)dataGridStates.ItemsSource;
+            List<CMSystemStateDto> cmSystemStates = (List<CMSystemStateDto>)dataGridStates.ItemsSource;
 
             // Verify data before doing anything
             foreach (var cmSystemState in cmSystemStates)

@@ -1,6 +1,6 @@
 ﻿namespace Dto
 {
-    public class CMFeatureTemplate : IdBasedObject
+    public class CMFeatureTemplateDto : IdBasedObject
     {
         /// <summary>
         /// The sytem that the feature template is connected to

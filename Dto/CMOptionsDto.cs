@@ -1,6 +1,6 @@
 ﻿namespace Dto
 {
-    public class CMOptions : IdBasedObject
+    public class CMOptionsDto : IdBasedObject
     {
         public string DataStorePath { get; set; }
     }

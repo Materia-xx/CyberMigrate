@@ -29,16 +29,16 @@ namespace DataProvider
         /// The program can only have one data store. If it has been configured in the program than this will return that path.
         /// </summary>
         /// <returns></returns>
-        public CMOptions GetOptions()
+        public CMOptionsDto GetOptions()
         {
             using (var db = new LiteDatabase(programDbPath))
             {
-                var optionsCollection = db.GetCollection<CMOptions>("CyberMigrateOptions");
+                var optionsCollection = db.GetCollection<CMOptionsDto>("CyberMigrateOptions");
                 var options = optionsCollection.FindAll().FirstOrDefault();
 
                 if (options == null)
                 {
-                    options = new CMOptions();
+                    options = new CMOptionsDto();
                     optionsCollection.Insert(options);
                 }
 
@@ -46,11 +46,11 @@ namespace DataProvider
             }
         }
 
-        public void updateOptions(CMOptions options)
+        public void updateOptions(CMOptionsDto options)
         {
             using (var db = new LiteDatabase(programDbPath))
             {
-                var optionsCollection = db.GetCollection<CMOptions>("CyberMigrateOptions");
+                var optionsCollection = db.GetCollection<CMOptionsDto>("CyberMigrateOptions");
                 if (!optionsCollection.Update(options))
                 {
                     throw new InvalidOperationException("Options were not found in master db.");

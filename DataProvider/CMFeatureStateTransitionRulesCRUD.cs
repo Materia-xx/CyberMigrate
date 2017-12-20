@@ -5,15 +5,15 @@ using System.Linq;
 
 namespace DataProvider
 {
-    public class CMFeatureStateTransitionRulesCRUD : CMDataProviderCRUD<CMFeatureStateTransitionRule>
+    public class CMFeatureStateTransitionRulesCRUD : CMDataProviderCRUD<CMFeatureStateTransitionRuleDto>
     {
         public CMFeatureStateTransitionRulesCRUD(string dataStoreDbPath, string collectionName) : base(dataStoreDbPath, collectionName)
         {
         }
 
-        public IEnumerable<CMFeatureStateTransitionRule> GetAll_ForFeatureTemplate(int cmFeatureTemplateId)
+        public IEnumerable<CMFeatureStateTransitionRuleDto> GetAll_ForFeatureTemplate(int cmFeatureTemplateId)
         {
-            Query query = Query.EQ(nameof(CMFeatureStateTransitionRule.CMFeatureTemplateId), cmFeatureTemplateId);
+            Query query = Query.EQ(nameof(CMFeatureStateTransitionRuleDto.CMFeatureTemplateId), cmFeatureTemplateId);
             var results = QueryCollection(query);
 
             // Always return rules so that the first one in the list that the program comes across is the winner and the rest are ignored

@@ -1,6 +1,6 @@
 ﻿namespace Dto
 {
-    public class CMFeatureStateTransitionRule : IdBasedObject
+    public class CMFeatureStateTransitionRuleDto : IdBasedObject
     {
         /// <summary>
         /// Transition rules are processed in order with the first one that matches winning and the rest being ignored

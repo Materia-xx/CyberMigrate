@@ -8,7 +8,7 @@ namespace DataProvider
     /// <summary>
     /// Provides additional functions for interacting with the Systems table that are not provided in the base CRUD class
     /// </summary>
-    public class CMSystemsCRUD : CMDataProviderCRUD<CMSystem>
+    public class CMSystemsCRUD : CMDataProviderCRUD<CMSystemDto>
     {
         public CMSystemsCRUD(string dataStoreDbPath, string collectionName) : base(dataStoreDbPath, collectionName)
         {
@@ -18,7 +18,7 @@ namespace DataProvider
         /// Returns all systems in the datastore
         /// </summary>
         /// <returns></returns>
-        public new IEnumerable<CMSystem> GetAll()
+        public new IEnumerable<CMSystemDto> GetAll()
         {
             var results = base.GetAll();
             return results.OrderBy(s => s.Name);
@@ -29,9 +29,9 @@ namespace DataProvider
         /// </summary>
         /// <param name="systemName"></param>
         /// <returns></returns>
-        public CMSystem Get_ForSystemName(string systemName)
+        public CMSystemDto Get_ForSystemName(string systemName)
         {
-            var query = Query.EQ(nameof(CMSystem.Name), systemName);
+            var query = Query.EQ(nameof(CMSystemDto.Name), systemName);
             return QueryCollection(query).FirstOrDefault();
         }
     }
