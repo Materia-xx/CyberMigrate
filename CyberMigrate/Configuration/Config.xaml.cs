@@ -72,7 +72,7 @@ namespace CyberMigrate
                 var cmSystemTreeViewItem = TreeConfiguration_AddCMSystem(dataStoreTreeViewItem, cmSystem);
 
                 // Get all of the feature templates within this system and show them.
-                var cmFeatureTemplates = Global.CmDataProvider.Value.CMFeatureTemplates.Value.GetAll_ForSystem(cmSystem.Id);
+                var cmFeatureTemplates = Global.CmDataProvider.Value.CMFeatures.Value.GetAll_ForSystem(cmSystem.Id, true);
                 foreach (var cmFeatureTemplate in cmFeatureTemplates)
                 {
                     var cmFeatureTemplateTreeViewItem = TreeConfiguration_AddFeatureTemplate(cmSystemTreeViewItem, cmFeatureTemplate);
@@ -231,19 +231,20 @@ namespace CyberMigrate
             contextMenu.Items.Add(addNewFeatureTemplate);
             addNewFeatureTemplate.Click += (sender, e) =>
             {
-                var newCMFeatureTemplate = new CMFeatureTemplateDto()
+                var newCMFeatureTemplate = new CMFeatureDto()
                 {
+                    IsTemplate = true,
                     Name = "New Feature Template",
                     CMSystemId = cmSystem.Id
                 };
 
-                if (Global.CmDataProvider.Value.CMFeatureTemplates.Value.Get_ForFeatureTemplateName(newCMFeatureTemplate.Name, cmSystem.Id) != null)
+                if (Global.CmDataProvider.Value.CMFeatures.Value.Get_ForName(newCMFeatureTemplate.Name, cmSystem.Id, true) != null)
                 {
-                    MessageBox.Show($"A '{newCMFeatureTemplate.Name}' already exists. Rename that one first.");
+                    MessageBox.Show($"A template named '{newCMFeatureTemplate.Name}' already exists. Rename that one first.");
                     return;
                 }
 
-                if (Global.CmDataProvider.Value.CMFeatureTemplates.Value.Upsert(newCMFeatureTemplate))
+                if (Global.CmDataProvider.Value.CMFeatures.Value.Upsert(newCMFeatureTemplate))
                 {
                     TreeConfiguration_AddFeatureTemplate(cmSystemTreeViewItem, newCMFeatureTemplate);
                 }
@@ -252,7 +253,7 @@ namespace CyberMigrate
             return contextMenu;
         }
 
-        private TreeViewItem TreeConfiguration_AddFeatureTemplate(TreeViewItem parentTreeViewItem, CMFeatureTemplateDto cmFeatureTemplate)
+        private TreeViewItem TreeConfiguration_AddFeatureTemplate(TreeViewItem parentTreeViewItem, CMFeatureDto cmFeatureTemplate)
         {
             var cmFeatureTemplateTreeViewItem = new TreeViewItem()
             {
@@ -338,8 +339,8 @@ namespace CyberMigrate
                     var systemConfigUc = new SystemConfigUC(this, attachedTag.Dto as CMSystemDto);
                     configUIPanel.Children.Add(systemConfigUc);
                     break;
-                case nameof(CMFeatureTemplateDto):
-                    var featureTemplateConfigUc = new FeatureTemplateConfigUC(this, attachedTag.Dto as CMFeatureTemplateDto);
+                case nameof(CMFeatureDto):
+                    var featureTemplateConfigUc = new FeatureTemplateConfigUC(this, attachedTag.Dto as CMFeatureDto);
                     configUIPanel.Children.Add(featureTemplateConfigUc);
                     break;
                 case nameof(CMTaskFactoryDto):

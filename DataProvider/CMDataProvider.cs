@@ -16,7 +16,7 @@ namespace DataProvider
 
         public Lazy<CMSystemStatesCRUD> CMSystemStates { get; set; }
 
-        public Lazy<CMFeatureTemplatesCRUD> CMFeatureTemplates { get; set; }
+        public Lazy<CMFeaturesCRUD> CMFeatures { get; set; }
 
         public Lazy<CMFeatureStateTransitionRulesCRUD> CMFeatureStateTransitionRules { get; set; }
 
@@ -35,9 +35,9 @@ namespace DataProvider
                 return new CMSystemStatesCRUD(dataStoreDbPath, "SystemStates");
             });
 
-            CMFeatureTemplates = new Lazy<CMFeatureTemplatesCRUD>(() =>
+            CMFeatures = new Lazy<CMFeaturesCRUD>(() =>
             {
-                return new CMFeatureTemplatesCRUD(dataStoreDbPath, "FeatureTemplates");
+                return new CMFeaturesCRUD(dataStoreDbPath, "Features");
             });
 
             CMFeatureStateTransitionRules = new Lazy<CMFeatureStateTransitionRulesCRUD>(() =>

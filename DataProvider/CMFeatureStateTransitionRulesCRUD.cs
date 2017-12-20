@@ -11,9 +11,9 @@ namespace DataProvider
         {
         }
 
-        public IEnumerable<CMFeatureStateTransitionRuleDto> GetAll_ForFeatureTemplate(int cmFeatureTemplateId)
+        public IEnumerable<CMFeatureStateTransitionRuleDto> GetAll_ForFeatureTemplate(int cmFeatureId)
         {
-            Query query = Query.EQ(nameof(CMFeatureStateTransitionRuleDto.CMFeatureTemplateId), cmFeatureTemplateId);
+            Query query = Query.EQ(nameof(CMFeatureStateTransitionRuleDto.CMFeatureId), cmFeatureId);
             var results = QueryCollection(query);
 
             // Always return rules so that the first one in the list that the program comes across is the winner and the rest are ignored

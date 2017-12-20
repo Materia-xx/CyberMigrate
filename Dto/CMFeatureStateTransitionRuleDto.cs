@@ -8,9 +8,9 @@
         public int Priority { get; set; }
 
         /// <summary>
-        /// The feature template that this rule is for
+        /// The feature (template) that this rule is for
         /// </summary>
-        public int CMFeatureTemplateId { get; set; }
+        public int CMFeatureId { get; set; }
 
         /// <summary>
         /// The system state id that will be moved to if the rule passes

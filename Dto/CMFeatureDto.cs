@@ -1,11 +1,16 @@
 ﻿namespace Dto
 {
-    public class CMFeatureTemplateDto : IdBasedObject
+    public class CMFeatureDto : IdBasedObject
     {
         /// <summary>
         /// The sytem that the feature template is connected to
         /// </summary>
         public int CMSystemId { get; set; }
+
+        /// <summary>
+        /// Indicates if this is a feature template or an actual implementation of a feature
+        /// </summary>
+        public bool IsTemplate { get; set; }
 
         /// <summary>
         /// The name of the feature template

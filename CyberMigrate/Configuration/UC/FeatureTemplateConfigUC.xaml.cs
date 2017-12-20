@@ -21,7 +21,7 @@ namespace CyberMigrate.ConfigurationUC
     /// </summary>
     public partial class FeatureTemplateConfigUC : UserControl
     {
-        private CMFeatureTemplateDto cmFeatureTemplate;
+        private CMFeatureDto cmFeatureTemplate;
 
         private Config ConfigWindow { get; set; }
 
@@ -29,7 +29,7 @@ namespace CyberMigrate.ConfigurationUC
 
         private List<BoolBasedComboBoxEntry> ConditionAreCompleteChoices { get; set; }
 
-        public FeatureTemplateConfigUC(Config configWindow, CMFeatureTemplateDto cmFeatureTemplate)
+        public FeatureTemplateConfigUC(Config configWindow, CMFeatureDto cmFeatureTemplate)
         {
             InitializeComponent();
             this.cmFeatureTemplate = cmFeatureTemplate;
@@ -87,8 +87,8 @@ namespace CyberMigrate.ConfigurationUC
             dataGridStateTransitionRules.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = nameof(CMFeatureStateTransitionRuleDto.CMFeatureTemplateId),
-                    Binding = new Binding(nameof(CMFeatureStateTransitionRuleDto.CMFeatureTemplateId)),
+                    Header = nameof(CMFeatureStateTransitionRuleDto.CMFeatureId),
+                    Binding = new Binding(nameof(CMFeatureStateTransitionRuleDto.CMFeatureId)),
                     Visibility = Visibility.Collapsed // Only meant to keep track of ids.
                 });
             dataGridStateTransitionRules.Columns.Add(
@@ -163,9 +163,9 @@ namespace CyberMigrate.ConfigurationUC
         private void btnApply_Click(object sender, RoutedEventArgs e)
         {
             // Update the feature template. Load it first from the db first just in case it has been updated elsewhere.
-            var cmFeatureTemplateDb = Global.CmDataProvider.Value.CMFeatureTemplates.Value.Get(cmFeatureTemplate.Id);
+            var cmFeatureTemplateDb = Global.CmDataProvider.Value.CMFeatures.Value.Get(cmFeatureTemplate.Id);
             cmFeatureTemplateDb.Name = txtFeatureTemplateName.Text;
-            Global.CmDataProvider.Value.CMFeatureTemplates.Value.Upsert(cmFeatureTemplateDb);
+            Global.CmDataProvider.Value.CMFeatures.Value.Upsert(cmFeatureTemplateDb);
 
             // Update the collection of transition rules to be what is currently displayed in the data grid
             List<CMFeatureStateTransitionRuleDto> stateTransitionRules = (List<CMFeatureStateTransitionRuleDto>)dataGridStateTransitionRules.ItemsSource;
@@ -177,7 +177,7 @@ namespace CyberMigrate.ConfigurationUC
             // Add the new ones now shown in the grid
             foreach (var rule in stateTransitionRules)
             {
-                rule.CMFeatureTemplateId = cmFeatureTemplate.Id; // Make sure the rules are connected to the correct feature template
+                rule.CMFeatureId = cmFeatureTemplate.Id; // Make sure the rules are connected to the correct feature template
                 Global.CmDataProvider.Value.CMFeatureStateTransitionRules.Value.Upsert(rule);
             }
 

@@ -43,7 +43,7 @@
     <Compile Include="CMFeatureStateTransitionRuleDto.cs" />
     <Compile Include="CMOptionsDto.cs" />
     <Compile Include="CMDataStoreDto.cs" />
-    <Compile Include="CMFeatureTemplateDto.cs" />
+    <Compile Include="CMFeatureDto.cs" />
     <Compile Include="CMSystemStateDto.cs" />
     <Compile Include="IdBasedObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -47,7 +47,7 @@
     <Compile Include="CMDataProviderCRUD.cs" />
     <Compile Include="CMDataProviderMaster.cs" />
     <Compile Include="CMFeatureStateTransitionRulesCRUD.cs" />
-    <Compile Include="CMFeatureTemplatesCRUD.cs" />
+    <Compile Include="CMFeaturesCRUD.cs" />
     <Compile Include="CMSystemStatesCRUD.cs" />
     <Compile Include="CMSystemsCRUD.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
