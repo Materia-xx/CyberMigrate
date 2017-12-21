@@ -1,5 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using LiteDB;
+using System;
 
 namespace DataProvider
 {
@@ -8,10 +8,6 @@ namespace DataProvider
     /// </summary>
     public class CMDataProviderDataStore
     {
-        private string dataStoreDirectory;
-        private string dataStoreDbPath;
-
-        //public SingletonWrapper<CMSystemsCRUD> CMSystems { get; set; }
         public Lazy<CMSystemsCRUD> CMSystems { get; set; }
 
         public Lazy<CMSystemStatesCRUD> CMSystemStates { get; set; }
@@ -20,29 +16,26 @@ namespace DataProvider
 
         public Lazy<CMFeatureStateTransitionRulesCRUD> CMFeatureStateTransitionRules { get; set; }
 
-        public CMDataProviderDataStore(string dataStoreDirectory)
+        public CMDataProviderDataStore(LiteDatabase dataStoreDatabase)
         {
-            this.dataStoreDirectory = dataStoreDirectory;
-            dataStoreDbPath = Path.Combine(dataStoreDirectory, "CyberMigrate.db");
-
             CMSystems = new Lazy<CMSystemsCRUD>(() =>
             {
-                return new CMSystemsCRUD(dataStoreDbPath, "Systems");
+                return new CMSystemsCRUD(dataStoreDatabase, "Systems");
             });
 
             CMSystemStates = new Lazy<CMSystemStatesCRUD>(() =>
             {
-                return new CMSystemStatesCRUD(dataStoreDbPath, "SystemStates");
+                return new CMSystemStatesCRUD(dataStoreDatabase, "SystemStates");
             });
 
             CMFeatures = new Lazy<CMFeaturesCRUD>(() =>
             {
-                return new CMFeaturesCRUD(dataStoreDbPath, "Features");
+                return new CMFeaturesCRUD(dataStoreDatabase, "Features");
             });
 
             CMFeatureStateTransitionRules = new Lazy<CMFeatureStateTransitionRulesCRUD>(() =>
             {
-                return new CMFeatureStateTransitionRulesCRUD(dataStoreDbPath, "FeatureStateTransitionRules");
+                return new CMFeatureStateTransitionRulesCRUD(dataStoreDatabase, "FeatureStateTransitionRules");
             });
         }
     }

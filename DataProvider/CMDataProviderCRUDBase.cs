@@ -13,13 +13,15 @@ namespace DataProvider
     /// </summary>
     public abstract class CMDataProviderCRUDBase<T> where T : IdBasedObject
     {
-        private string cmDatabasePath;
+        private LiteDatabase db;
         private string collectionName;
+        private LiteCollection<T> cmCollection;
 
-        public CMDataProviderCRUDBase(string cmDatabasePath, string collectionName)
+        public CMDataProviderCRUDBase(LiteDatabase liteDatabase, string collectionName)
         {
-            this.cmDatabasePath = cmDatabasePath;
+            this.db = liteDatabase;
             this.collectionName = collectionName;
+            cmCollection = db.GetCollection<T>(collectionName);
         }
 
         /// <summary>
@@ -29,61 +31,40 @@ namespace DataProvider
         /// <returns></returns>
         protected virtual IEnumerable<T> GetAll()
         {
-            using (var db = new LiteDatabase(cmDatabasePath))
-            {
-                var cmCollection = db.GetCollection<T>(collectionName);
-                var results = cmCollection.FindAll();
-                return results;
-            }
+            var results = cmCollection.FindAll();
+            return results;
         }
 
         protected virtual IEnumerable<T> Find(Expression<Func<T,bool>> expression)
         {
-            using (var db = new LiteDatabase(cmDatabasePath))
-            {
-                var cmCollection = db.GetCollection<T>(collectionName);
-                var results = cmCollection.Find(expression);
-                return results;
-            }
+            var results = cmCollection.Find(expression);
+            return results;
         }
 
         public virtual T Get(int id)
         {
-            using (var db = new LiteDatabase(cmDatabasePath))
-            {
-                var cmCollection = db.GetCollection<T>(collectionName);
-
-                return cmCollection.Find(s => s.Id == id).FirstOrDefault();
-            }
+            return cmCollection.Find(s => s.Id == id).FirstOrDefault();
         }
 
         public virtual bool Upsert(T updatingObject)
         {
-            using (var db = new LiteDatabase(cmDatabasePath))
-            {
-                var cmCollection = db.GetCollection<T>(collectionName);
-                var existingCMSystem = cmCollection.Find(s => s.Id == updatingObject.Id);
+            var existingCMSystem = cmCollection.Find(s => s.Id == updatingObject.Id);
 
-                if (existingCMSystem.Any())
-                {
-                    cmCollection.Update(updatingObject);
-                }
-                else
-                {
-                    cmCollection.Insert(updatingObject);
-                }
-                
-                return true;
+            if (existingCMSystem.Any())
+            {
+                cmCollection.Update(updatingObject);
             }
+            else
+            {
+                cmCollection.Insert(updatingObject);
+            }
+                
+            return true;
         }
 
         public virtual bool Delete(int deletingId)
         {
-            using (var db = new LiteDatabase(cmDatabasePath))
-            {
-                var cmCollection = db.GetCollection<T>(collectionName);
-                return cmCollection.Delete(deletingId);
-            }
+            return cmCollection.Delete(deletingId);
         }
     }
 }

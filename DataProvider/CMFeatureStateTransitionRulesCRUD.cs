@@ -7,7 +7,7 @@ namespace DataProvider
 {
     public class CMFeatureStateTransitionRulesCRUD : CMDataProviderCRUDBase<CMFeatureStateTransitionRuleDto>
     {
-        public CMFeatureStateTransitionRulesCRUD(string dataStoreDbPath, string collectionName) : base(dataStoreDbPath, collectionName)
+        public CMFeatureStateTransitionRulesCRUD(LiteDatabase liteDatabase, string collectionName) : base(liteDatabase, collectionName)
         {
         }
 

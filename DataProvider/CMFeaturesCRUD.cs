@@ -7,7 +7,7 @@ namespace DataProvider
 {
     public class CMFeaturesCRUD : CMDataProviderCRUDBase<CMFeatureDto>
     {
-        public CMFeaturesCRUD(string dataStoreDbPath, string collectionName) : base(dataStoreDbPath, collectionName)
+        public CMFeaturesCRUD(LiteDatabase liteDatabase, string collectionName) : base(liteDatabase, collectionName)
         {
         }
 

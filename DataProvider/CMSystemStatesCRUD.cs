@@ -7,7 +7,7 @@ namespace DataProvider
 {
     public class CMSystemStatesCRUD : CMDataProviderCRUDBase<CMSystemStateDto>
     {
-        public CMSystemStatesCRUD(string dataStoreDbPath, string collectionName) : base(dataStoreDbPath, collectionName)
+        public CMSystemStatesCRUD(LiteDatabase liteDatabase, string collectionName) : base(liteDatabase, collectionName)
         {
         }
 

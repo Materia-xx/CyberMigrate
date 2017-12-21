@@ -1,11 +1,7 @@
 ﻿using Dto;
 using LiteDB;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataProvider
 {
@@ -16,13 +12,13 @@ namespace DataProvider
     /// </summary>
     public class CMDataProviderMaster
     {
-        private string programDirectory;
-        private string programDbPath;
+        private LiteDatabase db;
+        private LiteCollection<CMOptionsDto> optionsCollection;
 
-        public CMDataProviderMaster()
+        public CMDataProviderMaster(LiteDatabase masterDatabase)
         {
-            programDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-            programDbPath = Path.Combine(programDirectory, "CyberMigrateMaster.db");
+            this.db = masterDatabase;
+            this.optionsCollection = db.GetCollection<CMOptionsDto>("CyberMigrateOptions");
         }
 
         /// <summary>
@@ -31,30 +27,22 @@ namespace DataProvider
         /// <returns></returns>
         public CMOptionsDto GetOptions()
         {
-            using (var db = new LiteDatabase(programDbPath))
+            var options = optionsCollection.FindAll().FirstOrDefault();
+
+            if (options == null)
             {
-                var optionsCollection = db.GetCollection<CMOptionsDto>("CyberMigrateOptions");
-                var options = optionsCollection.FindAll().FirstOrDefault();
-
-                if (options == null)
-                {
-                    options = new CMOptionsDto();
-                    optionsCollection.Insert(options);
-                }
-
-                return options;
+                options = new CMOptionsDto();
+                optionsCollection.Insert(options);
             }
+
+            return options;
         }
 
         public void updateOptions(CMOptionsDto options)
         {
-            using (var db = new LiteDatabase(programDbPath))
+            if (!optionsCollection.Update(options))
             {
-                var optionsCollection = db.GetCollection<CMOptionsDto>("CyberMigrateOptions");
-                if (!optionsCollection.Update(options))
-                {
-                    throw new InvalidOperationException("Options were not found in master db.");
-                }
+                throw new InvalidOperationException("Options were not found in master db.");
             }
         }
     }

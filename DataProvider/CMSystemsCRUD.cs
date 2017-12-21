@@ -10,7 +10,7 @@ namespace DataProvider
     /// </summary>
     public class CMSystemsCRUD : CMDataProviderCRUDBase<CMSystemDto>
     {
-        public CMSystemsCRUD(string dataStoreDbPath, string collectionName) : base(dataStoreDbPath, collectionName)
+        public CMSystemsCRUD(LiteDatabase liteDatabase, string collectionName) : base(liteDatabase, collectionName)
         {
         }
 
