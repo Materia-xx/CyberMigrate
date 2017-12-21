@@ -21,8 +21,9 @@ namespace DataProvider
                 return default(IEnumerable<CMFeatureStateTransitionRuleDto>);
             }
 
-            Query query = Query.EQ(nameof(CMFeatureStateTransitionRuleDto.CMFeatureId), cmFeatureId);
-            var results = QueryCollection(query);
+            var results = Find(r =>
+                r.CMFeatureId == cmFeatureId
+            );
 
             // Always return rules so that the first one in the list that the program comes across is the winner and the rest are ignored
             // This also has the side effect of listing them in this same order in the configuration UI.

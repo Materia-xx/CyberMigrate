@@ -1,7 +1,9 @@
 ﻿using Dto;
 using LiteDB;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace DataProvider
 {
@@ -22,7 +24,7 @@ namespace DataProvider
 
         /// <summary>
         /// Returns all elements of the collection.
-        /// Use <see cref="QueryCollection(Query)"/> instead if the intention is the filter the returned results.
+        /// Use <see cref="Find(Query)"/> instead if the intention is the filter the returned results.
         /// </summary>
         /// <returns></returns>
         protected virtual IEnumerable<T> GetAll()
@@ -35,18 +37,12 @@ namespace DataProvider
             }
         }
 
-        /// <summary>
-        /// Runs the specified query against the collection and returns the results.
-        /// No order is applied at the base level, instead implement this in the class that inherits from this one
-        /// </summary>
-        /// <param name="query"></param>
-        /// <returns></returns>
-        protected virtual IEnumerable<T> QueryCollection(Query query)
+        protected virtual IEnumerable<T> Find(Expression<Func<T,bool>> expression)
         {
             using (var db = new LiteDatabase(cmDatabasePath))
             {
                 var cmCollection = db.GetCollection<T>(collectionName);
-                var results = cmCollection.Find(query);
+                var results = cmCollection.Find(expression);
                 return results;
             }
         }

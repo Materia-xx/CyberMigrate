@@ -20,22 +20,19 @@ namespace DataProvider
         /// <returns></returns>
         public CMFeatureDto Get_ForName(string featureName, int cmSystemId, bool isTemplate)
         {
-            // mcbtodo: Query.EQ just isn't doing what we want here, recode it again to pass in lambdas
+            var results = Find(f => 
+                f.IsTemplate == isTemplate
+             && f.CMSystemId == cmSystemId
+             && f.Name.Equals(featureName, System.StringComparison.OrdinalIgnoreCase));
 
-            // First get all within the specified system
-            var results = GetAll_ForSystem(cmSystemId, isTemplate);
-
-            // The filter it down to just the one in the specified name, if it exists
-            results = results.Where(f => f.Name.Equals(featureName, System.StringComparison.OrdinalIgnoreCase));
             return results.FirstOrDefault();
         }
 
         public IEnumerable<CMFeatureDto> GetAll_ForSystem(int cmSystemId, bool isTemplate)
         {
-            Query query = Query.EQ(nameof(CMFeatureDto.CMSystemId), cmSystemId);
-            var results = QueryCollection(query);
-
-            results = results.Where(f => f.IsTemplate == isTemplate);
+            var results = Find(f =>
+                f.IsTemplate == isTemplate
+             && f.CMSystemId == cmSystemId);
 
             return results.OrderBy(f => f.Name);
         }

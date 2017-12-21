@@ -31,8 +31,10 @@ namespace DataProvider
         /// <returns></returns>
         public CMSystemDto Get_ForSystemName(string systemName)
         {
-            var query = Query.EQ(nameof(CMSystemDto.Name), systemName);
-            return QueryCollection(query).FirstOrDefault();
+            var results = Find(s =>
+                s.Name.Equals(systemName, System.StringComparison.OrdinalIgnoreCase)
+            );
+            return results.FirstOrDefault();
         }
     }
 }

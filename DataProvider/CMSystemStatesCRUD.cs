@@ -18,11 +18,11 @@ namespace DataProvider
         /// <returns></returns>
         public CMSystemStateDto Get_ForStateName(string statemName, int cmSystemId)
         {
-            // First get all in the system
-            var results = GetAll_ForSystem(cmSystemId);
+            var results = Find(s =>
+                s.CMSystemId == cmSystemId
+                && s.Name.Equals(statemName, System.StringComparison.OrdinalIgnoreCase)
+            );
 
-            // Then filter it down to just the one with the name or default
-            results = results.Where(s => s.Name.Equals(statemName, System.StringComparison.OrdinalIgnoreCase));
             return results.FirstOrDefault();
         }
 
@@ -33,8 +33,9 @@ namespace DataProvider
         /// <returns></returns>
         public IEnumerable<CMSystemStateDto> GetAll_ForSystem(int cmSystemId)
         {
-            Query query = Query.EQ(nameof(CMSystemStateDto.CMSystemId), cmSystemId);
-            var results = QueryCollection(query);
+            var results = Find(s =>
+                s.CMSystemId == cmSystemId
+            );
 
             // Return with the lowest priority first. Same pattern as other places that use priority.
             return results.OrderBy(s => s.Priority);
