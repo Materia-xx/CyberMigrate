@@ -63,7 +63,9 @@ namespace CyberMigrate
         public void ReLoadTreeConfiguration()
         {
             treeConfig.Items.Clear();
-            var dataStoreTreeViewItem = TreeConfiguration_AddDataStore();
+
+            var dataStoreTVI = GetTVI_DataStore();
+            treeConfig.Items.Add(dataStoreTVI);
 
             // If the data store path hasn't been set yet, then this is as far as we can go
             if (string.IsNullOrWhiteSpace(CMDataProvider.Master.Value.GetOptions().DataStorePath))
@@ -75,13 +77,15 @@ namespace CyberMigrate
             var cmSystems = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll();
             foreach (var cmSystem in cmSystems)
             {
-                var cmSystemTreeViewItem = TreeConfiguration_AddCMSystem(dataStoreTreeViewItem, cmSystem);
+                var cmSystemTVI = GetTVI_System(cmSystem);
+                dataStoreTVI.Items.Add(cmSystemTVI);
 
                 // Get all of the feature templates within this system and show them.
                 var cmFeatureTemplates = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll_ForSystem(cmSystem.Id, true);
                 foreach (var cmFeatureTemplate in cmFeatureTemplates)
                 {
-                    var cmFeatureTemplateTreeViewItem = TreeConfiguration_AddFeatureTemplate(cmSystemTreeViewItem, cmFeatureTemplate);
+                    var cmFeatureTemplateTVI = GetTVI_FeatureTemplate(cmFeatureTemplate);
+                    cmSystemTVI.Items.Add(cmFeatureTemplateTVI);
 
                     // Get the possible states for this feature template and show them
                     var featureTemplateStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForFeatureTemplate(cmFeatureTemplate.Id);
@@ -90,16 +94,17 @@ namespace CyberMigrate
                         var featureTemplateState = new CMFeatureTemplateStateDto();
                         featureTemplateState.State = cmSystemState;
 
-                        var cmFeatureTemplateStateTreeViewItem = TreeConfiguration_AddFeatureTemplateState(cmFeatureTemplateTreeViewItem, featureTemplateState);
+                        var featureTemplateStateTVI = GetTVI_FeatureTemplateState(featureTemplateState);
+                        cmFeatureTemplateTVI.Items.Add(featureTemplateStateTVI);
                     }
                 }
             }
 
-            dataStoreTreeViewItem.ExpandSubtree();
-
+            dataStoreTVI.ExpandSubtree();
 
             // Add the task factories node and UIs to configure each factory
-            var taskFactoriesTreeViewItem =  TreeConfiguration_AddTaskFactories();
+            var taskFactoriesTVI =  GetTVI_TaskFactories();
+            treeConfig.Items.Add(taskFactoriesTVI);
 
             foreach (var taskFactory in TaskFactoriesCatalog.Instance.TaskFactories)
             {
@@ -108,20 +113,20 @@ namespace CyberMigrate
                     TaskFactoryName = taskFactory.GetType().Name
                 };
 
-                var taskFactoryTreeViewItem = TreeConfiguration_AddTaskFactory(taskFactoriesTreeViewItem, cmTaskFactoryDto);
+                var taskFactoryTVI = GetTVI_TaskFactory(cmTaskFactoryDto);
+                taskFactoriesTVI.Items.Add(taskFactoryTVI);
             }
 
-            taskFactoriesTreeViewItem.ExpandSubtree();
+            taskFactoriesTVI.ExpandSubtree();
         }
 
-        private TreeViewItem TreeConfiguration_AddTaskFactories()
+        private TreeViewItem GetTVI_TaskFactories()
         {
             var taskFactoriesTreeViewItem = new TreeViewItem()
             {
                 Header = "Task Factories",
                 Tag = null, // There is no tag here because there is no need to show any UI at this level.
             };
-            treeConfig.Items.Add(taskFactoriesTreeViewItem);
 
             // Add the context menu
             taskFactoriesTreeViewItem.ContextMenu = new ContextMenu(); // There is no context menu actions currently for task factories
@@ -131,61 +136,14 @@ namespace CyberMigrate
             return taskFactoriesTreeViewItem;
         }
 
-        private TreeViewItem TreeConfiguration_AddDataStore()
+        private TreeViewItem GetTVI_DataStore()
         {
-            // Data Store
             var dataStoreTreeViewItem = new TreeViewItem()
             {
                 Header = "Data Store",
                 Tag = new ConfigTreeViewTag(new CMDataStoreDto()), // mcbtodo: there isn't currently an instance of cmDataStore availalble for this. Instead expose a Get function somewhere to get it.
             };
-            treeConfig.Items.Add(dataStoreTreeViewItem);
 
-            // Add the context menu
-            dataStoreTreeViewItem.ContextMenu = GetContextMenu_DataStore(dataStoreTreeViewItem);
-
-            dataStoreTreeViewItem.Selected += TreeConfiguration_NodeSelected;
-
-            return dataStoreTreeViewItem;
-        }
-
-        private TreeViewItem TreeConfiguration_AddTaskFactory(TreeViewItem parentTreeViewItem, CMTaskFactoryDto cmTaskFactoryDto)
-        {
-            var taskFactoryTreeViewItem = new TreeViewItem()
-            {
-                Header = cmTaskFactoryDto.TaskFactoryName,
-                Tag = new ConfigTreeViewTag(cmTaskFactoryDto),
-            };
-            parentTreeViewItem.Items.Add(taskFactoryTreeViewItem);
-
-            // Add the context menu
-            taskFactoryTreeViewItem.ContextMenu = new ContextMenu(); // There is no context menu actions currently for task factories
-
-            taskFactoryTreeViewItem.Selected += TreeConfiguration_NodeSelected;
-
-            return taskFactoryTreeViewItem;
-        }
-
-        private TreeViewItem TreeConfiguration_AddFeatureTemplateState(TreeViewItem parentTreeViewItem, CMFeatureTemplateStateDto cmFeatureTemplateStateDto)
-        {
-            var featureTemplateStateTreeViewItem = new TreeViewItem()
-            {
-                Header = cmFeatureTemplateStateDto.State.Name,
-                Tag = new ConfigTreeViewTag(cmFeatureTemplateStateDto),
-            };
-            parentTreeViewItem.Items.Add(featureTemplateStateTreeViewItem);
-
-            // Add the context menu
-            featureTemplateStateTreeViewItem.ContextMenu = new ContextMenu(); // mcbtodo: add context menu to add task templates
-
-            featureTemplateStateTreeViewItem.Selected += TreeConfiguration_NodeSelected;
-
-            return featureTemplateStateTreeViewItem;
-        }
-
-        private ContextMenu GetContextMenu_DataStore(TreeViewItem dataStoreTreeViewItem)
-        {
-            // Data Store context menu
             var contextMenu = new ContextMenu();
 
             var addNewSystemMenu = new MenuItem()
@@ -209,7 +167,8 @@ namespace CyberMigrate
 
                 if (CMDataProvider.DataStore.Value.CMSystems.Value.Upsert(newCMSystem))
                 {
-                    TreeConfiguration_AddCMSystem(dataStoreTreeViewItem, newCMSystem);
+                    var systemTVI = GetTVI_System(newCMSystem);
+                    dataStoreTreeViewItem.Items.Add(systemTVI);
                 }
             };
 
@@ -235,10 +194,47 @@ namespace CyberMigrate
                 CMDataProvider.DataStore.Value.CMSystems.Value.Delete(selectedCMSystemDto.Id);
                 RemoveSelectedTreeConfigItem();
             };
-            return contextMenu;
+
+            dataStoreTreeViewItem.ContextMenu = contextMenu;
+
+            dataStoreTreeViewItem.Selected += TreeConfiguration_NodeSelected;
+
+            return dataStoreTreeViewItem;
         }
 
-        private TreeViewItem TreeConfiguration_AddCMSystem(TreeViewItem parentTreeViewItem, CMSystemDto cmSystem)
+        private TreeViewItem GetTVI_TaskFactory(CMTaskFactoryDto cmTaskFactoryDto)
+        {
+            var taskFactoryTVI = new TreeViewItem()
+            {
+                Header = cmTaskFactoryDto.TaskFactoryName,
+                Tag = new ConfigTreeViewTag(cmTaskFactoryDto),
+            };
+
+            // Add the context menu
+            taskFactoryTVI.ContextMenu = new ContextMenu(); // There is no context menu actions currently for task factories
+
+            taskFactoryTVI.Selected += TreeConfiguration_NodeSelected;
+
+            return taskFactoryTVI;
+        }
+
+        private TreeViewItem GetTVI_FeatureTemplateState(CMFeatureTemplateStateDto cmFeatureTemplateStateDto)
+        {
+            var featureTemplateStateTVI = new TreeViewItem()
+            {
+                Header = cmFeatureTemplateStateDto.State.Name,
+                Tag = new ConfigTreeViewTag(cmFeatureTemplateStateDto),
+            };
+
+            // Add the context menu
+            featureTemplateStateTVI.ContextMenu = new ContextMenu(); // mcbtodo: add context menu to add task templates
+
+            featureTemplateStateTVI.Selected += TreeConfiguration_NodeSelected;
+
+            return featureTemplateStateTVI;
+        }
+
+        private TreeViewItem GetTVI_System(CMSystemDto cmSystem)
         {
             var cmSystemTreeViewItem = new TreeViewItem()
             {
@@ -246,15 +242,6 @@ namespace CyberMigrate
                 Tag = new ConfigTreeViewTag(cmSystem)
             };
 
-            parentTreeViewItem.Items.Add(cmSystemTreeViewItem);
-
-            cmSystemTreeViewItem.ContextMenu = GetContextMenu_CMSystem(cmSystemTreeViewItem, cmSystem);
-
-            return cmSystemTreeViewItem;
-        }
-
-        private ContextMenu GetContextMenu_CMSystem(TreeViewItem cmSystemTreeViewItem, CMSystemDto cmSystem)
-        {
             var contextMenu = new ContextMenu();
 
             var addNewFeatureTemplate = new MenuItem()
@@ -279,14 +266,17 @@ namespace CyberMigrate
 
                 if (CMDataProvider.DataStore.Value.CMFeatures.Value.Upsert(newCMFeatureTemplate))
                 {
-                    TreeConfiguration_AddFeatureTemplate(cmSystemTreeViewItem, newCMFeatureTemplate);
+                    var featureTemplateTVI = GetTVI_FeatureTemplate(newCMFeatureTemplate);
+                    cmSystemTreeViewItem.Items.Add(featureTemplateTVI);
                 }
             };
 
-            return contextMenu;
+            cmSystemTreeViewItem.ContextMenu = contextMenu;
+
+            return cmSystemTreeViewItem;
         }
 
-        private TreeViewItem TreeConfiguration_AddFeatureTemplate(TreeViewItem parentTreeViewItem, CMFeatureDto cmFeatureTemplate)
+        private TreeViewItem GetTVI_FeatureTemplate(CMFeatureDto cmFeatureTemplate)
         {
             var cmFeatureTemplateTreeViewItem = new TreeViewItem()
             {
@@ -294,17 +284,9 @@ namespace CyberMigrate
                 Tag = new ConfigTreeViewTag(cmFeatureTemplate)
             };
 
-            parentTreeViewItem.Items.Add(cmFeatureTemplateTreeViewItem);
-
-            cmFeatureTemplateTreeViewItem.ContextMenu = GetContextMenu_CMFeatureTemplate();
+            cmFeatureTemplateTreeViewItem.ContextMenu = new ContextMenu();
 
             return cmFeatureTemplateTreeViewItem;
-        }
-
-        private ContextMenu GetContextMenu_CMFeatureTemplate()
-        {
-            var contextMenu = new ContextMenu();
-            return contextMenu;
         }
 
         private void RemoveSelectedTreeConfigItem()
