@@ -44,7 +44,12 @@ namespace CyberMigrate
         {
             public string TaskFactoryName { get; set; }
         }
-
+        // same thing as a system state, but within the context of a feature template
+        private class CMFeatureTemplateStateDto : IdBasedObject
+        {
+            public CMSystemStateDto State { get; set; }
+        }
+        
         public Config()
         {
             InitializeComponent();
@@ -80,8 +85,13 @@ namespace CyberMigrate
 
                     // Get the possible states for this feature template and show them
                     var featureTemplateStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForFeatureTemplate(cmFeatureTemplate.Id);
+                    foreach (var cmSystemState in featureTemplateStates)
+                    {
+                        var featureTemplateState = new CMFeatureTemplateStateDto();
+                        featureTemplateState.State = cmSystemState;
 
-                    // mcbtodo: show them as tree view items. This will provide the structure to hang tasks that are templates off of within each state
+                        var cmFeatureTemplateStateTreeViewItem = TreeConfiguration_AddFeatureTemplateState(cmFeatureTemplateTreeViewItem, featureTemplateState);
+                    }
                 }
             }
 
@@ -102,23 +112,6 @@ namespace CyberMigrate
             }
 
             taskFactoriesTreeViewItem.ExpandSubtree();
-        }
-
-        private TreeViewItem TreeConfiguration_AddTaskFactory(TreeViewItem taskFactoriesTreeViewItem, CMTaskFactoryDto cmTaskFactoryDto)
-        {
-            var taskFactoryTreeViewItem = new TreeViewItem()
-            {
-                Header = cmTaskFactoryDto.TaskFactoryName,
-                Tag = new ConfigTreeViewTag(cmTaskFactoryDto),
-            };
-            taskFactoriesTreeViewItem.Items.Add(taskFactoryTreeViewItem);
-
-            // Add the context menu
-            taskFactoryTreeViewItem.ContextMenu = new ContextMenu(); // There is no context menu actions currently for task factories
-
-            taskFactoryTreeViewItem.Selected += TreeConfiguration_NodeSelected;
-
-            return taskFactoryTreeViewItem;
         }
 
         private TreeViewItem TreeConfiguration_AddTaskFactories()
@@ -154,6 +147,40 @@ namespace CyberMigrate
             dataStoreTreeViewItem.Selected += TreeConfiguration_NodeSelected;
 
             return dataStoreTreeViewItem;
+        }
+
+        private TreeViewItem TreeConfiguration_AddTaskFactory(TreeViewItem parentTreeViewItem, CMTaskFactoryDto cmTaskFactoryDto)
+        {
+            var taskFactoryTreeViewItem = new TreeViewItem()
+            {
+                Header = cmTaskFactoryDto.TaskFactoryName,
+                Tag = new ConfigTreeViewTag(cmTaskFactoryDto),
+            };
+            parentTreeViewItem.Items.Add(taskFactoryTreeViewItem);
+
+            // Add the context menu
+            taskFactoryTreeViewItem.ContextMenu = new ContextMenu(); // There is no context menu actions currently for task factories
+
+            taskFactoryTreeViewItem.Selected += TreeConfiguration_NodeSelected;
+
+            return taskFactoryTreeViewItem;
+        }
+
+        private TreeViewItem TreeConfiguration_AddFeatureTemplateState(TreeViewItem parentTreeViewItem, CMFeatureTemplateStateDto cmFeatureTemplateStateDto)
+        {
+            var featureTemplateStateTreeViewItem = new TreeViewItem()
+            {
+                Header = cmFeatureTemplateStateDto.State.Name,
+                Tag = new ConfigTreeViewTag(cmFeatureTemplateStateDto),
+            };
+            parentTreeViewItem.Items.Add(featureTemplateStateTreeViewItem);
+
+            // Add the context menu
+            featureTemplateStateTreeViewItem.ContextMenu = new ContextMenu(); // mcbtodo: add context menu to add task templates
+
+            featureTemplateStateTreeViewItem.Selected += TreeConfiguration_NodeSelected;
+
+            return featureTemplateStateTreeViewItem;
         }
 
         private ContextMenu GetContextMenu_DataStore(TreeViewItem dataStoreTreeViewItem)
