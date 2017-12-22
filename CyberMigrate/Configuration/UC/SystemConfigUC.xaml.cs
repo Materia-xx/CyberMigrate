@@ -92,20 +92,16 @@ namespace CyberMigrate.ConfigurationUC
             }
             else if (e.Action == NotifyCollectionChangedAction.Add)
             {
+                // The order of operations (I believe) is:
+                //  * A new row is added to the datagrid
+                //  * A new CMSystemStateDto is constructed and added to the observable collection.
+                //    Note that at this point this Dto *may* not be in a valid state to be entered into the db and an insert operation will fail.
+                // Therefore we do not do the insert attempt at this point. Instead it is handled in the row update code.
+                // However we do set defaults for things here that won't be available to set through the grid UI
                 foreach (var addedState in e.NewItems)
                 {
                     var gridState = (CMSystemStateDto)addedState;
                     gridState.CMSystemId = cmSystem.Id;
-
-                    var opResult = CMDataProvider.DataStore.Value.CMSystemStates.Value.Insert(gridState);
-                    if (opResult.Errors.Any())
-                    {
-                        MessageBox.Show(opResult.ErrorsCombined);
-
-                        // Reload the states grid to represent that the item wasn't actually added
-                        Load_StatesGrid();
-                        return;
-                    }
                 }
             }
         }
@@ -123,14 +119,28 @@ namespace CyberMigrate.ConfigurationUC
 
                 var gridState = (CMSystemStateDto)dataGridStates.SelectedItem;
 
-                var opResult = CMDataProvider.DataStore.Value.CMSystemStates.Value.Update(gridState);
-                if (opResult.Errors.Any())
+                if (gridState.Id > 0)
                 {
-                    MessageBox.Show(opResult.ErrorsCombined);
+                    var opResult = CMDataProvider.DataStore.Value.CMSystemStates.Value.Update(gridState);
+                    if (opResult.Errors.Any())
+                    {
+                        MessageBox.Show(opResult.ErrorsCombined);
 
-                    // Since the row has already been commited to the grid above, our only recourse at this point to roll it back is to reload the rules grid
-                    Load_StatesGrid();
-                    return;
+                        // Since the row has already been commited to the grid above, our only recourse at this point to roll it back is to reload the rules grid
+                        Load_StatesGrid();
+                        return;
+                    }
+                }
+                else
+                {
+                    var opResult = CMDataProvider.DataStore.Value.CMSystemStates.Value.Insert(gridState);
+                    if (opResult.Errors.Any())
+                    {
+                        MessageBox.Show(opResult.ErrorsCombined);
+
+                        // Keep the row around so the user has a chance to correct it.
+                        return;
+                    }
                 }
             }
         }

@@ -27,6 +27,8 @@ namespace CyberMigrate.ConfigurationUC
 
         private List<CMSystemStateDto> FeatureTemplateSystemStates { get; set; }
 
+        private List<CMTaskTypeDto> TaskTypes { get; set; }
+
         public FeatureTemplateConfigUC(Config configWindow, CMFeatureDto cmFeatureTemplate)
         {
             InitializeComponent();
@@ -54,6 +56,8 @@ namespace CyberMigrate.ConfigurationUC
         private void LoadComboBoxClasses_TaskTemplates()
         {
             FeatureTemplateSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForFeatureTemplate(cmFeatureTemplate.Id).ToList();
+
+            TaskTypes = CMDataProvider.DataStore.Value.CMTaskTypes.Value.GetAll().ToList(); ;
         }
 
         /// <summary>
@@ -200,8 +204,22 @@ namespace CyberMigrate.ConfigurationUC
 
                     // Instructions on how to interact with the "lookup" list
                     ItemsSource = FeatureTemplateSystemStates,
-                    SelectedValuePath = nameof(CMSystemStateDto.CMSystemId),
+                    SelectedValuePath = nameof(CMSystemStateDto.Id),
                     DisplayMemberPath = nameof(CMSystemStateDto.Name),
+                });
+            dataGridTaskTemplates.Columns.Add(
+                new DataGridComboBoxColumn()
+                {
+                    Header = "Task Type",
+                    Width = 200,
+
+                    // Where to store the selected value
+                    SelectedValueBinding = new Binding(nameof(CMTaskDto.CMTaskTypeId)),
+
+                    // Instructions on how to interact with the "lookup" list
+                    ItemsSource = TaskTypes,
+                    SelectedValuePath = nameof(CMTaskTypeDto.Id),
+                    DisplayMemberPath = nameof(CMTaskTypeDto.Name),
                 });
             dataGridTaskTemplates.Columns.Add(
                 new DataGridTextColumn()
@@ -210,7 +228,6 @@ namespace CyberMigrate.ConfigurationUC
                     Width = 400,
                     Binding = new Binding(nameof(CMTaskDto.Name)),
                 });
-            // mcbtodo: add a way to show task state here as a column ? or show it in the editor when that pops up ?
 
             // A factory because each row will generate a button
             var editButtonFactory = new FrameworkElementFactory(typeof(Button));
@@ -249,14 +266,29 @@ namespace CyberMigrate.ConfigurationUC
 
                 var gridRule = (CMFeatureStateTransitionRuleDto)dataGridStateTransitionRules.SelectedItem;
 
-                var opResult = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.Update(gridRule);
-                if (opResult.Errors.Any())
+                // If the item already exists in the db
+                if (gridRule.Id > 0)
                 {
-                    MessageBox.Show(opResult.ErrorsCombined);
+                    var opResult = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.Update(gridRule);
+                    if (opResult.Errors.Any())
+                    {
+                        MessageBox.Show(opResult.ErrorsCombined);
 
-                    // Since the row has already been commited to the grid above, our only recourse at this point to roll it back is to reload the rules grid
-                    Load_TransitionRulesGrid();
-                    return;
+                        // Since the row has already been commited to the grid above, our only recourse at this point to roll it back is to reload the rules grid
+                        Load_TransitionRulesGrid();
+                        return;
+                    }
+                }
+                else
+                {
+                    var opResult = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.Insert(gridRule);
+                    if (opResult.Errors.Any())
+                    {
+                        MessageBox.Show(opResult.ErrorsCombined);
+
+                        // Keep the incorrect row in the grid so they can keep trying to make it correct
+                        return;
+                    }
                 }
 
                 // Reload the tasks grid so the dropdowns now represent the correct system states that are available.
@@ -289,23 +321,16 @@ namespace CyberMigrate.ConfigurationUC
             }
             else if (e.Action == NotifyCollectionChangedAction.Add)
             {
+                // The order of operations (I believe) is:
+                //  * A new row is added to the datagrid
+                //  * A new CMFeatureStateTransitionRuleDto is constructed and added to the observable collection.
+                //    Note that at this point this Dto *may* not be in a valid state to be entered into the db and an insert operation will fail.
+                // Therefore we do not do the insert attempt at this point. Instead it is handled in the row update code.
+                // However we do set defaults for things here that won't be available to set through the grid UI
                 foreach (var addedRule in e.NewItems)
                 {
                     var gridRule = (CMFeatureStateTransitionRuleDto)addedRule;
                     gridRule.CMFeatureId = cmFeatureTemplate.Id;
-
-                    var opResult = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.Insert(gridRule);
-                    if (opResult.Errors.Any())
-                    {
-                        MessageBox.Show(opResult.ErrorsCombined);
-                        // Reload the rules datagrid to show that the item was not actually added
-                        Load_TransitionRulesGrid();
-                        return;
-                    }
-
-                    // The row will already be correctly added from the rules datagrid so no need at this point to refresh the rules grid.
-                    // However we reload the tasks grid so the dropdowns now represent the correct system states that are available.
-                    Load_TaskTemplatesGrid();
                 }
             }
         }
@@ -323,14 +348,29 @@ namespace CyberMigrate.ConfigurationUC
 
                 var gridTask = (CMTaskDto)dataGridTaskTemplates.SelectedItem;
 
-                var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Update(gridTask);
-                if (opResult.Errors.Any())
+                // If the item already exists in the db
+                if (gridTask.Id > 0)
                 {
-                    MessageBox.Show(opResult.ErrorsCombined);
+                    var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Update(gridTask);
+                    if (opResult.Errors.Any())
+                    {
+                        MessageBox.Show(opResult.ErrorsCombined);
 
-                    // Since the row has already been commited to the grid above, our only recourse at this point to roll it back is to reload the tasks grid
-                    Load_TaskTemplatesGrid();
-                    return;
+                        // Since the row has already been commited to the grid above, our only recourse at this point to roll it back is to reload the tasks grid
+                        Load_TaskTemplatesGrid();
+                        return;
+                    }
+                }
+                else
+                {
+                    var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(gridTask);
+                    if (opResult.Errors.Any())
+                    {
+                        MessageBox.Show(opResult.ErrorsCombined);
+
+                        // Keep the incorrect row in the grid so they can keep trying to make it correct
+                        return;
+                    }
                 }
             }
         }
@@ -343,13 +383,18 @@ namespace CyberMigrate.ConfigurationUC
                 {
                     var gridTask = (CMTaskDto)removedTask;
 
-                    var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Delete(gridTask.Id);
-                    if (opResult.Errors.Any())
+                    // This task may have never actually been added to the db because it was a new row that didn't yet meet the db requirements
+                    // So make sure it has a valid id first before trying to delete it.
+                    if (gridTask.Id > 0)
                     {
-                        MessageBox.Show(opResult.ErrorsCombined);
-                        // Reload the tasks datagrid to show that the item was not actually deleted
-                        Load_TaskTemplatesGrid();
-                        return;
+                        var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Delete(gridTask.Id);
+                        if (opResult.Errors.Any())
+                        {
+                            MessageBox.Show(opResult.ErrorsCombined);
+                            // Reload the tasks datagrid to show that the item was not actually deleted
+                            Load_TaskTemplatesGrid();
+                            return;
+                        }
                     }
 
                     // The row will already be correctly removed from the tasks datagrid so no need at this point to refresh the tasks grid.
@@ -358,22 +403,17 @@ namespace CyberMigrate.ConfigurationUC
             }
             else if (e.Action == NotifyCollectionChangedAction.Add)
             {
+                // The order of operations (I believe) is:
+                //  * A new row is added to the datagrid
+                //  * A new CMTaskDto is constructed and added to the observable collection.
+                //    Note that at this point this Dto is not in a valid state to be entered into the db and an insert operation will fail.
+                // Therefore we do not do the insert attempt at this point. Instead it is handled in the row update code.
+                // However we do set defaults for things here that won't be available to set through the grid UI
                 foreach (var addedTask in e.NewItems)
                 {
                     var gridTask = (CMTaskDto)addedTask;
                     gridTask.CMFeatureId = cmFeatureTemplate.Id;
-
-                    var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(gridTask);
-                    if (opResult.Errors.Any())
-                    {
-                        MessageBox.Show(opResult.ErrorsCombined);
-                        // Reload the rules datagrid to show that the item was not actually added
-                        Load_TaskTemplatesGrid();
-                        return;
-                    }
-
-                    // The row will already be correctly added to the tasks datagrid so no need at this point to refresh the tasks grid.
-                    // Also the rules do not depend on the tasks, so no need to reload that either.
+                    gridTask.IsTemplate = true;
                 }
             }
         }

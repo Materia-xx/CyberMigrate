@@ -8,6 +8,11 @@
         public int CMFeatureId { get; set; }
 
         /// <summary>
+        /// The task type of this feature
+        /// </summary>
+        public int CMTaskTypeId { get; set; }
+
+        /// <summary>
         /// Indicates if this is a task template or an actual implementation of a task
         /// </summary>
         public bool IsTemplate { get; set; }

@@ -47,6 +47,8 @@
     <Compile Include="CMDataProviderDataStore.cs" />
     <Compile Include="CMDataProviderCRUDBase.cs" />
     <Compile Include="CMDataProviderMaster.cs" />
+    <Compile Include="CMTaskTypesCRUD.cs" />
+    <Compile Include="CMTaskFactoriesCRUD.cs" />
     <Compile Include="CMTasksCRUD.cs" />
     <Compile Include="CMFeatureStateTransitionRulesCRUD.cs" />
     <Compile Include="CMFeaturesCRUD.cs" />

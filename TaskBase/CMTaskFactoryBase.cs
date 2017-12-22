@@ -9,7 +9,16 @@ namespace TaskBase
 {
     public abstract class CMTaskFactoryBase
     {
+        /// <summary>
+        /// Get a list of task types that the task factory supports creating.
+        /// The names should always be given in the format of 
+        /// </summary>
         public List<string> SupportedTasks { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Name of the task factory
+        /// </summary>
+        public abstract string Name { get; }
 
         public abstract CMTaskBase CreateTask(int cmSystemId, int cmFeatureId, int cmTaskId);
 

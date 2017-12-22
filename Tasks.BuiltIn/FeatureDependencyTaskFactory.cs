@@ -8,6 +8,14 @@ namespace Tasks.BuiltIn
     [Export(typeof(CMTaskFactoryBase))]
     public class FeatureDependencyTaskFactory : CMTaskFactoryBase
     {
+        public override string Name
+        {
+            get
+            {
+                return nameof(FeatureDependencyTaskFactory);
+            }
+        }
+
         public FeatureDependencyTaskFactory()
         {
             SupportedTasks.Add(nameof(FeatureDependencyTask));
