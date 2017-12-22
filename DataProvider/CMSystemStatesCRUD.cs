@@ -112,12 +112,27 @@ namespace DataProvider
                 return opResult;
             }
 
+            // Note: If a state's name is being updated this is okay to do without checking other refs. The refs should all refer to the state by the id
+            // and will show the new name next time they are viewed.
+
             return base.Update(updatingObject);
         }
 
         public override CMCUDResult Delete(int deletingId)
         {
-            // mcbtodo: check for other things that ref this state first
+            var opResult = new CMCUDResult();
+
+            var originalState = Get(deletingId);
+
+            // See if there are any features that referenced this state before deleting it
+            var refStateTransitionRulesA = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.GetAll_ThatRef_ConditionQuerySystemStateId(originalState.Id);
+            var refStateTransitionRulesB = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.GetAll_ThatRef_ToCMSystemStateId(originalState.Id);
+
+            if (refStateTransitionRulesA.Any() || refStateTransitionRulesB.Any())
+            {
+                opResult.Errors.Add($"Cannot delete item from {CollectionName} with id {deletingId} because there are feature state transition rules that still refer to it.");
+                return opResult;
+            }
 
             return base.Delete(deletingId);
         }

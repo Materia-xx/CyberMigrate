@@ -297,7 +297,7 @@ namespace CyberMigrate.ConfigurationUC
                     var opResult = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.Insert(gridRule);
                     if (opResult.Errors.Any())
                     {
-                        MessageBox.Show(opResult.ErrorsCombined); // mcbtodo: test this case
+                        MessageBox.Show(opResult.ErrorsCombined);
                         // Reload the rules datagrid to show that the item was not actually added
                         Load_TransitionRulesGrid();
                         return;
@@ -326,7 +326,7 @@ namespace CyberMigrate.ConfigurationUC
                 var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Update(gridTask);
                 if (opResult.Errors.Any())
                 {
-                    MessageBox.Show(opResult.ErrorsCombined); // mcbtodo: test this case
+                    MessageBox.Show(opResult.ErrorsCombined);
 
                     // Since the row has already been commited to the grid above, our only recourse at this point to roll it back is to reload the tasks grid
                     Load_TaskTemplatesGrid();
@@ -366,7 +366,7 @@ namespace CyberMigrate.ConfigurationUC
                     var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(gridTask);
                     if (opResult.Errors.Any())
                     {
-                        MessageBox.Show(opResult.ErrorsCombined); // mcbtodo: test this case
+                        MessageBox.Show(opResult.ErrorsCombined);
                         // Reload the rules datagrid to show that the item was not actually added
                         Load_TaskTemplatesGrid();
                         return;

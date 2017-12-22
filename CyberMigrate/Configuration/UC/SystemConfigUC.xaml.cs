@@ -64,7 +64,7 @@ namespace CyberMigrate.ConfigurationUC
             var cmSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id).ToList();
             var observable = new ObservableCollection<CMSystemStateDto>(cmSystemStates);
             observable.CollectionChanged += States_CollectionChanged;
-            dataGridStates.ItemsSource = cmSystemStates;
+            dataGridStates.ItemsSource = observable;
 
             // The way I've implemented it, this observable collection doesn't have detection if a property is updated, so we do that here
             dataGridStates.RowEditEnding -= DataGridState_RowEditEnding;
@@ -83,6 +83,9 @@ namespace CyberMigrate.ConfigurationUC
                     if (opResult.Errors.Any())
                     {
                         MessageBox.Show(opResult.ErrorsCombined);
+
+                        // Reload the states grid to represent that the item wasn't actually deleted
+                        Load_StatesGrid();
                         return;
                     }
                 }
@@ -98,6 +101,9 @@ namespace CyberMigrate.ConfigurationUC
                     if (opResult.Errors.Any())
                     {
                         MessageBox.Show(opResult.ErrorsCombined);
+
+                        // Reload the states grid to represent that the item wasn't actually added
+                        Load_StatesGrid();
                         return;
                     }
                 }
@@ -117,12 +123,10 @@ namespace CyberMigrate.ConfigurationUC
 
                 var gridState = (CMSystemStateDto)dataGridStates.SelectedItem;
 
-                // mcbtodo: add a check to see if the row is updating away from a system state name that is currently in use.
-                // mcbtodo: really it should verify that this wasn't the last rule to move away from that state... consider the same logic for the delete override
                 var opResult = CMDataProvider.DataStore.Value.CMSystemStates.Value.Update(gridState);
                 if (opResult.Errors.Any())
                 {
-                    MessageBox.Show(opResult.ErrorsCombined); // mcbtodo: test this case
+                    MessageBox.Show(opResult.ErrorsCombined);
 
                     // Since the row has already been commited to the grid above, our only recourse at this point to roll it back is to reload the rules grid
                     Load_StatesGrid();

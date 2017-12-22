@@ -30,6 +30,16 @@ namespace DataProvider
             return results.OrderBy(r => r.Priority);
         }
 
+        public IEnumerable<CMFeatureStateTransitionRuleDto> GetAll_ThatRef_ToCMSystemStateId(int cmSystemStateId)
+        {
+            return  Find(r => r.ToCMSystemStateId == cmSystemStateId);
+        }
+
+        public IEnumerable<CMFeatureStateTransitionRuleDto> GetAll_ThatRef_ConditionQuerySystemStateId(int cmSystemStateId)
+        {
+            return Find(r => r.ConditionQuerySystemStateId == cmSystemStateId);
+        }
+
         public override CMCUDResult Delete(int deletingId)
         {
             var opResult = new CMCUDResult();
@@ -39,6 +49,7 @@ namespace DataProvider
             // How many other transition rule states in this feature refer to the state that is being deleted ?
             var matchingRules = Find(r => 
                 r.ToCMSystemStateId == cmRule.ToCMSystemStateId
+                && r.CMFeatureId == cmRule.CMFeatureId
                 && r.Id != deletingId
                 );
 
@@ -48,7 +59,7 @@ namespace DataProvider
                 var taskTemplates = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(cmRule.CMFeatureId, true);
                 if (taskTemplates.Any(t => t.CMSystemStateId == cmRule.ToCMSystemStateId))
                 {
-                    opResult.Errors.Add($"Cannot delete item from {CollectionName} with id {deletingId} because there are currently task templates in the state it referrs to."); // mcbtodo: test
+                    opResult.Errors.Add($"Cannot delete item from {CollectionName} with id {deletingId} because there are currently task templates in the state it referrs to.");
                     return opResult;
                 }
             }
@@ -68,6 +79,7 @@ namespace DataProvider
                 // How many other transition rule states in this feature refer to the state ?
                 var matchingRules = Find(r =>
                     r.ToCMSystemStateId == cmRule.ToCMSystemStateId
+                    && r.CMFeatureId == cmRule.CMFeatureId
                     && r.Id != updatingObject.Id
                     );
 
@@ -77,7 +89,7 @@ namespace DataProvider
                     var taskTemplates = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(cmRule.CMFeatureId, true);
                     if (taskTemplates.Any(t => t.CMSystemStateId == cmRule.ToCMSystemStateId))
                     {
-                        opResult.Errors.Add($"Cannot update item in {CollectionName} with id {updatingObject.Id} because there are currently task templates in the state it referrs to."); // mcbtodo: test
+                        opResult.Errors.Add($"Cannot update item in {CollectionName} with id {updatingObject.Id} because there are currently task templates in the state it referrs to.");
                         return opResult;
                     }
                 }

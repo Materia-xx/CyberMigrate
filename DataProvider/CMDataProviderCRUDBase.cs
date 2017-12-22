@@ -41,6 +41,12 @@ namespace DataProvider
             return results;
         }
 
+        protected virtual int Count(Expression<Func<T, bool>> expression)
+        {
+            var results = cmCollection.Count(expression);
+            return results;
+        }
+
         public virtual T Get(int id)
         {
             return cmCollection.Find(s => s.Id == id).FirstOrDefault();

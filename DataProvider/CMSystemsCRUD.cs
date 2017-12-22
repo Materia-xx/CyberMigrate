@@ -63,7 +63,19 @@ namespace DataProvider
             return base.Update(updatingObject);
         }
 
-        // mcbtodo: add a delete override that does not allow deletes of systems that currently have features of any type
+        public override CMCUDResult Delete(int deletingId)
+        {
+            var opResult = new CMCUDResult();
 
+            var refFeaturesCount = CMDataProvider.DataStore.Value.CMFeatures.Value.GetCount_InSystem(deletingId);
+
+            if (refFeaturesCount > 0)
+            {
+                opResult.Errors.Add($"Cannot delete the item in {CollectionName} because there are features or feature templates that are still present.");
+                return opResult;
+            }
+
+            return base.Delete(deletingId);
+        }
     }
 }

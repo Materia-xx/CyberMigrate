@@ -37,6 +37,14 @@ namespace DataProvider
             return results.OrderBy(f => f.Name);
         }
 
+        public int GetCount_InSystem(int cmSystemId)
+        {
+            var results = Count(f =>
+                f.CMSystemId == cmSystemId);
+
+            return results;
+        }
+
         public override CMCUDResult Insert(CMFeatureDto insertingObject)
         {
             var opResult = new CMCUDResult();

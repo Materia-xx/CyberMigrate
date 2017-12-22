@@ -155,31 +155,6 @@ namespace CyberMigrate
                 dataStoreTreeViewItem.Items.Add(systemTVI);
             };
 
-            var deleteSystemMenu = new MenuItem()
-            {
-                Header = "Delete System"
-            };
-            contextMenu.Items.Add(deleteSystemMenu);
-            deleteSystemMenu.Click += (sender, e) =>
-            {
-                var selectedTreeViewTag = GetSelectedConfigTreeViewTag();
-
-                if (selectedTreeViewTag?.Dto == null || !(selectedTreeViewTag?.Dto is CMSystemDto))
-                {
-                    return;
-                }
-
-                var selectedCMSystemDto = selectedTreeViewTag.Dto as CMSystemDto;
-
-                var opResult = CMDataProvider.DataStore.Value.CMSystems.Value.Delete(selectedCMSystemDto.Id);
-                if (opResult.Errors.Any())
-                {
-                    MessageBox.Show(opResult.ErrorsCombined);
-                    return;
-                }
-                RemoveSelectedTreeConfigItem();
-            };
-
             dataStoreTreeViewItem.ContextMenu = contextMenu;
 
             dataStoreTreeViewItem.Selected += TreeConfiguration_NodeSelected;
@@ -236,6 +211,32 @@ namespace CyberMigrate
 
                 var featureTemplateTVI = GetTVI_FeatureTemplate(newCMFeatureTemplate);
                 cmSystemTreeViewItem.Items.Add(featureTemplateTVI);
+            };
+
+            var deleteSystemMenu = new MenuItem()
+            {
+                Header = "Delete System"
+            };
+            contextMenu.Items.Add(deleteSystemMenu);
+            deleteSystemMenu.Click += (sender, e) =>
+            {
+                var selectedTreeViewTag = GetSelectedConfigTreeViewTag();
+
+                if (selectedTreeViewTag?.Dto == null || !(selectedTreeViewTag?.Dto is CMSystemDto))
+                {
+                    return;
+                }
+
+                // mcbtodo: Add confirm dialogs on delete operations where appropriate
+                var selectedCMSystemDto = selectedTreeViewTag.Dto as CMSystemDto;
+
+                var opResult = CMDataProvider.DataStore.Value.CMSystems.Value.Delete(selectedCMSystemDto.Id);
+                if (opResult.Errors.Any())
+                {
+                    MessageBox.Show(opResult.ErrorsCombined);
+                    return;
+                }
+                RemoveSelectedTreeConfigItem();
             };
 
             cmSystemTreeViewItem.ContextMenu = contextMenu;
