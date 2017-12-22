@@ -23,7 +23,7 @@ namespace DataProvider
             var results = Find(f => 
                 f.IsTemplate == isTemplate
              && f.CMSystemId == cmSystemId
-             && f.Name.Equals(featureName, System.StringComparison.Ordinal)); // Sensitive case allows the user to more easily rename items by just the case
+             && f.Name.Equals(featureName, System.StringComparison.Ordinal)); // Note: case 'sensitive' compare so we allow renames to upper/lower case
 
             return results.FirstOrDefault();
         }

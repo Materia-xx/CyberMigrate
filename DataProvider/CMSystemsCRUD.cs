@@ -32,7 +32,7 @@ namespace DataProvider
         public CMSystemDto Get_ForSystemName(string systemName)
         {
             var results = Find(s =>
-                s.Name.Equals(systemName, System.StringComparison.Ordinal)  // Sensitive case allows the user to more easily rename items by just the case
+                s.Name.Equals(systemName, System.StringComparison.Ordinal) // Note: case 'sensitive' compare so we allow renames to upper/lower case
             );
             return results.FirstOrDefault();
         }

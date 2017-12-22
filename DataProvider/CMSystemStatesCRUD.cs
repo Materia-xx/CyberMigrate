@@ -20,7 +20,7 @@ namespace DataProvider
         {
             var results = Find(s =>
                 s.CMSystemId == cmSystemId
-                && s.Name.Equals(statemName, System.StringComparison.OrdinalIgnoreCase)
+                && s.Name.Equals(statemName, System.StringComparison.Ordinal) // Note: case 'sensitive' compare so we allow renames to upper/lower case
             );
 
             return results.FirstOrDefault();
@@ -104,7 +104,7 @@ namespace DataProvider
             var dupeNameResults = Find(s =>
                     s.CMSystemId == updatingObject.CMSystemId 
                     && s.Id != updatingObject.Id
-                    && s.Name.Equals(updatingObject.Name, System.StringComparison.Ordinal)
+                    && s.Name.Equals(updatingObject.Name, System.StringComparison.Ordinal) // Note: case 'sensitive' compare so we allow renames to upper/lower case
                 );
             if (dupeNameResults.Any())
             { 
