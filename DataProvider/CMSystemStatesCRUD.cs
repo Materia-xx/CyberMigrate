@@ -81,7 +81,11 @@ namespace DataProvider
                 return opResult;
             }
 
-            // mcbtodo: also check for duplicate names here
+            if (Get_ForStateName(insertingObject.Name, insertingObject.CMSystemId) != null)
+            {
+                opResult.Errors.Add($"Cannot insert an item into {CollectionName} because an item with the same name already exists within this system.");
+                return opResult;
+            }
 
             return base.Insert(insertingObject);
         }
@@ -96,7 +100,17 @@ namespace DataProvider
                 return opResult;
             }
 
-            // mcbtodo: also check for duplicate names here
+            // Look for other items in the same system with the same name, that are not this item.
+            var dupeNameResults = Find(s =>
+                    s.CMSystemId == updatingObject.CMSystemId 
+                    && s.Id != updatingObject.Id
+                    && s.Name.Equals(updatingObject.Name, System.StringComparison.Ordinal)
+                );
+            if (dupeNameResults.Any())
+            { 
+                opResult.Errors.Add($"Cannot update item in {CollectionName} because an item with the same name already exists within this system.");
+                return opResult;
+            }
 
             return base.Update(updatingObject);
         }
