@@ -249,12 +249,10 @@ namespace CyberMigrate.ConfigurationUC
 
                 var gridRule = (CMFeatureStateTransitionRuleDto)dataGridStateTransitionRules.SelectedItem;
 
-                // mcbtodo: add a check to see if the row is updating away from a system state name that is currently in use.
-                // mcbtodo: really it should verify that this wasn't the last rule to move away from that state... consider the same logic for the delete override
                 var opResult = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.Update(gridRule);
                 if (opResult.Errors.Any())
                 {
-                    MessageBox.Show(opResult.ErrorsCombined); // mcbtodo: test this case
+                    MessageBox.Show(opResult.ErrorsCombined);
 
                     // Since the row has already been commited to the grid above, our only recourse at this point to roll it back is to reload the rules grid
                     Load_TransitionRulesGrid();
