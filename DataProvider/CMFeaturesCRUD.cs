@@ -23,7 +23,7 @@ namespace DataProvider
             var results = Find(f => 
                 f.IsTemplate == isTemplate
              && f.CMSystemId == cmSystemId
-             && f.Name.Equals(featureName, System.StringComparison.OrdinalIgnoreCase));
+             && f.Name.Equals(featureName, System.StringComparison.Ordinal)); // Sensitive case allows the user to more easily rename items by just the case
 
             return results.FirstOrDefault();
         }
@@ -35,6 +35,32 @@ namespace DataProvider
              && f.CMSystemId == cmSystemId);
 
             return results.OrderBy(f => f.Name);
+        }
+
+        public override CMCUDResult Insert(CMFeatureDto insertingObject)
+        {
+            var opResult = new CMCUDResult();
+
+            if (Get_ForName(insertingObject.Name, insertingObject.CMSystemId, insertingObject.IsTemplate) != null)
+            {
+                opResult.Errors.Add($"A feature with the name '{insertingObject.Name}' already exists within the system. Rename that one first.");
+                return opResult;
+            }
+
+            return base.Insert(insertingObject);
+        }
+
+        public override CMCUDResult Update(CMFeatureDto updatingObject)
+        {
+            var opResult = new CMCUDResult();
+
+            if (Get_ForName(updatingObject.Name, updatingObject.CMSystemId, updatingObject.IsTemplate) != null)
+            {
+                opResult.Errors.Add($"A feature with the name '{updatingObject.Name}' already exists within the system.");
+                return opResult;
+            }
+
+            return base.Update(updatingObject);
         }
     }
 }

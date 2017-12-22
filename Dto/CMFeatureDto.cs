@@ -3,7 +3,7 @@
     public class CMFeatureDto : IdBasedObject
     {
         /// <summary>
-        /// The sytem that the feature template is connected to
+        /// The sytem that the feature is connected to
         /// </summary>
         public int CMSystemId { get; set; }
 

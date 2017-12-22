@@ -30,14 +30,19 @@ namespace DataProvider
             return results.OrderBy(r => r.Priority);
         }
 
-        public void DeleteAll_ForFeatureTemplate(int cmFeatureTemplateId)
+        public override CMCUDResult Delete(int deletingId)
         {
-            var results = GetAll_ForFeatureTemplate(cmFeatureTemplateId);
-
-            foreach (var rule in results)
+            var opResult = new CMCUDResult();
+            // Check to see if there are any task templates that reference the state referred to in this rule
+            var cmRule = Get(deletingId);
+            var taskTemplates = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(cmRule.CMFeatureId, true);
+            if (taskTemplates.Any(t => t.CMSystemStateId == cmRule.ToCMSystemStateId))
             {
-                base.Delete(rule.Id);
+                opResult.Errors.Add($"Cannot delete {CollectionName} with id {deletingId} because there are currently task templates in the state it referrs to.");
+                return opResult;
             }
+
+            return base.Delete(deletingId);
         }
     }
 }

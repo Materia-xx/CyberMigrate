@@ -16,6 +16,8 @@ namespace DataProvider
 
         public Lazy<CMFeatureStateTransitionRulesCRUD> CMFeatureStateTransitionRules { get; set; }
 
+        public Lazy<CMTasksCRUD> CMTasks { get; set; }
+
         public CMDataProviderDataStore(LiteDatabase dataStoreDatabase)
         {
             CMSystems = new Lazy<CMSystemsCRUD>(() =>
@@ -36,6 +38,11 @@ namespace DataProvider
             CMFeatureStateTransitionRules = new Lazy<CMFeatureStateTransitionRulesCRUD>(() =>
             {
                 return new CMFeatureStateTransitionRulesCRUD(dataStoreDatabase, "FeatureStateTransitionRules");
+            });
+
+            CMTasks = new Lazy<CMTasksCRUD>(() =>
+            {
+                return new CMTasksCRUD(dataStoreDatabase, "Tasks");
             });
         }
     }

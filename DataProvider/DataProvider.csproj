@@ -43,9 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CMCUDResult.cs" />
     <Compile Include="CMDataProviderDataStore.cs" />
     <Compile Include="CMDataProviderCRUDBase.cs" />
     <Compile Include="CMDataProviderMaster.cs" />
+    <Compile Include="CMTasksCRUD.cs" />
     <Compile Include="CMFeatureStateTransitionRulesCRUD.cs" />
     <Compile Include="CMFeaturesCRUD.cs" />
     <Compile Include="CMSystemStatesCRUD.cs" />

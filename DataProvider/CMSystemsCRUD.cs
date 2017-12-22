@@ -32,9 +32,38 @@ namespace DataProvider
         public CMSystemDto Get_ForSystemName(string systemName)
         {
             var results = Find(s =>
-                s.Name.Equals(systemName, System.StringComparison.OrdinalIgnoreCase)
+                s.Name.Equals(systemName, System.StringComparison.Ordinal)  // Sensitive case allows the user to more easily rename items by just the case
             );
             return results.FirstOrDefault();
         }
+
+        public override CMCUDResult Insert(CMSystemDto insertingObject)
+        {
+            var opResult = new CMCUDResult();
+
+            if (Get_ForSystemName(insertingObject.Name) != null)
+            {
+                opResult.Errors.Add($"A system with the name '{insertingObject.Name}' already exists. Rename that one first.");
+                return opResult;
+            }
+
+            return base.Insert(insertingObject);
+        }
+
+        public override CMCUDResult Update(CMSystemDto updatingObject)
+        {
+            var opResult = new CMCUDResult();
+
+            if (Get_ForSystemName(updatingObject.Name) != null)
+            {
+                opResult.Errors.Add($"A system with the name '{updatingObject.Name}' already exists.");
+                return opResult;
+            }
+
+            return base.Update(updatingObject);
+        }
+
+        // mcbtodo: add a delete override that does not allow deletes of systems that currently have features of any type
+
     }
 }

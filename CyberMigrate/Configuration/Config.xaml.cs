@@ -2,6 +2,7 @@
 using DataProvider;
 using Dto;
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -44,11 +45,6 @@ namespace CyberMigrate
         {
             public string TaskFactoryName { get; set; }
         }
-        // same thing as a system state, but within the context of a feature template
-        private class CMFeatureTemplateStateDto : IdBasedObject
-        {
-            public CMSystemStateDto State { get; set; }
-        }
         
         public Config()
         {
@@ -86,17 +82,6 @@ namespace CyberMigrate
                 {
                     var cmFeatureTemplateTVI = GetTVI_FeatureTemplate(cmFeatureTemplate);
                     cmSystemTVI.Items.Add(cmFeatureTemplateTVI);
-
-                    // Get the possible states for this feature template and show them
-                    var featureTemplateStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForFeatureTemplate(cmFeatureTemplate.Id);
-                    foreach (var cmSystemState in featureTemplateStates)
-                    {
-                        var featureTemplateState = new CMFeatureTemplateStateDto();
-                        featureTemplateState.State = cmSystemState;
-
-                        var featureTemplateStateTVI = GetTVI_FeatureTemplateState(featureTemplateState);
-                        cmFeatureTemplateTVI.Items.Add(featureTemplateStateTVI);
-                    }
                 }
             }
 
@@ -159,17 +144,15 @@ namespace CyberMigrate
                     Name = "New System"
                 };
 
-                if (CMDataProvider.DataStore.Value.CMSystems.Value.Get_ForSystemName(newCMSystem.Name) != null)
+                var opResult = CMDataProvider.DataStore.Value.CMSystems.Value.Insert(newCMSystem);
+                if (opResult.Errors.Any())
                 {
-                    MessageBox.Show($"A '{newCMSystem.Name}' already exists. Rename that one first.");
+                    MessageBox.Show(opResult.ErrorsCombined);
                     return;
                 }
 
-                if (CMDataProvider.DataStore.Value.CMSystems.Value.Upsert(newCMSystem))
-                {
-                    var systemTVI = GetTVI_System(newCMSystem);
-                    dataStoreTreeViewItem.Items.Add(systemTVI);
-                }
+                var systemTVI = GetTVI_System(newCMSystem);
+                dataStoreTreeViewItem.Items.Add(systemTVI);
             };
 
             var deleteSystemMenu = new MenuItem()
@@ -188,10 +171,12 @@ namespace CyberMigrate
 
                 var selectedCMSystemDto = selectedTreeViewTag.Dto as CMSystemDto;
 
-                // mcbtodo: Check for any refs before deleting, do this as a callback ? e.g. how to provide a delete function that comes with the CRUD object but 
-                // mcbtodo: allow for extensibility to allow the creator to provide custom logic to indicate if an id is still referenced.
-                // mcbtodo: is there a concept of referential integrity in liteDb ?
-                CMDataProvider.DataStore.Value.CMSystems.Value.Delete(selectedCMSystemDto.Id);
+                var opResult = CMDataProvider.DataStore.Value.CMSystems.Value.Delete(selectedCMSystemDto.Id);
+                if (opResult.Errors.Any())
+                {
+                    MessageBox.Show(opResult.ErrorsCombined);
+                    return;
+                }
                 RemoveSelectedTreeConfigItem();
             };
 
@@ -218,22 +203,6 @@ namespace CyberMigrate
             return taskFactoryTVI;
         }
 
-        private TreeViewItem GetTVI_FeatureTemplateState(CMFeatureTemplateStateDto cmFeatureTemplateStateDto)
-        {
-            var featureTemplateStateTVI = new TreeViewItem()
-            {
-                Header = cmFeatureTemplateStateDto.State.Name,
-                Tag = new ConfigTreeViewTag(cmFeatureTemplateStateDto),
-            };
-
-            // Add the context menu
-            featureTemplateStateTVI.ContextMenu = new ContextMenu(); // mcbtodo: add context menu to add task templates
-
-            featureTemplateStateTVI.Selected += TreeConfiguration_NodeSelected;
-
-            return featureTemplateStateTVI;
-        }
-
         private TreeViewItem GetTVI_System(CMSystemDto cmSystem)
         {
             var cmSystemTreeViewItem = new TreeViewItem()
@@ -258,17 +227,15 @@ namespace CyberMigrate
                     CMSystemId = cmSystem.Id
                 };
 
-                if (CMDataProvider.DataStore.Value.CMFeatures.Value.Get_ForName(newCMFeatureTemplate.Name, cmSystem.Id, true) != null)
+                var opResult = CMDataProvider.DataStore.Value.CMFeatures.Value.Insert(newCMFeatureTemplate);
+                if (opResult.Errors.Any())
                 {
-                    MessageBox.Show($"A template named '{newCMFeatureTemplate.Name}' already exists. Rename that one first.");
+                    MessageBox.Show(opResult.ErrorsCombined);
                     return;
                 }
 
-                if (CMDataProvider.DataStore.Value.CMFeatures.Value.Upsert(newCMFeatureTemplate))
-                {
-                    var featureTemplateTVI = GetTVI_FeatureTemplate(newCMFeatureTemplate);
-                    cmSystemTreeViewItem.Items.Add(featureTemplateTVI);
-                }
+                var featureTemplateTVI = GetTVI_FeatureTemplate(newCMFeatureTemplate);
+                cmSystemTreeViewItem.Items.Add(featureTemplateTVI);
             };
 
             cmSystemTreeViewItem.ContextMenu = contextMenu;

@@ -70,5 +70,42 @@ namespace DataProvider
 
             return validStates;
         }
+
+        public override CMCUDResult Insert(CMSystemStateDto insertingObject)
+        {
+            var opResult = new CMCUDResult();
+            
+            if (string.IsNullOrWhiteSpace(insertingObject.Name))
+            {
+                opResult.Errors.Add($"Cannot insert an item into {CollectionName} with an empty name.");
+                return opResult;
+            }
+
+            // mcbtodo: also check for duplicate names here
+
+            return base.Insert(insertingObject);
+        }
+
+        public override CMCUDResult Update(CMSystemStateDto updatingObject)
+        {
+            var opResult = new CMCUDResult();
+
+            if (string.IsNullOrWhiteSpace(updatingObject.Name))
+            {
+                opResult.Errors.Add($"Cannot update an item in {CollectionName} to have an empty name.");
+                return opResult;
+            }
+
+            // mcbtodo: also check for duplicate names here
+
+            return base.Update(updatingObject);
+        }
+
+        public override CMCUDResult Delete(int deletingId)
+        {
+            // mcbtodo: check for other things that ref this state first
+
+            return base.Delete(deletingId);
+        }
     }
 }

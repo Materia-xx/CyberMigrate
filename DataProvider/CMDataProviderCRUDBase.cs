@@ -14,13 +14,13 @@ namespace DataProvider
     public abstract class CMDataProviderCRUDBase<T> where T : IdBasedObject
     {
         private LiteDatabase db;
-        private string collectionName;
+        protected string CollectionName { get; set; }
         private LiteCollection<T> cmCollection;
 
         public CMDataProviderCRUDBase(LiteDatabase liteDatabase, string collectionName)
         {
             this.db = liteDatabase;
-            this.collectionName = collectionName;
+            this.CollectionName = collectionName;
             cmCollection = db.GetCollection<T>(collectionName);
         }
 
@@ -46,25 +46,39 @@ namespace DataProvider
             return cmCollection.Find(s => s.Id == id).FirstOrDefault();
         }
 
-        public virtual bool Upsert(T updatingObject)
+        public virtual CMCUDResult Insert(T insertingObject)
         {
-            var existingCMSystem = cmCollection.Find(s => s.Id == updatingObject.Id);
+            var opResult = new CMCUDResult();
+            if (insertingObject.Id != 0)
+            {
+                opResult.Errors.Add($"Cannot insert a new item into {CollectionName}. New items must have their id set to 0 before insert.");
+                return opResult;
+            }
 
-            if (existingCMSystem.Any())
-            {
-                cmCollection.Update(updatingObject);
-            }
-            else
-            {
-                cmCollection.Insert(updatingObject);
-            }
-                
-            return true;
+            cmCollection.Insert(insertingObject);
+            return opResult;
         }
 
-        public virtual bool Delete(int deletingId)
+        public virtual CMCUDResult Update(T updatingObject)
         {
-            return cmCollection.Delete(deletingId);
+            var opResult = new CMCUDResult();
+            if (cmCollection.Update(updatingObject) == false)
+            {
+                opResult.Errors.Add($"An item in {CollectionName} with id {updatingObject.Id} was not found to update.");
+            }
+            return opResult;
+        }
+
+        public virtual CMCUDResult Delete(int deletingId)
+        {
+            var opResult = new CMCUDResult();
+
+            if (!cmCollection.Delete(deletingId))
+            {
+                opResult.Errors.Add($"{CollectionName} with id {deletingId} was not found to delete.");
+            }
+
+            return opResult;
         }
     }
 }
