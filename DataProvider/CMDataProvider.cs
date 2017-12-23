@@ -24,7 +24,7 @@ namespace DataProvider
 
         public static Lazy<CMDataProviderDataStore> DataStore = new Lazy<CMDataProviderDataStore>(() =>
         {
-            // Note this assumes that the data store path is already set up. The program should not access this field until it vierifies this is the case.
+            // Note this assumes that the data store path is already set up. The program should not access this field until it verifies this is the case.
             var options = Master.Value.GetOptions();
 
             var dataStoreDbPath = Path.Combine(options.DataStorePath, "CyberMigrate.db");

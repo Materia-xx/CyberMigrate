@@ -35,5 +35,19 @@ namespace Tasks.BuiltIn
             var configUI = new FeatureDependencyTaskFactoryUC();
             return configUI;
         }
+
+        public override List<string> GetRequiredTaskStates(string taskType)
+        {
+            var requiredStates = new List<string>();
+
+            switch (taskType)
+            {
+                case nameof(FeatureDependencyTask):
+                    requiredStates.Add("WaitingOnDependency");
+                    break;
+            }
+
+            return requiredStates;
+        }
     }
 }

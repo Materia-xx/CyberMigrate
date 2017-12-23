@@ -38,7 +38,7 @@ namespace DataProvider
             return options;
         }
 
-        public void updateOptions(CMOptionsDto options)
+        public void UpdateOptions(CMOptionsDto options)
         {
             if (!optionsCollection.Update(options))
             {

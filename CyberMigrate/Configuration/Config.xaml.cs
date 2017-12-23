@@ -15,6 +15,8 @@ namespace CyberMigrate
     /// </summary>
     public partial class Config : Window
     {
+        public MainWindow MainForm { get; set; }
+
         /// <summary>
         /// Attached to nodes in the configuration tree view. Used to store information such as the Dto that each node represents
         /// </summary>

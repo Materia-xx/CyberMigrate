@@ -1,20 +1,8 @@
 ﻿using DataProvider;
 using Dto;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace CyberMigrate.ConfigurationUC
 {
@@ -51,9 +39,11 @@ namespace CyberMigrate.ConfigurationUC
             var options = CMDataProvider.Master.Value.GetOptions();
             options.DataStorePath = txtStorePath.Text;
 
-            CMDataProvider.Master.Value.updateOptions(options);
+            CMDataProvider.Master.Value.UpdateOptions(options);
 
             MessageBox.Show("Updated.");
+
+            ConfigWindow.MainForm.DataStorePathSet();
         }
     }
 }

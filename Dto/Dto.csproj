@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CMTaskStateDto.cs" />
     <Compile Include="CMTaskTypeDto.cs" />
     <Compile Include="CMTaskFactoryDto.cs" />
     <Compile Include="CMTaskDto.cs" />

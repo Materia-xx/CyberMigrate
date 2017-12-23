@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows.Controls;
 
 namespace TaskBase
@@ -19,6 +15,17 @@ namespace TaskBase
         /// Name of the task factory
         /// </summary>
         public abstract string Name { get; }
+
+        /// <summary>
+        /// Gets a list of task states that the specified task type will set at any point.
+        /// This list should not include the following reserved states, which are automatically added for all states.
+        ///     * Complete  - Represents a task that is complete.
+        ///     * Template  - A task that is a template will have this state
+        ///     * Instance - When a task is copied from a template to an instance the instance will be at this state initially
+        /// </summary>
+        /// <param name="taskType"></param>
+        /// <returns></returns>
+        public abstract List<string> GetRequiredTaskStates(string taskType);
 
         public abstract CMTaskBase CreateTask(int cmSystemId, int cmFeatureId, int cmTaskId);
 

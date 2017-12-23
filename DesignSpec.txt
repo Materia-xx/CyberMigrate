@@ -101,7 +101,7 @@ TODO: Make sure there is a way to re-assign dependency states across all feature
 
 * System states vs Task states, auto vs manual
 
-  System states are always controlled by the program and are not available to be directly overridden by the user. Though there are
+  System states are always controlled by the program and are not available to be directly overridden (set manually) by the user. Though there are
   a number of things a user could do indirectly that would cause the SystemState to be re-calculated to what the user desired.
 
   Task states can be auto-calculated by the task if the task type has implemented this functionality. E.g. The "dependency" task would auto-set its state to 

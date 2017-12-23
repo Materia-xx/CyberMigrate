@@ -22,6 +22,8 @@ namespace DataProvider
 
         public Lazy<CMTaskTypesCRUD> CMTaskTypes { get; set; }
 
+        public Lazy<CMTaskStatesCRUD> CMTaskStates { get; set; }
+
         public CMDataProviderDataStore(LiteDatabase dataStoreDatabase)
         {
             CMSystems = new Lazy<CMSystemsCRUD>(() =>
@@ -59,6 +61,10 @@ namespace DataProvider
                 return new CMTaskTypesCRUD(dataStoreDatabase, "TaskTypes");
             });
 
+            CMTaskStates = new Lazy<CMTaskStatesCRUD>(() =>
+            {
+                return new CMTaskStatesCRUD(dataStoreDatabase, "TaskStates");
+            });
         }
     }
 }

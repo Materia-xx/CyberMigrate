@@ -21,6 +21,25 @@ namespace CyberMigrate
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            // Automatically show the configuration if the program has not been set up.
+            if (!DataStoreOptionConfigured())
+            {
+                ShowConfigurationUI();
+            }
+            else
+            {
+                DataStorePathSet();
+            }
+
+            RedrawMainMenu();
+        }
+
+        /// <summary>
+        /// Call this after the data store path has been set, or verified that it is set after startup.
+        /// It takes care of registering everything for the new or pre-existing data store
+        /// </summary>
+        public void DataStorePathSet()
+        {
             var registerError = RegisterTaskFactories();
             if (!string.IsNullOrWhiteSpace(registerError))
             {
@@ -29,14 +48,6 @@ namespace CyberMigrate
                 MessageBox.Show(registerError);
                 this.Close();
                 return;
-            }
-
-            RedrawMainMenu();
-
-            // Automatically show the configuration if the program has not been set up.
-            if (!DataStoreOptionConfigured())
-            {
-                ShowConfigurationUI();
             }
         }
 
@@ -97,8 +108,37 @@ namespace CyberMigrate
                     {
                         return $"There is more than 1 task type registering with the same name {cmTaskType.Name}. Please resolve this before running the program.";
                     }
-
                     currentTaskTypesFromDisk.Add(cmTaskType.Name);
+
+                    // Make sure the task states for this task type are registered
+                    // First make sure the built in states are present
+                    var reservedTaskStates = new List<string> { "Complete", "Template", "Instance" };
+                    var taskPluginRequiredStates = taskFactory.GetRequiredTaskStates(taskTypeName);
+                    var invalidPluginStates = taskPluginRequiredStates.Intersect(reservedTaskStates);
+                    if (invalidPluginStates.Any())
+                    {
+                        var allInvalidStates = string.Join(",", invalidPluginStates);
+                        return $"The task factory {taskFactory.Name} is attempting to use reserved state(s) {allInvalidStates}. Please remove this task factory and try again.";
+                    }
+                    var allTaskStates = reservedTaskStates.Union(taskPluginRequiredStates);
+                    foreach (var taskState in allTaskStates)
+                    {
+                        var dbTaskState = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForPluginTaskStateName(taskState, cmTaskType.Id);
+                        if (dbTaskState == null)
+                        {
+                            var newTaskStateDto = new CMTaskStateDto()
+                            {
+                                DisplayTaskStateName = taskState,
+                                PluginTaskStateName = taskState,
+                                TaskTypeId = cmTaskType.Id
+                            };
+                            var opResult = CMDataProvider.DataStore.Value.CMTaskStates.Value.Insert(newTaskStateDto);
+                            if (opResult.Errors.Any())
+                            {
+                                return opResult.ErrorsCombined;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -138,7 +178,10 @@ namespace CyberMigrate
 
         public void ShowConfigurationUI()
         {
-            var optionsWindow = new Config();
+            var optionsWindow = new Config()
+            {
+                MainForm = this
+            };
             optionsWindow.ShowDialog();
         }
 
