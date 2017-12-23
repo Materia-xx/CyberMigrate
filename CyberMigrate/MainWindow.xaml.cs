@@ -112,7 +112,7 @@ namespace CyberMigrate
 
                     // Make sure the task states for this task type are registered
                     // First make sure the built in states are present
-                    var reservedInternalTaskStates = new List<string> { "Complete", "Template", "Instance" };
+                    var reservedInternalTaskStates = CMDataProvider.DataStore.Value.CMTaskStates.Value.InternalStates;
                     var reservedTaskPluginStates = taskFactory.GetRequiredTaskStates(taskTypeName);
                     var invalidPluginStates = reservedTaskPluginStates.Intersect(reservedInternalTaskStates);
                     if (invalidPluginStates.Any())
@@ -121,9 +121,10 @@ namespace CyberMigrate
                         return $"The task factory {taskFactory.Name} is attempting to use reserved state(s) {allInvalidStates}. Please remove this task factory and try again.";
                     }
                     var allReservedTaskStates = reservedInternalTaskStates.Union(reservedTaskPluginStates);
+                    int priority = 0;
                     foreach (var taskState in allReservedTaskStates)
                     {
-                        var dbTaskState = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForPluginTaskStateName(taskState, cmTaskType.Id);
+                        var dbTaskState = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(taskState, cmTaskType.Id);
                         if (dbTaskState == null)
                         {
                             var newTaskStateDto = new CMTaskStateDto()
@@ -131,7 +132,8 @@ namespace CyberMigrate
                                 DisplayName = taskState,
                                 InternalName = taskState,
                                 Reserved = true,
-                                TaskTypeId = cmTaskType.Id
+                                TaskTypeId = cmTaskType.Id,
+                                Priority = ++priority
                             };
                             var opResult = CMDataProvider.DataStore.Value.CMTaskStates.Value.Insert(newTaskStateDto);
                             if (opResult.Errors.Any())

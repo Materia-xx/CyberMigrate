@@ -7,6 +7,17 @@ namespace DataProvider
 {
     public class CMTaskStatesCRUD : CMDataProviderCRUDBase<CMTaskStateDto>
     {
+        public const string InternalState_Complete = "Complete";
+        public const string InternalState_Template = "Template";
+        public const string InternalState_Instance = "Instance";
+
+        public List<string> InternalStates { get; set; } = new List<string>()
+        {
+            InternalState_Template,
+            InternalState_Instance,
+            InternalState_Complete
+        };
+
         public CMTaskStatesCRUD(LiteDatabase liteDatabase, string collectionName) : base(liteDatabase, collectionName)
         {
         }
@@ -17,11 +28,11 @@ namespace DataProvider
             return results.OrderBy(t => t.Priority);
         }
 
-        public CMTaskStateDto Get_ForPluginTaskStateName(string pluginTaskStateName, int cmTaskTypeId)
+        public CMTaskStateDto Get_ForInternalName(string name, int cmTaskTypeId)
         {
             var results = Find(s => 
                 s.TaskTypeId == cmTaskTypeId
-                && s.InternalName.Equals(pluginTaskStateName, System.StringComparison.OrdinalIgnoreCase)
+                && s.InternalName.Equals(name, System.StringComparison.Ordinal)
                 );
             return results.FirstOrDefault();
         }

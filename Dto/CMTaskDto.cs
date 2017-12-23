@@ -22,7 +22,10 @@
         /// </summary>
         public int CMSystemStateId { get; set; }
 
-        // mcbtodo: add in a way to represent the task state
+        /// <summary>
+        /// The task state that the task is currently in
+        /// </summary>
+        public int CMTaskStateId { get; set; }
 
         /// <summary>
         /// The name/title of the task

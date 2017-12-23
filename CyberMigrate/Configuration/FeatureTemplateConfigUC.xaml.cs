@@ -351,6 +351,13 @@ namespace CyberMigrate.Configuration
 
                 var gridTask = (CMTaskDto)dataGridTaskTemplates.SelectedItem;
 
+                // Update the task to be in the Template state if a task type is selected
+                if (gridTask.CMTaskTypeId > 0)
+                {
+                    var selectedTaskType = ComboBox_TaskTypes.Single(t => t.Id == gridTask.CMTaskTypeId);
+                    gridTask.CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(CMTaskStatesCRUD.InternalState_Template, selectedTaskType.Id).Id;
+                }
+
                 // If the item already exists in the db
                 if (gridTask.Id > 0)
                 {
