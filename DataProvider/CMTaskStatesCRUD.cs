@@ -14,7 +14,7 @@ namespace DataProvider
         public IEnumerable<CMTaskStateDto> GetAll_ForTaskType(int cmTaskTypeId)
         {
             var results = base.Find(s => s.TaskTypeId == cmTaskTypeId);
-            return results;
+            return results.OrderBy(t => t.Priority);
         }
 
         public CMTaskStateDto Get_ForPluginTaskStateName(string pluginTaskStateName, int cmTaskTypeId)
