@@ -18,7 +18,7 @@
 
         <TreeView x:Name="treeConfig" Grid.Column="0" PreviewMouseRightButtonDown="treeConfig_PreviewMouseRightButtonDown" />
 
-        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch"/>
+        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
 
         <DockPanel x:Name="configUIPanel" Grid.Column="2" Margin="8" />
 

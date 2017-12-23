@@ -13,15 +13,15 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="25" />
             <RowDefinition Height="130" />
-            <RowDefinition Height="5" />
+            <RowDefinition Height="10" />
             <RowDefinition/>
         </Grid.RowDefinitions>
 
         <Label x:Name="lblTaskStates" Content="Task States" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="0" />
         <DataGrid x:Name="dataGridTaskStates" Grid.Row="1" Grid.Column="0" />
 
+        <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch" />
+
         <DockPanel x:Name="TaskTypePluginUC" Grid.Row="3" Grid.Column="0" />
-
     </Grid>
-
 </UserControl>
