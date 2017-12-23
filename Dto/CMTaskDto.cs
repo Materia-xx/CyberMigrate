@@ -22,8 +22,7 @@
         /// </summary>
         public int CMSystemStateId { get; set; }
 
-        // mcbtodo: add in a way to represent the task status
-        // mcbtodo: make sure the task status is available to set (the initial status) in the feature template config UI
+        // mcbtodo: add in a way to represent the task state
 
         /// <summary>
         /// The name/title of the task

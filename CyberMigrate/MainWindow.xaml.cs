@@ -87,7 +87,7 @@ namespace CyberMigrate
                 currentFactoriesFromDisk.Add(cmTaskFactory.Name);
 
                 // Make sure all of the task types that this task factory provides are registered in the database
-                foreach (var taskTypeName in taskFactory.SupportedTasks)
+                foreach (var taskTypeName in taskFactory.GetTaskTypes())
                 {
                     var cmTaskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get_ForName(taskTypeName);
                     if (cmTaskType == null)
@@ -112,27 +112,54 @@ namespace CyberMigrate
 
                     // Make sure the task states for this task type are registered
                     // First make sure the built in states are present
-                    var reservedTaskStates = new List<string> { "Complete", "Template", "Instance" };
-                    var taskPluginRequiredStates = taskFactory.GetRequiredTaskStates(taskTypeName);
-                    var invalidPluginStates = taskPluginRequiredStates.Intersect(reservedTaskStates);
+                    var reservedInternalTaskStates = new List<string> { "Complete", "Template", "Instance" };
+                    var reservedTaskPluginStates = taskFactory.GetRequiredTaskStates(taskTypeName);
+                    var invalidPluginStates = reservedTaskPluginStates.Intersect(reservedInternalTaskStates);
                     if (invalidPluginStates.Any())
                     {
                         var allInvalidStates = string.Join(",", invalidPluginStates);
                         return $"The task factory {taskFactory.Name} is attempting to use reserved state(s) {allInvalidStates}. Please remove this task factory and try again.";
                     }
-                    var allTaskStates = reservedTaskStates.Union(taskPluginRequiredStates);
-                    foreach (var taskState in allTaskStates)
+                    var allReservedTaskStates = reservedInternalTaskStates.Union(reservedTaskPluginStates);
+                    foreach (var taskState in allReservedTaskStates)
                     {
                         var dbTaskState = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForPluginTaskStateName(taskState, cmTaskType.Id);
                         if (dbTaskState == null)
                         {
                             var newTaskStateDto = new CMTaskStateDto()
                             {
-                                DisplayTaskStateName = taskState,
-                                PluginTaskStateName = taskState,
+                                DisplayName = taskState,
+                                InternalName = taskState,
+                                Reserved = true,
                                 TaskTypeId = cmTaskType.Id
                             };
                             var opResult = CMDataProvider.DataStore.Value.CMTaskStates.Value.Insert(newTaskStateDto);
+                            if (opResult.Errors.Any())
+                            {
+                                return opResult.ErrorsCombined;
+                            }
+                        }
+                        else
+                        {
+                            dbTaskState.InternalName = taskState;
+                            dbTaskState.DisplayName = taskState;
+                            dbTaskState.Reserved = true;
+                            var opResult = CMDataProvider.DataStore.Value.CMTaskStates.Value.Update(dbTaskState);
+                            if (opResult.Errors.Any())
+                            {
+                                return opResult.ErrorsCombined;
+                            }
+                        }
+                    }
+
+                    // Un-reserve states that are not required to be reserved now, just in case we are upgrading the db
+                    var dbTaskStates = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll_ForTaskType(cmTaskType.Id);
+                    foreach (var dbTaskState in dbTaskStates)
+                    {
+                        if (dbTaskState.Reserved && !allReservedTaskStates.Contains(dbTaskState.InternalName))
+                        {
+                            dbTaskState.Reserved = false;
+                            var opResult = CMDataProvider.DataStore.Value.CMTaskStates.Value.Update(dbTaskState);
                             if (opResult.Errors.Any())
                             {
                                 return opResult.ErrorsCombined;

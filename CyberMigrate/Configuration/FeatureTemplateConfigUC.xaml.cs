@@ -4,13 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace CyberMigrate.ConfigurationUC
+namespace CyberMigrate.Configuration
 {
     /// <summary>
     /// Interaction logic for FeatureTemplateConfigUC.xaml
@@ -21,20 +20,19 @@ namespace CyberMigrate.ConfigurationUC
 
         private Config ConfigWindow { get; set; }
 
-        private List<BoolBasedComboBoxEntry> ConditionAllAnyChoices { get; set; }
+        private List<BoolBasedComboBoxEntry> ComboBox_ConditionAllAnyChoices { get; set; }
 
-        private List<BoolBasedComboBoxEntry> ConditionAreCompleteChoices { get; set; }
+        private List<BoolBasedComboBoxEntry> ComboBox_ConditionAreCompleteChoices { get; set; }
 
-        private List<CMSystemStateDto> FeatureTemplateSystemStates { get; set; }
+        private List<CMSystemStateDto> ComboBox_FeatureTemplateSystemStates { get; set; }
 
-        private List<CMTaskTypeDto> TaskTypes { get; set; }
+        private List<CMTaskTypeDto> ComboBox_TaskTypes { get; set; }
 
-        public FeatureTemplateConfigUC(Config configWindow, CMFeatureDto cmFeatureTemplate)
-        {
-            InitializeComponent();
-            this.cmFeatureTemplate = cmFeatureTemplate;
-            this.ConfigWindow = configWindow;
-        }
+        private List<CMSystemStateDto> ComboBox_CurrentSystemStates { get; set; }
+
+        private ObservableCollection<CMFeatureStateTransitionRuleDto> featureStateTransitionRules = new ObservableCollection<CMFeatureStateTransitionRuleDto>();
+
+        private ObservableCollection<CMTaskDto> taskTemplates = new ObservableCollection<CMTaskDto>();
 
         private class BoolBasedComboBoxEntry
         {
@@ -48,60 +46,56 @@ namespace CyberMigrate.ConfigurationUC
             public string Name { get; private set; }
         }
 
-        private List<CMSystemStateDto> CurrentSystemStates { get; set; }
+        public FeatureTemplateConfigUC(Config configWindow, CMFeatureDto cmFeatureTemplate)
+        {
+            InitializeComponent();
+            this.cmFeatureTemplate = cmFeatureTemplate;
+            this.ConfigWindow = configWindow;
+        }
 
         /// <summary>
         /// Loads the lists that will be displayed as dropdown choices in the task templates datagrid
         /// </summary>
-        private void LoadComboBoxClasses_TaskTemplates()
+        private void LoadComboBoxes_TaskTemplates()
         {
-            FeatureTemplateSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForFeatureTemplate(cmFeatureTemplate.Id).ToList();
-
-            TaskTypes = CMDataProvider.DataStore.Value.CMTaskTypes.Value.GetAll().ToList(); ;
+            ComboBox_FeatureTemplateSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForFeatureTemplate(cmFeatureTemplate.Id).ToList();
+            ComboBox_TaskTypes = CMDataProvider.DataStore.Value.CMTaskTypes.Value.GetAll().ToList(); ;
         }
 
         /// <summary>
         /// Loads the lists that will be displayed as dropdown choices in the state transitions datagrid
         /// </summary>
-        private void LoadComboBoxClasses_TransitionRules()
+        private void LoadComboBoxes_TransitionRules()
         {
-            ConditionAllAnyChoices = new List<BoolBasedComboBoxEntry>()
+            ComboBox_ConditionAllAnyChoices = new List<BoolBasedComboBoxEntry>()
             {
                 new BoolBasedComboBoxEntry(true, "All"),
                 new BoolBasedComboBoxEntry(false, "Any")
             };
 
-            ConditionAreCompleteChoices = new List<BoolBasedComboBoxEntry>()
+            ComboBox_ConditionAreCompleteChoices = new List<BoolBasedComboBoxEntry>()
             {
                 new BoolBasedComboBoxEntry(true, "Are complete"),
                 new BoolBasedComboBoxEntry(false, "Are not complete")
             };
 
-            CurrentSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmFeatureTemplate.CMSystemId).ToList();
+            ComboBox_CurrentSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmFeatureTemplate.CMSystemId).ToList();
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             txtFeatureTemplateName.Text = cmFeatureTemplate.Name;
-            Load_TransitionRulesGrid();
-            Load_TaskTemplatesGrid();
+            Init_TransitionRulesGrid();
+            Init_TaskTemplatesGrid();
         }
 
-        private void Load_TransitionRulesGrid()
+        private void Init_TransitionRulesGrid()
         {
-            LoadComboBoxClasses_TransitionRules();
+            LoadComboBoxes_TransitionRules();
 
             dataGridStateTransitionRules.AutoGenerateColumns = false;
             dataGridStateTransitionRules.Columns.Clear();
 
-            dataGridStateTransitionRules.Columns.Add(
-                new DataGridTextColumn()
-                {
-                    Header = nameof(CMFeatureStateTransitionRuleDto.Id),
-                    Binding = new Binding(nameof(CMFeatureStateTransitionRuleDto.Id)),
-                    Visibility = Visibility.Collapsed // Only meant to keep track of ids.
-                });
-            // Note: CMFeatureId is always set to the current editor feature id when saving, there isn't a need for it here in a non-visible column
             dataGridStateTransitionRules.Columns.Add(
                 new DataGridTextColumn()
                 {
@@ -118,7 +112,7 @@ namespace CyberMigrate.ConfigurationUC
                     SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.ConditionAllTasks)),
 
                     // Instructions on how to interact with the "lookup" list
-                    ItemsSource = ConditionAllAnyChoices,
+                    ItemsSource = ComboBox_ConditionAllAnyChoices,
                     SelectedValuePath = nameof(BoolBasedComboBoxEntry.Value),
                     DisplayMemberPath = nameof(BoolBasedComboBoxEntry.Name),
                 });
@@ -132,7 +126,7 @@ namespace CyberMigrate.ConfigurationUC
                     SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.ConditionQuerySystemStateId)),
 
                     // Instructions on how to interact with the "lookup" list
-                    ItemsSource = CurrentSystemStates,
+                    ItemsSource = ComboBox_CurrentSystemStates,
                     SelectedValuePath = nameof(CMSystemStateDto.Id),
                     DisplayMemberPath = nameof(CMSystemStateDto.Name),
                 });
@@ -147,7 +141,7 @@ namespace CyberMigrate.ConfigurationUC
                     SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.ConditionTaskComplete)),
 
                     // Instructions on how to interact with the "lookup" list
-                    ItemsSource = ConditionAreCompleteChoices,
+                    ItemsSource = ComboBox_ConditionAreCompleteChoices,
                     SelectedValuePath = nameof(BoolBasedComboBoxEntry.Value),
                     DisplayMemberPath = nameof(BoolBasedComboBoxEntry.Name),
                 });
@@ -161,38 +155,26 @@ namespace CyberMigrate.ConfigurationUC
                     SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.ToCMSystemStateId)),
 
                     // Instructions on how to interact with the "lookup" list
-                    ItemsSource = CurrentSystemStates,
+                    ItemsSource = ComboBox_CurrentSystemStates,
                     SelectedValuePath = nameof(CMSystemStateDto.Id),
                     DisplayMemberPath = nameof(CMSystemStateDto.Name),
                 });
 
             // Load all state transition rules
-            var cmFeatureStateTransitionRules = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.GetAll_ForFeatureTemplate(cmFeatureTemplate.Id).ToList();
-            var observable = new ObservableCollection<CMFeatureStateTransitionRuleDto>(cmFeatureStateTransitionRules);
-            observable.CollectionChanged += FeatureStateTransitionRules_CollectionChanged;
-            dataGridStateTransitionRules.ItemsSource = observable;
+            dataGridStateTransitionRules.ItemsSource = featureStateTransitionRules;
+            Reload_FeatureStateTransitionRules();
 
             // The way I've implemented it, this observable collection doesn't have detection if a property is updated, so we do that here
-            dataGridStateTransitionRules.RowEditEnding -= DataGridStateTransitionRules_RowEditEnding;
             dataGridStateTransitionRules.RowEditEnding += DataGridStateTransitionRules_RowEditEnding;
         }
 
-        private void Load_TaskTemplatesGrid()
+        private void Init_TaskTemplatesGrid()
         {
-            LoadComboBoxClasses_TaskTemplates();
+            LoadComboBoxes_TaskTemplates();
 
             dataGridTaskTemplates.AutoGenerateColumns = false;
             dataGridTaskTemplates.Columns.Clear();
 
-            dataGridTaskTemplates.Columns.Add(
-                new DataGridTextColumn()
-                {
-                    Header = nameof(CMTaskDto.Id),
-                    Binding = new Binding(nameof(CMTaskDto.Id)),
-                    Visibility = Visibility.Collapsed // Only meant to keep track of ids.
-                });
-            // Note: CMFeatureId is always set to the current editor feature id when saving, there isn't a need for it here in a non-visible column
-            // Note: Same with IsTemplate
             dataGridTaskTemplates.Columns.Add(
                 new DataGridComboBoxColumn()
                 {
@@ -203,7 +185,7 @@ namespace CyberMigrate.ConfigurationUC
                     SelectedValueBinding = new Binding(nameof(CMTaskDto.CMSystemStateId)),
 
                     // Instructions on how to interact with the "lookup" list
-                    ItemsSource = FeatureTemplateSystemStates,
+                    ItemsSource = ComboBox_FeatureTemplateSystemStates,
                     SelectedValuePath = nameof(CMSystemStateDto.Id),
                     DisplayMemberPath = nameof(CMSystemStateDto.Name),
                 });
@@ -217,7 +199,7 @@ namespace CyberMigrate.ConfigurationUC
                     SelectedValueBinding = new Binding(nameof(CMTaskDto.CMTaskTypeId)),
 
                     // Instructions on how to interact with the "lookup" list
-                    ItemsSource = TaskTypes,
+                    ItemsSource = ComboBox_TaskTypes,
                     SelectedValuePath = nameof(CMTaskTypeDto.Id),
                     DisplayMemberPath = nameof(CMTaskTypeDto.Name),
                 });
@@ -242,15 +224,36 @@ namespace CyberMigrate.ConfigurationUC
                 }
             });
 
-            var cmTaskTemplates = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(cmFeatureTemplate.Id, true).ToList();
-
-            var observable = new ObservableCollection<CMTaskDto>(cmTaskTemplates);
-            observable.CollectionChanged += TaskTemplates_CollectionChanged;
-            dataGridTaskTemplates.ItemsSource = observable;
+            // Load all task templates
+            dataGridTaskTemplates.ItemsSource = taskTemplates;
+            Reload_TaskTemplates();
 
             // The way I've implemented it, this observable collection doesn't have detection if a property is updated, so we do that here
-            dataGridTaskTemplates.RowEditEnding -= DataGridTaskTemplates_RowEditEnding;
             dataGridTaskTemplates.RowEditEnding += DataGridTaskTemplates_RowEditEnding;
+        }
+
+        private void Reload_FeatureStateTransitionRules()
+        {
+            featureStateTransitionRules.CollectionChanged -= FeatureStateTransitionRules_CollectionChanged;
+            featureStateTransitionRules.Clear();
+            var cmFeatureStateTransitionRules = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.GetAll_ForFeatureTemplate(cmFeatureTemplate.Id).ToList();
+            foreach (var rule in cmFeatureStateTransitionRules)
+            {
+                featureStateTransitionRules.Add(rule);
+            }
+            featureStateTransitionRules.CollectionChanged += FeatureStateTransitionRules_CollectionChanged;
+        }
+
+        private void Reload_TaskTemplates()
+        {
+            taskTemplates.CollectionChanged -= TaskTemplates_CollectionChanged;
+            taskTemplates.Clear();
+            var cmTaskTemplates = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(cmFeatureTemplate.Id, true).ToList();
+            foreach (var taskTemplate in cmTaskTemplates)
+            {
+                taskTemplates.Add(taskTemplate);
+            }
+            taskTemplates.CollectionChanged += TaskTemplates_CollectionChanged;
         }
 
         private void DataGridStateTransitionRules_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
@@ -275,7 +278,7 @@ namespace CyberMigrate.ConfigurationUC
                         MessageBox.Show(opResult.ErrorsCombined);
 
                         // Since the row has already been commited to the grid above, our only recourse at this point to roll it back is to reload the rules grid
-                        Load_TransitionRulesGrid();
+                        Reload_FeatureStateTransitionRules();
                         return;
                     }
                 }
@@ -293,7 +296,7 @@ namespace CyberMigrate.ConfigurationUC
 
                 // Reload the tasks grid so the dropdowns now represent the correct system states that are available.
                 // Just in case the update changed an availalbe system state
-                Load_TaskTemplatesGrid();
+                Reload_TaskTemplates();
             }
         }
 
@@ -310,13 +313,13 @@ namespace CyberMigrate.ConfigurationUC
                     {
                         MessageBox.Show(opResult.ErrorsCombined);
                         // Reload the rules datagrid to show that the item was not actually deleted
-                        Load_TransitionRulesGrid();
+                        Reload_FeatureStateTransitionRules();
                         return;
                     }
 
                     // The row will already be correctly removed from the rules datagrid so no need at this point to refresh the rules grid.
                     // However we reload the tasks grid so the dropdowns now represent the correct system states that are available.
-                    Load_TaskTemplatesGrid();
+                    Reload_TaskTemplates();
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Add)
@@ -357,7 +360,7 @@ namespace CyberMigrate.ConfigurationUC
                         MessageBox.Show(opResult.ErrorsCombined);
 
                         // Since the row has already been commited to the grid above, our only recourse at this point to roll it back is to reload the tasks grid
-                        Load_TaskTemplatesGrid();
+                        Reload_TaskTemplates();
                         return;
                     }
                 }
@@ -392,7 +395,7 @@ namespace CyberMigrate.ConfigurationUC
                         {
                             MessageBox.Show(opResult.ErrorsCombined);
                             // Reload the tasks datagrid to show that the item was not actually deleted
-                            Load_TaskTemplatesGrid();
+                            Reload_TaskTemplates();
                             return;
                         }
                     }

@@ -9,7 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace CyberMigrate.ConfigurationUC
+namespace CyberMigrate.Configuration
 {
     /// <summary>
     /// Interaction logic for SystemConfiguration.xaml
@@ -19,6 +19,8 @@ namespace CyberMigrate.ConfigurationUC
         public Config ConfigWindow { get; set; }
 
         public CMSystemDto cmSystem;
+
+        private ObservableCollection<CMSystemStateDto> systemStates = new ObservableCollection<CMSystemStateDto>();
 
         public SystemConfigUC(Config configWindow, CMSystemDto cmSystem)
         {
@@ -30,23 +32,16 @@ namespace CyberMigrate.ConfigurationUC
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             txtSystemName.Text = cmSystem.Name;
-            Load_StatesGrid();
+            Init_StatesGrid();
         }
 
-        private void Load_StatesGrid()
+        private void Init_StatesGrid()
         {
             // Don't let the grid auto-generate the columns. Because we want to instead have some of them hidden
             dataGridStates.AutoGenerateColumns = false;
             dataGridStates.Columns.Clear();
 
-            dataGridStates.Columns.Add(
-                new DataGridTextColumn()
-                {
-                    Header = nameof(CMSystemStateDto.Id),
-                    Binding = new Binding(nameof(CMSystemStateDto.Id)),
-                    Visibility = Visibility.Collapsed // Only meant to keep track of ids.
-                });
-            dataGridStates.Columns.Add(
+           dataGridStates.Columns.Add(
                 new DataGridTextColumn()
                 {
                     Header = nameof(CMSystemStateDto.Priority),
@@ -61,14 +56,23 @@ namespace CyberMigrate.ConfigurationUC
                 });
 
             // Load all states in this system
-            var cmSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id).ToList();
-            var observable = new ObservableCollection<CMSystemStateDto>(cmSystemStates);
-            observable.CollectionChanged += States_CollectionChanged;
-            dataGridStates.ItemsSource = observable;
+            dataGridStates.ItemsSource = systemStates;
+            Reload_SystemStates();
 
             // The way I've implemented it, this observable collection doesn't have detection if a property is updated, so we do that here
-            dataGridStates.RowEditEnding -= DataGridState_RowEditEnding;
             dataGridStates.RowEditEnding += DataGridState_RowEditEnding;
+        }
+
+        private void Reload_SystemStates()
+        {
+            systemStates.CollectionChanged -= States_CollectionChanged;
+            systemStates.Clear();
+            var cmSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id).ToList();
+            foreach (var systemState in cmSystemStates)
+            {
+                systemStates.Add(systemState);
+            }
+            systemStates.CollectionChanged += States_CollectionChanged;
         }
 
         private void States_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -85,7 +89,7 @@ namespace CyberMigrate.ConfigurationUC
                         MessageBox.Show(opResult.ErrorsCombined);
 
                         // Reload the states grid to represent that the item wasn't actually deleted
-                        Load_StatesGrid();
+                        Reload_SystemStates();
                         return;
                     }
                 }
@@ -127,7 +131,7 @@ namespace CyberMigrate.ConfigurationUC
                         MessageBox.Show(opResult.ErrorsCombined);
 
                         // Since the row has already been commited to the grid above, our only recourse at this point to roll it back is to reload the rules grid
-                        Load_StatesGrid();
+                        Reload_SystemStates();
                         return;
                     }
                 }

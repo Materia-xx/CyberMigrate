@@ -4,7 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace CyberMigrate.ConfigurationUC
+namespace CyberMigrate.Configuration
 {
     /// <summary>
     /// Interaction logic for DataStoreConfigUC.xaml

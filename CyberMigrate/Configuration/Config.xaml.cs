@@ -1,4 +1,4 @@
-﻿using CyberMigrate.ConfigurationUC;
+﻿using CyberMigrate.Configuration;
 using DataProvider;
 using Dto;
 using System;
@@ -42,12 +42,6 @@ namespace CyberMigrate
             }
         }
 
-        // special case for task factories to keep track of which tree view node is showing the UI for each task factory
-        private class CMTaskFactoryDto : IdBasedObject // mcbtodo: put this in the dto class anyway ?
-        {
-            public string TaskFactoryName { get; set; }
-        }
-        
         public Config()
         {
             InitializeComponent();
@@ -95,13 +89,19 @@ namespace CyberMigrate
 
             foreach (var taskFactory in TaskFactoriesCatalog.Instance.TaskFactories)
             {
-                var cmTaskFactoryDto = new CMTaskFactoryDto()
-                {
-                    TaskFactoryName = taskFactory.GetType().Name
-                };
+                var cmTaskFactoryDto = CMDataProvider.DataStore.Value.CMTaskFactories.Value.Get_ForName(taskFactory.Name);
 
                 var taskFactoryTVI = GetTVI_TaskFactory(cmTaskFactoryDto);
                 taskFactoriesTVI.Items.Add(taskFactoryTVI);
+
+                // Add a config UI for each task type within this task factory
+                foreach (var taskType in taskFactory.GetTaskTypes())
+                {
+                    var cmTaskTypeDto = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get_ForName(taskType);
+
+                    var taskTypeConfigTVI = GetTVI_TaskType(cmTaskTypeDto);
+                    taskFactoryTVI.Items.Add(taskTypeConfigTVI);
+                }
             }
 
             taskFactoriesTVI.ExpandSubtree();
@@ -121,6 +121,38 @@ namespace CyberMigrate
             taskFactoriesTreeViewItem.Selected += TreeConfiguration_NodeSelected; // Still keep the onSelected event so the UI can clear what may be there when selected
 
             return taskFactoriesTreeViewItem;
+        }
+
+        private TreeViewItem GetTVI_TaskFactory(CMTaskFactoryDto cmTaskFactoryDto)
+        {
+            var taskFactoryTVI = new TreeViewItem()
+            {
+                Header = cmTaskFactoryDto.Name,
+                Tag = new ConfigTreeViewTag(cmTaskFactoryDto),
+            };
+
+            // Add the context menu
+            taskFactoryTVI.ContextMenu = new ContextMenu(); // There is no context menu actions currently for task factories
+
+            taskFactoryTVI.Selected += TreeConfiguration_NodeSelected;
+
+            return taskFactoryTVI;
+        }
+
+        private TreeViewItem GetTVI_TaskType(CMTaskTypeDto cmTaskTypeDto)
+        {
+            var taskTypeTVI = new TreeViewItem()
+            {
+                Header = cmTaskTypeDto.Name,
+                Tag = new ConfigTreeViewTag(cmTaskTypeDto),
+            };
+
+            // Add the context menu
+            taskTypeTVI.ContextMenu = new ContextMenu(); // There is no context menu actions currently for task types
+
+            taskTypeTVI.Selected += TreeConfiguration_NodeSelected;
+
+            return taskTypeTVI;
         }
 
         private TreeViewItem GetTVI_DataStore()
@@ -162,22 +194,6 @@ namespace CyberMigrate
             dataStoreTreeViewItem.Selected += TreeConfiguration_NodeSelected;
 
             return dataStoreTreeViewItem;
-        }
-
-        private TreeViewItem GetTVI_TaskFactory(CMTaskFactoryDto cmTaskFactoryDto)
-        {
-            var taskFactoryTVI = new TreeViewItem()
-            {
-                Header = cmTaskFactoryDto.TaskFactoryName,
-                Tag = new ConfigTreeViewTag(cmTaskFactoryDto),
-            };
-
-            // Add the context menu
-            taskFactoryTVI.ContextMenu = new ContextMenu(); // There is no context menu actions currently for task factories
-
-            taskFactoryTVI.Selected += TreeConfiguration_NodeSelected;
-
-            return taskFactoryTVI;
         }
 
         private TreeViewItem GetTVI_System(CMSystemDto cmSystem)
@@ -328,10 +344,9 @@ namespace CyberMigrate
                     var featureTemplateConfigUc = new FeatureTemplateConfigUC(this, attachedTag.Dto as CMFeatureDto);
                     configUIPanel.Children.Add(featureTemplateConfigUc);
                     break;
-                case nameof(CMTaskFactoryDto):
-                    var dto = attachedTag.Dto as CMTaskFactoryDto;
-                    var taskFactoryUc = TaskFactoriesCatalog.Instance.GetConfigUI(dto.TaskFactoryName);
-                    configUIPanel.Children.Add(taskFactoryUc);
+                case nameof(CMTaskTypeDto):
+                    var taskTypeUc = new TaskTypeConfigUC(this, attachedTag.Dto as CMTaskTypeDto);
+                    configUIPanel.Children.Add(taskTypeUc);
                     break;
                 default:
                     break;

@@ -21,7 +21,7 @@ namespace DataProvider
         {
             var results = Find(s => 
                 s.TaskTypeId == cmTaskTypeId
-                && s.PluginTaskStateName.Equals(pluginTaskStateName, System.StringComparison.OrdinalIgnoreCase)
+                && s.InternalName.Equals(pluginTaskStateName, System.StringComparison.OrdinalIgnoreCase)
                 );
             return results.FirstOrDefault();
         }
@@ -30,7 +30,7 @@ namespace DataProvider
         {
             var opResult = new CMCUDResult();
 
-            if (string.IsNullOrWhiteSpace(insertingObject.PluginTaskStateName) || string.IsNullOrWhiteSpace(insertingObject.DisplayTaskStateName))
+            if (string.IsNullOrWhiteSpace(insertingObject.InternalName) || string.IsNullOrWhiteSpace(insertingObject.DisplayName))
             {
                 opResult.Errors.Add($"Cannot insert a new item into {CollectionName} because the name is empty.");
                 return opResult;
@@ -45,5 +45,18 @@ namespace DataProvider
             return base.Insert(insertingObject);
         }
 
+        public override CMCUDResult Delete(int deletingId)
+        {
+            var opResult = new CMCUDResult();
+
+            var dbTaskState = Get(deletingId);
+            if (dbTaskState.Reserved)
+            {
+                opResult.Errors.Add($"Unable to delete task state {dbTaskState.DisplayName} because it is marked as reserved.");
+                return opResult;
+            }
+
+            return base.Delete(deletingId); 
+        }
     }
 }

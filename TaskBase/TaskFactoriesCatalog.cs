@@ -68,7 +68,7 @@ namespace TaskBase
 
         public CMTaskBase CreateTask(string taskName, int cmSystemId, int cmFeatureId, int cmTaskId)
         {
-            var supportingFactories = TaskFactories.Where(f => f.SupportedTasks.Contains(taskName));
+            var supportingFactories = TaskFactories.Where(f => f.GetTaskTypes().Contains(taskName));
             if (!supportingFactories.Any())
             {
                 throw new InvalidOperationException($"Unable to create a task of type '{taskName}'. The task factory for this task was not found.");
@@ -82,21 +82,17 @@ namespace TaskBase
             return createdTask;
         }
 
-        public UserControl GetConfigUI(string taskFactoryName)
+        public UserControl GetTaskTypeConfigUI(string taskTypeName)
         {
-            var matchingFactories = TaskFactories.Where(f => f.GetType().Name.Equals(taskFactoryName, StringComparison.OrdinalIgnoreCase));
-
-            if (!matchingFactories.Any())
+            foreach (var taskFactory in TaskFactories)
             {
-                throw new InvalidOperationException($"Unable to create a config UI for '{taskFactoryName}'. The task factory was not found.");
-            }
-            else if (matchingFactories.Count() > 1)
-            {
-                throw new InvalidOperationException($"Unable to create a config UI for '{taskFactoryName}'. There are more than 1 task factories with this name.");
+                if (taskFactory.GetTaskTypes().Contains(taskTypeName))
+                {
+                    return taskFactory.GetTaskTypeConfigUI(taskTypeName);
+                }
             }
 
-            var configUI = matchingFactories.First().GetConfigurationUI();
-            return configUI;
+            throw new InvalidOperationException($"Unable to find the task type {taskTypeName} in order to create the configuration UI.");
         }
 
     }

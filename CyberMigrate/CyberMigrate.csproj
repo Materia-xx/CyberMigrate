@@ -58,15 +58,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Configuration\UC\DataStoreConfigUC.xaml">
+    <Page Include="Configuration\DataStoreConfigUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Configuration\UC\FeatureTemplateConfigUC.xaml">
+    <Page Include="Configuration\FeatureTemplateConfigUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Configuration\UC\SystemConfigUC.xaml">
+    <Page Include="Configuration\SystemConfigUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Configuration\TaskTypeConfigUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -81,14 +85,17 @@
     <Compile Include="Configuration\Config.xaml.cs">
       <DependentUpon>Config.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Configuration\UC\DataStoreConfigUC.xaml.cs">
+    <Compile Include="Configuration\DataStoreConfigUC.xaml.cs">
       <DependentUpon>DataStoreConfigUC.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Configuration\UC\FeatureTemplateConfigUC.xaml.cs">
+    <Compile Include="Configuration\FeatureTemplateConfigUC.xaml.cs">
       <DependentUpon>FeatureTemplateConfigUC.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Configuration\UC\SystemConfigUC.xaml.cs">
+    <Compile Include="Configuration\SystemConfigUC.xaml.cs">
       <DependentUpon>SystemConfigUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Configuration\TaskTypeConfigUC.xaml.cs">
+      <DependentUpon>TaskTypeConfigUC.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

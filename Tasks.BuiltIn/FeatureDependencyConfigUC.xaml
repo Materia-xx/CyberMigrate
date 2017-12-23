@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Tasks.BuiltIn.FeatureDependencyTaskFactoryUC"
+﻿<UserControl x:Class="Tasks.BuiltIn.FeatureDependencyConfigUC"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -14,6 +14,6 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <Button x:Name="btnApply" Grid.Row="1" Grid.Column="1" >Example task factory config</Button>
+        <Button x:Name="btnApply" Grid.Row="1" Grid.Column="1" >Example config for the dependency task</Button>
     </Grid>
 </UserControl>

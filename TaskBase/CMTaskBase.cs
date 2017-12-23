@@ -17,9 +17,12 @@ namespace TaskBase
 
         /// <summary>
         /// Called on a regular basis by the main program to have tasks auto-progress their state if appropriate.
-        /// Note: A task that is changed to the reserved task state "complete" is considered a complete task to the program.
+        /// Note: A task that is changed to the reserved task state "Complete" is considered a complete task to the program.
         /// e.g.The dependency task that tracks other features may choose to check the state of another feature during this phase and if appropriate
-        /// mark this task as complete.Another manual type task may choose to do nothing here, letting the user completely control the task states.
+        /// mark this task as Complete.
+        /// Another manual type task may choose to do nothing here, letting the user completely control the task states.
+        /// Also a task can use this function to set the default state of a task. When a task is first instanced by the program
+        /// it will be in the "Instance" state.
         /// </summary>
         public abstract void AutoProgress();
 

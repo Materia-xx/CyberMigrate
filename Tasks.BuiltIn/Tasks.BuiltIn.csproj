@@ -47,8 +47,8 @@
   <ItemGroup>
     <Compile Include="FeatureDependencyTask.cs" />
     <Compile Include="FeatureDependencyTaskFactory.cs" />
-    <Compile Include="FeatureDependencyTaskFactoryUC.xaml.cs">
-      <DependentUpon>FeatureDependencyTaskFactoryUC.xaml</DependentUpon>
+    <Compile Include="FeatureDependencyConfigUC.xaml.cs">
+      <DependentUpon>FeatureDependencyConfigUC.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -59,7 +59,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="FeatureDependencyTaskFactoryUC.xaml">
+    <Page Include="FeatureDependencyConfigUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

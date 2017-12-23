@@ -16,11 +16,6 @@ namespace Tasks.BuiltIn
             }
         }
 
-        public FeatureDependencyTaskFactory()
-        {
-            SupportedTasks.Add(nameof(FeatureDependencyTask));
-        }
-
         public override CMTaskBase CreateTask(int cmSystemId, int cmFeatureId, int cmTaskId)
         {
             var featureTask = new FeatureDependencyTask();
@@ -30,17 +25,30 @@ namespace Tasks.BuiltIn
             return featureTask;
         }
 
-        public override UserControl GetConfigurationUI()
+        public override List<string> GetTaskTypes()
         {
-            var configUI = new FeatureDependencyTaskFactoryUC();
-            return configUI;
+            var taskTypes = new List<string>();
+            taskTypes.Add(nameof(FeatureDependencyTask));
+            return taskTypes;
         }
 
-        public override List<string> GetRequiredTaskStates(string taskType)
+        public override UserControl GetTaskTypeConfigUI(string taskTypeName)
+        {
+            switch (taskTypeName)
+            {
+                case nameof(FeatureDependencyTask):
+                    var configUI = new FeatureDependencyConfigUC();
+                    return configUI;
+            }
+
+            return null;
+        }
+
+        public override List<string> GetRequiredTaskStates(string taskTypeName)
         {
             var requiredStates = new List<string>();
 
-            switch (taskType)
+            switch (taskTypeName)
             {
                 case nameof(FeatureDependencyTask):
                     requiredStates.Add("WaitingOnDependency");
