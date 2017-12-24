@@ -46,6 +46,10 @@ TODO: Make sure there is a way to re-assign dependency states across all feature
       dependencies should be able to be satisfied by any of multiple conditions. Which means a dependency passes if the state is either complete or
       complete+.
 
+TODO: Add in the concept of choice based workflows. The ability to query the user or a Feature var and depending on the answer, be able to instance
+      a different feature. This hints that instancing would stop when it met a spot in a feature template where a choice was needed, and the
+      instancing would continue at a later time when the needed input to the choice was resolved. Could this be implemented via another built-in task?
+
 * Plan on using http://www.litedb.org/ for the tables / db.
 
 * Goal is to have the tool be able to run without having to run an external setups by default. (xcopy deploy and run to a base, up-to-date windows system)
