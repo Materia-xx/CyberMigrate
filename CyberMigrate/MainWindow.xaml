@@ -8,5 +8,22 @@
         Title="MainWindow" Width="1024" Height="768" Loaded="Window_Loaded">
     <DockPanel>
         <Menu DockPanel.Dock="Top" Name="MainMenu" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TreeView x:Name="treeFilter" Grid.Column="0" PreviewMouseRightButtonDown="treeFilter_PreviewMouseRightButtonDown" />
+
+            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
+
+            <DockPanel x:Name="summaryPanel" Grid.Column="2" Margin="8" />
+
+        </Grid>
     </DockPanel>
 </Window>

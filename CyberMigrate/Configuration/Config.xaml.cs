@@ -17,31 +17,6 @@ namespace CyberMigrate
     {
         private MainWindow MainForm { get; set; }
 
-        /// <summary>
-        /// Attached to nodes in the configuration tree view. Used to store information such as the Dto that each node represents
-        /// </summary>
-        private class ConfigTreeViewTag
-        {
-            public ConfigTreeViewTag(IdBasedObject dto)
-            {
-                this.Dto = dto;
-            }
-
-            public IdBasedObject Dto { get; private set; }
-
-            public string DtoTypeName
-            {
-                get
-                {
-                    if (Dto == null)
-                    {
-                        return string.Empty;
-                    }
-                    return Dto.GetType().Name;
-                }
-            }
-        }
-
         public Config(MainWindow mainForm)
         {
             this.MainForm = mainForm;
@@ -129,7 +104,7 @@ namespace CyberMigrate
             var taskFactoryTVI = new TreeViewItem()
             {
                 Header = cmTaskFactoryDto.Name,
-                Tag = new ConfigTreeViewTag(cmTaskFactoryDto),
+                Tag = new TreeViewTag(cmTaskFactoryDto),
             };
 
             // Add the context menu
@@ -145,7 +120,7 @@ namespace CyberMigrate
             var taskTypeTVI = new TreeViewItem()
             {
                 Header = cmTaskTypeDto.Name,
-                Tag = new ConfigTreeViewTag(cmTaskTypeDto),
+                Tag = new TreeViewTag(cmTaskTypeDto),
             };
 
             // Add the context menu
@@ -161,7 +136,7 @@ namespace CyberMigrate
             var dataStoreTreeViewItem = new TreeViewItem()
             {
                 Header = "Data Store",
-                Tag = new ConfigTreeViewTag(new CMDataStoreDto()), // mcbtodo: there isn't currently an instance of cmDataStore availalble for this. Instead expose a Get function somewhere to get it.
+                Tag = new TreeViewTag(new CMDataStoreDto()), // mcbtodo: there isn't currently an instance of cmDataStore availalble for this. Instead expose a Get function somewhere to get it.
             };
 
             var contextMenu = new ContextMenu();
@@ -202,7 +177,7 @@ namespace CyberMigrate
             var cmSystemTreeViewItem = new TreeViewItem()
             {
                 Header = cmSystem.Name,
-                Tag = new ConfigTreeViewTag(cmSystem)
+                Tag = new TreeViewTag(cmSystem)
             };
 
             var contextMenu = new ContextMenu();
@@ -322,7 +297,7 @@ namespace CyberMigrate
             var cmFeatureTemplateTreeViewItem = new TreeViewItem()
             {
                 Header = cmFeatureTemplate.Name,
-                Tag = new ConfigTreeViewTag(cmFeatureTemplate)
+                Tag = new TreeViewTag(cmFeatureTemplate)
             };
 
             var contextMenu = new ContextMenu();
@@ -384,21 +359,21 @@ namespace CyberMigrate
         /// Gets the currently selected TreeView tag item.
         /// </summary>
         /// <returns></returns>
-        private ConfigTreeViewTag GetSelectedConfigTreeViewTag()
+        private TreeViewTag GetSelectedConfigTreeViewTag()
         {
             var selectedNode = treeConfig.SelectedItem;
             if (selectedNode == null || !(selectedNode is TreeViewItem))
             {
-                return default(ConfigTreeViewTag);
+                return default(TreeViewTag);
             }
 
             var selectedTreeViewItem = (selectedNode as TreeViewItem);
             if (selectedTreeViewItem?.Tag == null)
             {
-                return default(ConfigTreeViewTag);
+                return default(TreeViewTag);
             }
 
-            return selectedTreeViewItem.Tag as ConfigTreeViewTag;
+            return selectedTreeViewItem.Tag as TreeViewTag;
         }
 
         private void TreeConfiguration_NodeSelected(object sender, RoutedEventArgs e)
@@ -464,6 +439,5 @@ namespace CyberMigrate
 
             return source as TreeViewItem;
         }
-
     }
 }

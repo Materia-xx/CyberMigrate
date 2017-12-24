@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using TaskBase;
 
 namespace CyberMigrate
@@ -25,13 +26,87 @@ namespace CyberMigrate
             if (!DataStoreOptionConfigured())
             {
                 ShowConfigurationUI();
-            }
-            else
-            {
-                DataStorePathSet();
+                RedrawMainMenu();
+                return;
             }
 
+            // Everything past this point depends on the data store being set up already
+            DataStorePathSet();
+            RedrawFilterTreeView();
             RedrawMainMenu();
+        }
+
+        private void RedrawFilterTreeView()
+        {
+            treeFilter.Items.Clear();
+
+            // Get all of the systems and show them as tree view items
+            var cmSystems = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll();
+
+            foreach (var cmSystem in cmSystems)
+            {
+                var cmSystemTVI = GetTVI_System(cmSystem);
+                treeFilter.Items.Add(cmSystemTVI);
+
+                // Show all system states available in this system
+                var cmSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id);
+
+                foreach(var cmSystemState in cmSystemStates)
+                {
+                    var cmSystemStateTVI = GetTVI_SystemState(cmSystemState);
+                    cmSystemTVI.Items.Add(cmSystemStateTVI);
+                }
+
+                cmSystemTVI.ExpandSubtree();
+            }
+        }
+
+        private TreeViewItem GetTVI_System(CMSystemDto cmSystem)
+        {
+            var cmSystemTreeViewItem = new TreeViewItem()
+            {
+                Header = cmSystem.Name,
+                Tag = new TreeViewTag(cmSystem)
+            };
+
+            var contextMenu = new ContextMenu();
+
+            var addNewFeature = new MenuItem()
+            {
+                Header = "New Feature"
+            };
+            contextMenu.Items.Add(addNewFeature);
+
+            var cmFeatureTemplates = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll_ForSystem(cmSystem.Id, true);
+            foreach (var cmFeatureTemplate in cmFeatureTemplates)
+            {
+                var newFeatureSubMenu = new MenuItem()
+                {
+                    Header = cmFeatureTemplate.Name
+                };
+                addNewFeature.Items.Add(newFeatureSubMenu);
+
+                // mcbtodo: add click event that will instance a new feature
+            }
+
+            cmSystemTreeViewItem.ContextMenu = contextMenu;
+
+            return cmSystemTreeViewItem;
+        }
+
+        private TreeViewItem GetTVI_SystemState(CMSystemStateDto cmSystemState)
+        {
+            var cmSystemStateTVI = new TreeViewItem()
+            {
+                Header = cmSystemState.Name,
+                Tag = new TreeViewTag(cmSystemState)
+            };
+
+            var contextMenu = new ContextMenu();
+            // mcbtodo: figure out how to make this not show a context menu with no menu items in it.
+            cmSystemStateTVI.ContextMenu = contextMenu;
+
+            return cmSystemStateTVI;
         }
 
         /// <summary>
@@ -225,5 +300,37 @@ namespace CyberMigrate
             };
             MainMenu.Items.Add(configurationMenu);
         }
+
+        /// <summary>
+        /// Select the nearest treeview element when right clicking if clicking in the treeview
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void treeFilter_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var treeViewItem = VisualTreeViewItemFinder(e.OriginalSource as DependencyObject);
+            if (treeViewItem != null)
+            {
+                treeViewItem.Focus();
+                treeViewItem.IsSelected = true;
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Finds the treeview node closest to where the mouse was clicked and returns it.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        private TreeViewItem VisualTreeViewItemFinder(DependencyObject source)
+        {
+            while (source != null && !(source is TreeViewItem))
+            {
+                source = VisualTreeHelper.GetParent(source);
+            }
+
+            return source as TreeViewItem;
+        }
+
     }
 }

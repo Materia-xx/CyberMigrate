@@ -27,7 +27,8 @@ namespace DataProvider
         /// <returns></returns>
         public CMOptionsDto GetOptions()
         {
-            var options = optionsCollection.FindAll().FirstOrDefault();
+            var allOptions = optionsCollection.FindAll();
+            var options = allOptions.FirstOrDefault();
 
             if (options == null)
             {
