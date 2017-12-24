@@ -47,12 +47,13 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FeatureDependencyTask.cs" />
-    <Compile Include="FeatureDependencyTaskFactory.cs" />
-    <Compile Include="FeatureDependencyConfigUC.xaml.cs">
+    <Compile Include="FeatureDependency\FeatureDependencyDto.cs" />
+    <Compile Include="FeatureDependency\FeatureDependencyTask.cs" />
+    <Compile Include="CMBuiltInTaskFactory.cs" />
+    <Compile Include="FeatureDependency\FeatureDependencyConfigUC.xaml.cs">
       <DependentUpon>FeatureDependencyConfigUC.xaml</DependentUpon>
     </Compile>
-    <Compile Include="FeatureDependencyUC.xaml.cs">
+    <Compile Include="FeatureDependency\FeatureDependencyUC.xaml.cs">
       <DependentUpon>FeatureDependencyUC.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -72,11 +73,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="FeatureDependencyConfigUC.xaml">
+    <Page Include="FeatureDependency\FeatureDependencyConfigUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="FeatureDependencyUC.xaml">
+    <Page Include="FeatureDependency\FeatureDependencyUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

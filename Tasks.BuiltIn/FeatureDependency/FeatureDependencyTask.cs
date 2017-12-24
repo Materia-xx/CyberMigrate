@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using TaskBase;
 
-namespace Tasks.BuiltIn
+namespace Tasks.BuiltIn.FeatureDependency
 {
     public class FeatureDependencyTask : CMTaskBase
     {

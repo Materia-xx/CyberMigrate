@@ -174,14 +174,17 @@ namespace CyberMigrate
             // Go through everything that is currently registered in the db and check for things that are now missing on disk
             // mcbtodo: for now I'm just showing an error here, but there should be a way to either automatically resolve this
             // mcbtodo: issue or give instructions to the user on how to clean up any references to the removed taskfactory/tasktype.
-            var dbTaskFactories = CMDataProvider.DataStore.Value.CMTaskFactories.Value.GetAll();
-            foreach (var dbTaskFactory in dbTaskFactories)
-            {
-                if (!currentFactoriesFromDisk.Contains(dbTaskFactory.Name))
-                {
-                    return $"Task factory with name {dbTaskFactory.Name} that was previously registered has been removed. Please put this task factory back in place so the program can run properly.";
-                }
-            }
+
+
+            // mcbtodo: nothing referenced the factories yet, add this back in or delete as some point
+            //var dbTaskFactories = CMDataProvider.DataStore.Value.CMTaskFactories.Value.GetAll();
+            //foreach (var dbTaskFactory in dbTaskFactories)
+            //{
+            //    if (!currentFactoriesFromDisk.Contains(dbTaskFactory.Name))
+            //    {
+            //        return $"Task factory with name {dbTaskFactory.Name} that was previously registered has been removed. Please put this task factory back in place so the program can run properly.";
+            //    }
+            //}
             var dbTaskTypes = CMDataProvider.DataStore.Value.CMTaskTypes.Value.GetAll();
             foreach (var dbTaskType in dbTaskTypes)
             {

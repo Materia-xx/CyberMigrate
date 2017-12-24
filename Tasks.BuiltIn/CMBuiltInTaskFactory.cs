@@ -2,17 +2,18 @@
 using System.ComponentModel.Composition;
 using System.Windows.Controls;
 using TaskBase;
+using Tasks.BuiltIn.FeatureDependency;
 
 namespace Tasks.BuiltIn
 {
     [Export(typeof(CMTaskFactoryBase))]
-    public class FeatureDependencyTaskFactory : CMTaskFactoryBase
+    public class CMBuiltInTaskFactory : CMTaskFactoryBase
     {
         public override string Name
         {
             get
             {
-                return nameof(FeatureDependencyTaskFactory);
+                return nameof(CMBuiltInTaskFactory);
             }
         }
 
