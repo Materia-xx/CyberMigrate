@@ -20,15 +20,15 @@ namespace CyberMigrate.Configuration
 
         private Config ConfigWindow { get; set; }
 
-        private List<BoolBasedComboBoxEntry> ComboBox_ConditionAllAnyChoices { get; set; }
+        private List<BoolBasedComboBoxEntry> ComboBox_ConditionAllAnyChoices { get; set; } = new List<BoolBasedComboBoxEntry>();
 
-        private List<BoolBasedComboBoxEntry> ComboBox_ConditionAreCompleteChoices { get; set; }
+        private List<BoolBasedComboBoxEntry> ComboBox_ConditionAreCompleteChoices { get; set; } = new List<BoolBasedComboBoxEntry>();
 
-        private List<CMSystemStateDto> ComboBox_FeatureTemplateSystemStates { get; set; }
+        private List<CMSystemStateDto> ComboBox_FeatureTemplateSystemStates { get; set; } = new List<CMSystemStateDto>();
 
-        private List<CMTaskTypeDto> ComboBox_TaskTypes { get; set; }
+        private List<CMTaskTypeDto> ComboBox_TaskTypes { get; set; } = new List<CMTaskTypeDto>();
 
-        private List<CMSystemStateDto> ComboBox_CurrentSystemStates { get; set; }
+        private List<CMSystemStateDto> ComboBox_CurrentSystemStates { get; set; } = new List<CMSystemStateDto>();
 
         private ObservableCollection<CMFeatureStateTransitionRuleDto> featureStateTransitionRules = new ObservableCollection<CMFeatureStateTransitionRuleDto>();
 
@@ -58,8 +58,15 @@ namespace CyberMigrate.Configuration
         /// </summary>
         private void LoadComboBoxes_TaskTemplates()
         {
-            ComboBox_FeatureTemplateSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForFeatureTemplate(cmFeatureTemplate.Id).ToList();
-            ComboBox_TaskTypes = CMDataProvider.DataStore.Value.CMTaskTypes.Value.GetAll().ToList(); ;
+            ComboBox_FeatureTemplateSystemStates.Clear();
+            ComboBox_FeatureTemplateSystemStates.AddRange(
+                CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForFeatureTemplate(cmFeatureTemplate.Id)
+                );
+
+            ComboBox_TaskTypes.Clear();
+            ComboBox_TaskTypes.AddRange(
+                CMDataProvider.DataStore.Value.CMTaskTypes.Value.GetAll()
+                );
         }
 
         /// <summary>
@@ -67,19 +74,18 @@ namespace CyberMigrate.Configuration
         /// </summary>
         private void LoadComboBoxes_TransitionRules()
         {
-            ComboBox_ConditionAllAnyChoices = new List<BoolBasedComboBoxEntry>()
-            {
-                new BoolBasedComboBoxEntry(true, "All"),
-                new BoolBasedComboBoxEntry(false, "Any")
-            };
+            ComboBox_ConditionAllAnyChoices.Clear();
+            ComboBox_ConditionAllAnyChoices.Add(new BoolBasedComboBoxEntry(true, "All"));
+            ComboBox_ConditionAllAnyChoices.Add(new BoolBasedComboBoxEntry(false, "Any"));
 
-            ComboBox_ConditionAreCompleteChoices = new List<BoolBasedComboBoxEntry>()
-            {
-                new BoolBasedComboBoxEntry(true, "Are complete"),
-                new BoolBasedComboBoxEntry(false, "Are not complete")
-            };
+            ComboBox_ConditionAreCompleteChoices.Clear();
+            ComboBox_ConditionAreCompleteChoices.Add(new BoolBasedComboBoxEntry(true, "Are complete"));
+            ComboBox_ConditionAreCompleteChoices.Add(new BoolBasedComboBoxEntry(false, "Are not complete"));
 
-            ComboBox_CurrentSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmFeatureTemplate.CMSystemId).ToList();
+            ComboBox_CurrentSystemStates.Clear();
+            ComboBox_CurrentSystemStates.AddRange(
+                CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmFeatureTemplate.CMSystemId)
+                );
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -294,9 +300,8 @@ namespace CyberMigrate.Configuration
                     }
                 }
 
-                // Reload the tasks grid so the dropdowns now represent the correct system states that are available.
-                // Just in case the update changed an availalbe system state
-                Reload_TaskTemplates();
+                // Reload the tasks grid combo boxes to now represent the correct system states that are available.
+                LoadComboBoxes_TaskTemplates();
             }
         }
 
@@ -318,8 +323,9 @@ namespace CyberMigrate.Configuration
                     }
 
                     // The row will already be correctly removed from the rules datagrid so no need at this point to refresh the rules grid.
-                    // However we reload the tasks grid so the dropdowns now represent the correct system states that are available.
-                    Reload_TaskTemplates();
+
+                    // Reload the tasks grid combo boxes to now represent the correct system states that are available.
+                    LoadComboBoxes_TaskTemplates();
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Add)

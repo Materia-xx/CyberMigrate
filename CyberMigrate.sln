@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Design", "Design", "{7D4F6789-1FF7-4E06-AFBE-8786D8F44F2D}"
 	ProjectSection(SolutionItems) = preProject
 		DesignSpec.txt = DesignSpec.txt
+		Planned.txt = Planned.txt
 		ProjectStructure.txt = ProjectStructure.txt
 	EndProjectSection
 EndProject
