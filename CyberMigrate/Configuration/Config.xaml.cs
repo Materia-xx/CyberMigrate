@@ -271,7 +271,33 @@ namespace CyberMigrate
                 Tag = new ConfigTreeViewTag(cmFeatureTemplate)
             };
 
-            cmFeatureTemplateTreeViewItem.ContextMenu = new ContextMenu();
+            var contextMenu = new ContextMenu();
+
+            var deleteFeatureTemplateMenu = new MenuItem()
+            {
+                Header = "Delete Feature Template"
+            };
+            contextMenu.Items.Add(deleteFeatureTemplateMenu);
+            deleteFeatureTemplateMenu.Click += (sender, e) =>
+            {
+                var selectedTreeViewTag = GetSelectedConfigTreeViewTag();
+
+                if (selectedTreeViewTag?.Dto == null || !(selectedTreeViewTag?.Dto is CMFeatureDto))
+                {
+                    return;
+                }
+
+                var selectedFeatureTemplateDto = selectedTreeViewTag.Dto as CMFeatureDto;
+
+                var opResult = CMDataProvider.DataStore.Value.CMFeatures.Value.Delete(selectedFeatureTemplateDto.Id);
+                if (opResult.Errors.Any())
+                {
+                    MessageBox.Show(opResult.ErrorsCombined);
+                    return;
+                }
+                RemoveSelectedTreeConfigItem();
+            };
+            cmFeatureTemplateTreeViewItem.ContextMenu = contextMenu;
 
             return cmFeatureTemplateTreeViewItem;
         }

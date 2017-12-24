@@ -45,13 +45,23 @@ namespace DataProvider
             return results;
         }
 
+        private CMCUDResult CommonUpsertChecks(CMCUDResult opResult, CMFeatureDto dto)
+        {
+            if (Get_ForName(dto.Name, dto.CMSystemId, dto.IsTemplate) != null)
+            {
+                opResult.Errors.Add($"A feature with the name '{dto.Name}' already exists within the system. Rename that one first.");
+            }
+
+            return opResult;
+        }
+
         public override CMCUDResult Insert(CMFeatureDto insertingObject)
         {
             var opResult = new CMCUDResult();
 
-            if (Get_ForName(insertingObject.Name, insertingObject.CMSystemId, insertingObject.IsTemplate) != null)
+            opResult = CommonUpsertChecks(opResult, insertingObject);
+            if (opResult.Errors.Any())
             {
-                opResult.Errors.Add($"A feature with the name '{insertingObject.Name}' already exists within the system. Rename that one first.");
                 return opResult;
             }
 
@@ -62,13 +72,39 @@ namespace DataProvider
         {
             var opResult = new CMCUDResult();
 
-            if (Get_ForName(updatingObject.Name, updatingObject.CMSystemId, updatingObject.IsTemplate) != null)
+            opResult = CommonUpsertChecks(opResult, updatingObject);
+            if (opResult.Errors.Any())
             {
-                opResult.Errors.Add($"A feature with the name '{updatingObject.Name}' already exists within the system.");
                 return opResult;
             }
 
             return base.Update(updatingObject);
         }
+
+        public override CMCUDResult Delete(int deletingId)
+        {
+            var opResult = new CMCUDResult();
+
+            var deletingItem = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(deletingId);
+
+            // Do not allow deleting of features if there are still tasks assigned to it.
+            var featureTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(deletingId, deletingItem.IsTemplate);
+            if (featureTasks.Any())
+            {
+                opResult.Errors.Add($"Cannot delete item in {CollectionName} because tasks are still assigned.");
+                return opResult;
+            }
+
+            // Also require any state transition rules to be removed
+            var stateTransitionRules = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.GetAll_ForFeatureTemplate(deletingId);
+            if (stateTransitionRules.Any())
+            {
+                opResult.Errors.Add($"Cannot delete item in {CollectionName} because there are feature state transition rules still associated with it.");
+                return opResult;
+            }
+
+            return base.Delete(deletingId);
+        }
+
     }
 }
