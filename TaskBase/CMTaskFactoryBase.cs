@@ -27,15 +27,32 @@ namespace TaskBase
         /// </summary>
         public abstract List<string> GetTaskTypes();
 
+        /// <summary>
+        /// Called when the program needs an instance of the task in order to call task specific methods.
+        /// </summary>
+        /// <param name="taskTypeName"></param>
+        /// <param name="cmSystemId"></param>
+        /// <param name="cmFeatureId"></param>
+        /// <param name="cmTaskId"></param>
+        /// <returns></returns>
+        public abstract CMTaskBase GetTask(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId);
 
-        public abstract CMTaskBase CreateTask(int cmSystemId, int cmFeatureId, int cmTaskId);
+        /// <summary>
+        /// The UI that is shown when editing a task
+        /// </summary>
+        /// <param name="taskTypeName"></param>
+        /// <param name="cmSystemId"></param>
+        /// <param name="cmFeatureId"></param>
+        /// <param name="cmTaskId"></param>
+        /// <returns></returns>
+        public abstract UserControl GetTaskUI(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId);
 
         /// <summary>
         /// Gets a configuration UI that can be used to configure each task type that are supplied by this task factory.
         /// It is optional for the task factory to implement this. A blank panel will be used by default.
         /// </summary>
         /// <returns></returns>
-        public virtual UserControl GetTaskTypeConfigUI(string taskTypeName)
+        public virtual UserControl GetTaskConfigUI(string taskTypeName)
         {
             // mcbtodo: flesh out the way that task factories will store their configuration data. It is assumed to be of a different structure for each task factory
             // mcbtodo: If there is a way to store it in the db, I'd like to do that.. and just feed some sort of base class type back and forth to the config ui

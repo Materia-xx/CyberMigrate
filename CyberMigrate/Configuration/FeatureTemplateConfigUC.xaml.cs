@@ -436,12 +436,21 @@ namespace CyberMigrate.Configuration
             if (cmTaskTemplates.Count() <= selectedRowIndex)
             {
                 // This means clicking on the button of a new row that has not yet been added into the database
+                MessageBox.Show("A task must be fully entered before the editor can be invoked.");
                 return;
             }
 
             var cmTask = cmTaskTemplates[selectedRowIndex];
-            
-            // mcbtodo: add logic to show the task editor for cmTask
+            if (cmTask.Id == 0)
+            {
+                // Also a new row not yet in the db, but in a further state than the above.
+                MessageBox.Show("A task must be fully entered before the editor can be invoked.");
+                return;
+            }
+
+            // Currently we only allow 1 task editor template to be present at a time
+            var taskEditor = new TaskEditor(cmTask);
+            taskEditor.ShowDialog();
         }
 
         private void txtFeatureTemplateName_LostFocus(object sender, RoutedEventArgs e)

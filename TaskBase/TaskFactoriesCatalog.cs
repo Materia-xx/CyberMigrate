@@ -66,34 +66,53 @@ namespace TaskBase
             }
         }
 
-        public CMTaskBase CreateTask(string taskName, int cmSystemId, int cmFeatureId, int cmTaskId)
+        private CMTaskFactoryBase GetTaskFactory(string taskTypeName)
         {
-            var supportingFactories = TaskFactories.Where(f => f.GetTaskTypes().Contains(taskName));
+            var supportingFactories = TaskFactories.Where(f => f.GetTaskTypes().Contains(taskTypeName));
             if (!supportingFactories.Any())
             {
-                throw new InvalidOperationException($"Unable to create a task of type '{taskName}'. The task factory for this task was not found.");
+                throw new InvalidOperationException($"Unable to create a task of type '{taskTypeName}'. The task factory for this task was not found.");
             }
             else if (supportingFactories.Count() > 1)
             {
-                throw new InvalidOperationException($"Unable to create a task of type '{taskName}'. There are more than 1 task factories that support this type.");
+                throw new InvalidOperationException($"Unable to create a task of type '{taskTypeName}'. There are more than 1 task factories that support this type.");
             }
 
-            var createdTask = supportingFactories.First().CreateTask(cmSystemId, cmFeatureId, cmTaskId);
+            return supportingFactories.First();
+        }
+
+        public CMTaskBase GetTask(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId)
+        {
+            var taskFactory = GetTaskFactory(taskTypeName);
+            var createdTask = taskFactory.GetTask(taskTypeName, cmSystemId, cmFeatureId, cmTaskId);
             return createdTask;
         }
 
-        public UserControl GetTaskTypeConfigUI(string taskTypeName)
+        /// <summary>
+        /// Gets the user control meant to configure the task type
+        /// </summary>
+        /// <param name="taskTypeName"></param>
+        /// <returns></returns>
+        public UserControl GetTaskConfigUI(string taskTypeName)
         {
-            foreach (var taskFactory in TaskFactories)
-            {
-                if (taskFactory.GetTaskTypes().Contains(taskTypeName))
-                {
-                    return taskFactory.GetTaskTypeConfigUI(taskTypeName);
-                }
-            }
-
-            throw new InvalidOperationException($"Unable to find the task type {taskTypeName} in order to create the configuration UI.");
+            var taskFactory = GetTaskFactory(taskTypeName);
+            var configUC = taskFactory.GetTaskConfigUI(taskTypeName);
+            return configUC;
         }
 
+        /// <summary>
+        /// Gets the user control meant to edit or view a particular task
+        /// </summary>
+        /// <param name="taskTypeName"></param>
+        /// <param name="cmSystemId"></param>
+        /// <param name="cmFeatureId"></param>
+        /// <param name="cmTaskId"></param>
+        /// <returns></returns>
+        public UserControl GetTaskUI(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId)
+        {
+            var taskFactory = GetTaskFactory(taskTypeName);
+            var taskUC = taskFactory.GetTaskUI(taskTypeName, cmSystemId, cmFeatureId, cmTaskId);
+            return taskUC;
+        }
     }
 }

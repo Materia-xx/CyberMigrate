@@ -5,8 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CyberMigrate"
         mc:Ignorable="d"
-        Title="Task" Height="300" Width="300" Loaded="Window_Loaded">
+        Title="Task" Width="800" Height="600" Loaded="Window_Loaded">
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="200"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Label x:Name="lblTaskState" Content="Task State:" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" />
+
+        <ComboBox x:Name="cboTaskStates" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="2" />
+
+        <DockPanel x:Name="taskUI" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" />
     </Grid>
 </Window>

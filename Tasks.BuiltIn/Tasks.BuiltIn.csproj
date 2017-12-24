@@ -35,6 +35,8 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -50,9 +52,20 @@
     <Compile Include="FeatureDependencyConfigUC.xaml.cs">
       <DependentUpon>FeatureDependencyConfigUC.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FeatureDependencyUC.xaml.cs">
+      <DependentUpon>FeatureDependencyUC.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DataProvider\DataProvider.csproj">
+      <Project>{0BAD30F4-DD06-4ACB-9292-BD1E855FD5EB}</Project>
+      <Name>DataProvider</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Dto\Dto.csproj">
+      <Project>{6ADF08EC-74F6-40D7-B4F5-634C1BA45A53}</Project>
+      <Name>Dto</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TaskBase\TaskBase.csproj">
       <Project>{6731a57a-4daa-48d4-b35c-b32095c85ecf}</Project>
       <Name>TaskBase</Name>
@@ -60,6 +73,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="FeatureDependencyConfigUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FeatureDependencyUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

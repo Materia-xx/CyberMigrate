@@ -16,32 +16,11 @@ namespace Tasks.BuiltIn
             }
         }
 
-        public override CMTaskBase CreateTask(int cmSystemId, int cmFeatureId, int cmTaskId)
-        {
-            var featureTask = new FeatureDependencyTask();
-            featureTask.CmSystemId = cmSystemId;
-            featureTask.CmFeatureId = cmFeatureId;
-            featureTask.CmTaskId = cmTaskId;
-            return featureTask;
-        }
-
         public override List<string> GetTaskTypes()
         {
             var taskTypes = new List<string>();
             taskTypes.Add(nameof(FeatureDependencyTask));
             return taskTypes;
-        }
-
-        public override UserControl GetTaskTypeConfigUI(string taskTypeName)
-        {
-            switch (taskTypeName)
-            {
-                case nameof(FeatureDependencyTask):
-                    var configUI = new FeatureDependencyConfigUC();
-                    return configUI;
-            }
-
-            return null;
         }
 
         public override List<string> GetRequiredTaskStates(string taskTypeName)
@@ -56,6 +35,45 @@ namespace Tasks.BuiltIn
             }
 
             return requiredStates;
+        }
+
+        public override CMTaskBase GetTask(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId)
+        {
+            switch (taskTypeName)
+            {
+                case nameof(FeatureDependencyTask):
+                    var featureTask = new FeatureDependencyTask();
+                    featureTask.CmSystemId = cmSystemId;
+                    featureTask.CmFeatureId = cmFeatureId;
+                    featureTask.CmTaskId = cmTaskId;
+                    return featureTask;
+            }
+
+            return null;
+        }
+
+        public override UserControl GetTaskConfigUI(string taskTypeName)
+        {
+            switch (taskTypeName)
+            {
+                case nameof(FeatureDependencyTask):
+                    var configUI = new FeatureDependencyConfigUC();
+                    return configUI;
+            }
+
+            return null;
+        }
+
+        public override UserControl GetTaskUI(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId)
+        {
+            switch (taskTypeName)
+            {
+                case nameof(FeatureDependencyTask):
+                    var configUI = new FeatureDependencyUC(cmSystemId, cmFeatureId, cmTaskId);
+                    return configUI;
+            }
+
+            return null;
         }
     }
 }

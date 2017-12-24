@@ -1,17 +1,8 @@
-﻿using Dto;
-using System;
+﻿using DataProvider;
+using Dto;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using TaskBase;
 
 namespace CyberMigrate
 {
@@ -22,6 +13,10 @@ namespace CyberMigrate
     {
         private CMTaskDto cmTaskDto;
 
+        private CMTaskTypeDto ref_TaskTypeDto;
+        private CMSystemDto ref_SystemDto;
+        private CMFeatureDto ref_FeatureDto;
+
         public TaskEditor(CMTaskDto cmTaskDto)
         {
             this.cmTaskDto = cmTaskDto;
@@ -31,6 +26,40 @@ namespace CyberMigrate
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             this.Title = cmTaskDto.Title;
+
+            ref_TaskTypeDto = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(cmTaskDto.CMTaskTypeId);
+            ref_FeatureDto = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(cmTaskDto.CMFeatureId);
+            ref_SystemDto = CMDataProvider.DataStore.Value.CMSystems.Value.Get(ref_FeatureDto.CMSystemId);
+
+            LoadTaskStatesCombo();
+            LoadTaskUI();
         }
+
+        private void LoadTaskUI()
+        {
+            var taskUC = TaskFactoriesCatalog.Instance.GetTaskUI(ref_TaskTypeDto.Name, ref_SystemDto.Id, ref_FeatureDto.Id, cmTaskDto.Id);
+            taskUI.Children.Add(taskUC);
+        }
+
+        private void LoadTaskStatesCombo()
+        {
+            var taskStates = new List<CMTaskStateDto>();
+            if (cmTaskDto.IsTemplate)
+            {
+                var taskStateTemplate = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(CMTaskStatesCRUD.InternalState_Template, cmTaskDto.CMTaskTypeId);
+                taskStates.Add(taskStateTemplate);
+            }
+            else
+            {
+                var allTaskStates = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll_ForTaskType(cmTaskDto.CMTaskTypeId);
+                taskStates.AddRange(allTaskStates);
+            }
+
+            cboTaskStates.DisplayMemberPath = "DisplayName";
+            cboTaskStates.SelectedValuePath = "Id";
+            cboTaskStates.SelectedValue = cmTaskDto.CMTaskStateId;
+            cboTaskStates.ItemsSource = taskStates;
+        }
+
     }
 }
