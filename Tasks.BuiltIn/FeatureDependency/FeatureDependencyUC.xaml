@@ -8,12 +8,24 @@
              d:DesignHeight="300" d:DesignWidth="300" Loaded="UserControl_Loaded">
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition/>
+            <RowDefinition Height="25" />
+            <RowDefinition Height="5" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="5" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
-        <Label x:Name="lblDemo" Content="Task UI" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="0" />
+
+        <Label x:Name="lblSystem" Content="System" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="0" />
+        <Label x:Name="lblFeature" Content="Feature" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0" />
+        <Label x:Name="lblState" Content="Target State" HorizontalAlignment="Left" Grid.Row="4" Grid.Column="0" />
+
+        <ComboBox x:Name="cboSystem" Grid.Row="0" Grid.Column="1" />
+        <ComboBox x:Name="cboFeature" Grid.Row="2" Grid.Column="1" />
+        <ComboBox x:Name="cboState" Grid.Row="4" Grid.Column="1" />
     </Grid>
 </UserControl>

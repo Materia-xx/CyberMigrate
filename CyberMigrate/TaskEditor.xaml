@@ -21,6 +21,6 @@
 
         <ComboBox x:Name="cboTaskStates" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="2" />
 
-        <DockPanel x:Name="taskUI" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" />
+        <DockPanel x:Name="taskUI" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="5" />
     </Grid>
 </Window>
