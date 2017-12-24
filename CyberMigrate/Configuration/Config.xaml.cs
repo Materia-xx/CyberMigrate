@@ -228,6 +228,60 @@ namespace CyberMigrate
                     return;
                 }
 
+                // Add a set of default transition rules that match the current system states
+                int rulePriority = 1;
+                var systemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id).ToList();
+                // These are the rules that detect that an un-complete task exists and to snap back into that state in priority order
+                for (int i = systemStates.Count() - 1; i >= 0; i--)
+                {
+                    var currentState = systemStates[i];
+
+                    var newTransitionRule = new CMFeatureStateTransitionRuleDto()
+                    {
+                        CMFeatureId = newCMFeatureTemplate.Id,
+                        ConditionAllTasks = false,
+                        ConditionQuerySystemStateId = currentState.Id,
+                        ConditionTaskComplete = false,
+                        Priority = rulePriority++,
+                        ToCMSystemStateId = currentState.Id
+                    };
+                    var opResultRule = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.Insert(newTransitionRule);
+                    if (opResultRule.Errors.Any())
+                    {
+                        MessageBox.Show(opResultRule.ErrorsCombined);
+                        return;
+                    }
+                }
+                // These are the auto-progressing rules, which if the priority wasn't set up or is done so in a specialized way.. they might be
+                // wrong for the template that is being created. We'll pop up a message box for the user to validate. I figure it's easier to
+                // delete a couple rows and maybe change a couple values than to manually add everything in.
+                for (int i = systemStates.Count()-1; i > 0; i--)
+                {
+                    var currentState = systemStates[i];
+                    var nextState = systemStates[i - 1];
+
+                    var newTransitionRule = new CMFeatureStateTransitionRuleDto()
+                    {
+                        CMFeatureId = newCMFeatureTemplate.Id,
+                        ConditionAllTasks = true,
+                        ConditionQuerySystemStateId = currentState.Id,
+                        ConditionTaskComplete = true,
+                        Priority = rulePriority++,
+                        ToCMSystemStateId = nextState.Id
+                    };
+                    var opResultRule = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.Insert(newTransitionRule);
+                    if (opResultRule.Errors.Any())
+                    {
+                        MessageBox.Show(opResultRule.ErrorsCombined);
+                        return;
+                    }
+                }
+
+                if (systemStates.Any())
+                {
+                    MessageBox.Show("Feature state transition rules were automatically added. Please validate these rules.");
+                }
+
                 var featureTemplateTVI = GetTVI_FeatureTemplate(newCMFeatureTemplate);
                 cmSystemTreeViewItem.Items.Add(featureTemplateTVI);
             };

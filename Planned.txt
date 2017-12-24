@@ -1,6 +1,5 @@
 Upcoming:
 
-    - Default the set of transition rules when creating a new feature template
     - Create the real UI for the dependency task. During template editing mode it should allow setting dependencies on feature templates. If not template then it should only list features that are not a template.
     - Does the feature dto need a way to store the current system state, did I miss that ?
     - Draw the main form treeview up to the point where it knows what type of new features can be added to which system
