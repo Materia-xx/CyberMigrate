@@ -15,7 +15,7 @@ namespace CyberMigrate
     /// </summary>
     public partial class Config : Window
     {
-        public MainWindow MainForm { get; set; }
+        private MainWindow MainForm { get; set; }
 
         /// <summary>
         /// Attached to nodes in the configuration tree view. Used to store information such as the Dto that each node represents
@@ -42,8 +42,9 @@ namespace CyberMigrate
             }
         }
 
-        public Config()
+        public Config(MainWindow mainForm)
         {
+            this.MainForm = mainForm;
             InitializeComponent();
         }
 
@@ -333,7 +334,7 @@ namespace CyberMigrate
             switch (attachedTag.DtoTypeName)
             {
                 case nameof(CMDataStoreDto):
-                    var dataStoreConfigUc = new DataStoreConfigUC(this, attachedTag.Dto as CMDataStoreDto);
+                    var dataStoreConfigUc = new DataStoreConfigUC(this, MainForm, attachedTag.Dto as CMDataStoreDto);
                     configUIPanel.Children.Add(dataStoreConfigUc);
                     break;
                 case nameof(CMSystemDto):

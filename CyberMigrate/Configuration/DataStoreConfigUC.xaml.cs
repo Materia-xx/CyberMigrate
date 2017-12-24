@@ -11,15 +11,19 @@ namespace CyberMigrate.Configuration
     /// </summary>
     public partial class DataStoreConfigUC : UserControl
     {
-        public Config ConfigWindow { get; set; }
+        private Config ConfigWindow { get; set; }
+        private MainWindow MainForm { get; set; }
+
 
         public CMDataStoreDto cmDataStore;
 
-        public DataStoreConfigUC(Config configWindow, CMDataStoreDto cmDataStore)
+        public DataStoreConfigUC(Config configWindow, MainWindow mainForm, CMDataStoreDto cmDataStore)
         {
-            InitializeComponent();
             this.cmDataStore = cmDataStore;
             this.ConfigWindow = configWindow;
+            this.MainForm = mainForm;
+
+            InitializeComponent();
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -43,7 +47,7 @@ namespace CyberMigrate.Configuration
 
             MessageBox.Show("Updated.");
 
-            ConfigWindow.MainForm.DataStorePathSet();
+            MainForm.DataStorePathSet();
         }
     }
 }

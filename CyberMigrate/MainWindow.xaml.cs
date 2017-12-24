@@ -207,10 +207,7 @@ namespace CyberMigrate
 
         public void ShowConfigurationUI()
         {
-            var optionsWindow = new Config()
-            {
-                MainForm = this
-            };
+            var optionsWindow = new Config(this);
             optionsWindow.ShowDialog();
         }
 

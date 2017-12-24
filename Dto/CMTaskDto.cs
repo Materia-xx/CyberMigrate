@@ -28,8 +28,8 @@
         public int CMTaskStateId { get; set; }
 
         /// <summary>
-        /// The name/title of the task
+        /// The title of the task
         /// </summary>
-        public string Name { get; set; }
+        public string Title { get; set; }
     }
 }

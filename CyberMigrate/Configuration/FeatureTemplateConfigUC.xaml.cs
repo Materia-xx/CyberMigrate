@@ -206,9 +206,9 @@ namespace CyberMigrate.Configuration
             dataGridTaskTemplates.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = nameof(CMTaskDto.Name),
+                    Header = nameof(CMTaskDto.Title),
                     Width = 400,
-                    Binding = new Binding(nameof(CMTaskDto.Name)),
+                    Binding = new Binding(nameof(CMTaskDto.Title)),
                 });
 
             // A factory because each row will generate a button

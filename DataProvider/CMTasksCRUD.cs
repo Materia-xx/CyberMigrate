@@ -17,7 +17,7 @@ namespace DataProvider
                 t.IsTemplate == isTemplate
              && t.CMFeatureId == cmFeatureId);
 
-            return results.OrderBy(t => t.Name);
+            return results.OrderBy(t => t.Title);
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace DataProvider
         /// <returns></returns>
         private CMCUDResult UpsertChecks(CMCUDResult opResult, CMTaskDto dto) // mcbtodo: do this in all CRUD
         {
-            if (string.IsNullOrWhiteSpace(dto.Name))
+            if (string.IsNullOrWhiteSpace(dto.Title))
             {
                 opResult.Errors.Add($"Name cannot be empty when inserting a new item into {CollectionName}");
             }
