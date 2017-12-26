@@ -1,4 +1,5 @@
-﻿using DataProvider;
+﻿using CyberMigrate.Extensions;
+using DataProvider;
 using Dto;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,7 +8,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Media;
 using TaskBase;
 using TaskBase.Extensions;
 
@@ -38,6 +38,8 @@ namespace CyberMigrate
             // Everything past this point depends on the data store being set up already
             DataStorePathSet();
             Init_TasksGrid();
+            // Select the node that is hovered over when right clicking and before showing the context menu
+            treeFilter.PreviewMouseRightButtonDown += TreeViewExtensions.TreeView_PreviewMouseRightButtonDown_SelectNode;
             RedrawFilterTreeView();
             RedrawMainMenu();
         }
@@ -145,30 +147,6 @@ namespace CyberMigrate
             return allSystemsTVI;
         }
 
-        /// <summary>
-        /// Gets the currently selected TreeView tag item.
-        /// </summary>
-        /// <returns></returns>
-        private TreeViewTag GetSelectedFilterTreeViewTag()
-        {
-            // mcbtodo: turn this into an extension method on the treeView. Delete the dupe function in Config.xaml.cs also.
-            // mcbtodo: there are also a couple more functions that can be consolidated like this such as the right click select and visual tree finder code
-
-            var selectedNode = treeFilter.SelectedItem;
-            if (selectedNode == null || !(selectedNode is TreeViewItem))
-            {
-                return default(TreeViewTag);
-            }
-
-            var selectedTreeViewItem = (selectedNode as TreeViewItem);
-            if (selectedTreeViewItem?.Tag == null)
-            {
-                return default(TreeViewTag);
-            }
-
-            return selectedTreeViewItem.Tag as TreeViewTag;
-        }
-
         private void TreeFilter_NodeSelected(object sender, RoutedEventArgs e)
         {
             filterResults.Clear();
@@ -182,7 +160,7 @@ namespace CyberMigrate
             // mcbtodo: add a way to query for just task instances that are open
             var filteredTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll(false);
 
-            var attachedTag = GetSelectedFilterTreeViewTag();
+            var attachedTag = treeFilter.GetSelectedTreeViewTag();
 
             int filterSystemId = 0;
             int filterSystemStateId = 0;
@@ -288,9 +266,6 @@ namespace CyberMigrate
 
             return cmSystemStateTVI;
         }
-
-
-
 
         /// <summary>
         /// Call this after the data store path has been set, or verified that it is set after startup.
@@ -483,37 +458,5 @@ namespace CyberMigrate
             };
             MainMenu.Items.Add(configurationMenu);
         }
-
-        /// <summary>
-        /// Select the nearest treeview element when right clicking if clicking in the treeview
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void treeFilter_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            var treeViewItem = VisualTreeViewItemFinder(e.OriginalSource as DependencyObject);
-            if (treeViewItem != null)
-            {
-                treeViewItem.Focus();
-                treeViewItem.IsSelected = true;
-                e.Handled = true;
-            }
-        }
-
-        /// <summary>
-        /// Finds the treeview node closest to where the mouse was clicked and returns it.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        private TreeViewItem VisualTreeViewItemFinder(DependencyObject source)
-        {
-            while (source != null && !(source is TreeViewItem))
-            {
-                source = VisualTreeHelper.GetParent(source);
-            }
-
-            return source as TreeViewItem;
-        }
-
     }
 }

@@ -1,4 +1,5 @@
 ﻿using CyberMigrate.Configuration;
+using CyberMigrate.Extensions;
 using DataProvider;
 using Dto;
 using System;
@@ -25,6 +26,8 @@ namespace CyberMigrate
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            // Select the node that is hovered over when right clicking and before showing the context menu
+            treeConfig.PreviewMouseRightButtonDown += TreeViewExtensions.TreeView_PreviewMouseRightButtonDown_SelectNode;
             ReLoadTreeConfiguration();
         }
 
@@ -276,7 +279,7 @@ namespace CyberMigrate
             contextMenu.Items.Add(deleteSystemMenu);
             deleteSystemMenu.Click += (sender, e) =>
             {
-                var selectedTreeViewTag = GetSelectedConfigTreeViewTag();
+                var selectedTreeViewTag = treeConfig.GetSelectedTreeViewTag();
 
                 if (selectedTreeViewTag?.Dto == null || !(selectedTreeViewTag?.Dto is CMSystemDto))
                 {
@@ -292,7 +295,7 @@ namespace CyberMigrate
                     MessageBox.Show(opResult.ErrorsCombined);
                     return;
                 }
-                RemoveSelectedTreeConfigItem();
+                treeConfig.RemoveSelectedNode();
             };
 
             cmSystemTreeViewItem.ContextMenu = contextMenu;
@@ -317,7 +320,7 @@ namespace CyberMigrate
             contextMenu.Items.Add(deleteFeatureTemplateMenu);
             deleteFeatureTemplateMenu.Click += (sender, e) =>
             {
-                var selectedTreeViewTag = GetSelectedConfigTreeViewTag();
+                var selectedTreeViewTag = treeConfig.GetSelectedTreeViewTag();
 
                 if (selectedTreeViewTag?.Dto == null || !(selectedTreeViewTag?.Dto is CMFeatureDto))
                 {
@@ -332,63 +335,18 @@ namespace CyberMigrate
                     MessageBox.Show(opResult.ErrorsCombined);
                     return;
                 }
-                RemoveSelectedTreeConfigItem();
+                treeConfig.RemoveSelectedNode();
             };
             cmFeatureTemplateTreeViewItem.ContextMenu = contextMenu;
 
             return cmFeatureTemplateTreeViewItem;
         }
 
-        private void RemoveSelectedTreeConfigItem()
-        {
-            var selectedItem = treeConfig.SelectedItem as TreeViewItem;
-            
-            // if the parent is null, try to remove it straight from the treeview
-            if (selectedItem.Parent == null || !(selectedItem.Parent is TreeViewItem))
-            {
-                // even this call will silently fail if it doesn't work
-                treeConfig.Items.Remove(selectedItem);
-                return;
-            }
-
-            // Otherwise find the parent node and execute the from from that.
-            // The remove function will only search first level children for the node to delete.
-            var parentItem = selectedItem.Parent as TreeViewItem;
-            if (parentItem == null)
-            {
-                // No parent ? How did we get here?
-                throw new InvalidOperationException("Unable to find parent node of the node that is being deleted.");
-            }
-
-            parentItem.Items.Remove(selectedItem);
-        }
-
-        /// <summary>
-        /// Gets the currently selected TreeView tag item.
-        /// </summary>
-        /// <returns></returns>
-        private TreeViewTag GetSelectedConfigTreeViewTag()
-        {
-            var selectedNode = treeConfig.SelectedItem;
-            if (selectedNode == null || !(selectedNode is TreeViewItem))
-            {
-                return default(TreeViewTag);
-            }
-
-            var selectedTreeViewItem = (selectedNode as TreeViewItem);
-            if (selectedTreeViewItem?.Tag == null)
-            {
-                return default(TreeViewTag);
-            }
-
-            return selectedTreeViewItem.Tag as TreeViewTag;
-        }
-
         private void TreeConfiguration_NodeSelected(object sender, RoutedEventArgs e)
         {
             configUIPanel.Children.Clear(); // mcbtodo: check to see if there are any unsaved changes before doing this.
 
-            var attachedTag = GetSelectedConfigTreeViewTag();
+            var attachedTag = treeConfig.GetSelectedTreeViewTag();
             if (attachedTag?.Dto == null)
             {
                 return;
@@ -415,37 +373,6 @@ namespace CyberMigrate
                 default:
                     break;
             }
-        }
-
-        /// <summary>
-        /// Select the nearest treeview element when right clicking if clicking in the treeview
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void treeConfig_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            var treeViewItem = VisualTreeViewItemFinder(e.OriginalSource as DependencyObject);
-            if (treeViewItem != null)
-            {
-                treeViewItem.Focus();
-                treeViewItem.IsSelected = true;
-                e.Handled = true;
-            }
-        }
-
-        /// <summary>
-        /// Finds the treeview node closest to where the mouse was clicked and returns it.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        private TreeViewItem VisualTreeViewItemFinder(DependencyObject source)
-        {
-            while (source != null && !(source is TreeViewItem))
-            {
-                source = VisualTreeHelper.GetParent(source);
-            }
-
-            return source as TreeViewItem;
         }
     }
 }

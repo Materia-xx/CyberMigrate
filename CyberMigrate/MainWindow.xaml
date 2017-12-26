@@ -18,7 +18,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <TreeView x:Name="treeFilter" Grid.Column="0" PreviewMouseRightButtonDown="treeFilter_PreviewMouseRightButtonDown" />
+            <TreeView x:Name="treeFilter" Grid.Column="0" />
 
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
 
