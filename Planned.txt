@@ -1,17 +1,16 @@
 Upcoming:
 
+    - Shows the tasks sorted in the way the design plan indicates
+    - Be able to click on the task "View" button in the main UI and see the task instance UI
     - Add in feature vars
     - Update the dependency task to display correctly for a task that has been instanced.
             During template editing mode it should allow setting dependencies on feature templates. 
             If not template then it should only list features that are not a template.
     - Implement the generic text based task and all current interface methods for it
-    - Hook up instancing with what we have, be able to see features show up in the main form
     - Work on making the autoprogress methods of the tasks work and having the main program call this for the correct
             tasks on a regular interval
     - Put in the logic for the autoprogression of system state within a feature
-    - Create the main UI that shows the tasks sorted in the way the design plan indicates
-    - Be able to double click on tasks in the main UI and bring up dialogs to work from.
-    - Ability to manually change the task state via the task dialog
+    - Ability to manually change the task state via the task dialog (when the task is an instance)
     - Verify that a Task.AutoProgress call works to update any open task dialog with the correct state.
 
 

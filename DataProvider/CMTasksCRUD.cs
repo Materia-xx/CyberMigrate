@@ -11,10 +11,19 @@ namespace DataProvider
         {
         }
 
+        public IEnumerable<CMTaskDto> GetAll(bool isTemplate)
+        {
+            var results = Find(t =>
+                isTemplate ? t.CMParentTaskTemplateId == 0 : t.CMParentTaskTemplateId != 0 // Don't use IsTemplate Dto property here b/c this queries BSON data directly
+             );
+
+            return results;
+        }
+
         public IEnumerable<CMTaskDto> GetAll_ForFeature(int cmFeatureId, bool isTemplate)
         {
             var results = Find(t =>
-                t.IsTemplate == isTemplate
+                isTemplate ? t.CMParentTaskTemplateId == 0 : t.CMParentTaskTemplateId != 0 // Don't use IsTemplate Dto property here b/c this queries BSON data directly
              && t.CMFeatureId == cmFeatureId);
 
             return results.OrderBy(t => t.Title);

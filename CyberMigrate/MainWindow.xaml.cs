@@ -1,10 +1,12 @@
 ﻿using DataProvider;
 using Dto;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using TaskBase;
 using TaskBase.Extensions;
@@ -16,6 +18,8 @@ namespace CyberMigrate
     /// </summary>
     public partial class MainWindow : Window
     {
+        private ObservableCollection<FilterResultItem> filterResults = new ObservableCollection<FilterResultItem>();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -33,6 +37,7 @@ namespace CyberMigrate
 
             // Everything past this point depends on the data store being set up already
             DataStorePathSet();
+            Init_TasksGrid();
             RedrawFilterTreeView();
             RedrawMainMenu();
         }
@@ -41,13 +46,16 @@ namespace CyberMigrate
         {
             treeFilter.Items.Clear();
 
+            var allSystemsTVI = GetTVI_AllSystems();
+            treeFilter.Items.Add(allSystemsTVI);
+
             // Get all of the systems and show them as tree view items
             var cmSystems = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll();
 
             foreach (var cmSystem in cmSystems)
             {
                 var cmSystemTVI = GetTVI_System(cmSystem);
-                treeFilter.Items.Add(cmSystemTVI);
+                allSystemsTVI.Items.Add(cmSystemTVI);
 
                 // Show all system states available in this system
                 var cmSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id);
@@ -59,6 +67,175 @@ namespace CyberMigrate
                 }
 
                 cmSystemTVI.ExpandSubtree();
+            }
+        }
+
+        private void Init_TasksGrid()
+        {
+            dataGridTasks.AutoGenerateColumns = false;
+            dataGridTasks.CanUserAddRows = false;
+            dataGridTasks.Columns.Clear();
+
+            dataGridTasks.Columns.Add(
+                new DataGridTextColumn()
+                {
+                    Header = "System",
+                    Width = 150,
+                    Binding = new Binding(nameof(FilterResultItem.SystemName)),
+                });
+
+            dataGridTasks.Columns.Add(
+                new DataGridTextColumn()
+                {
+                    Header = "System State",
+                    Width = 150,
+                    Binding = new Binding(nameof(FilterResultItem.SystemStateName)),
+                });
+
+            dataGridTasks.Columns.Add(
+                new DataGridTextColumn()
+                {
+                    Header = "Feature",
+                    Width = 150,
+                    Binding = new Binding(nameof(FilterResultItem.FeatureName)),
+                });
+
+            dataGridTasks.Columns.Add(
+                new DataGridTextColumn()
+                {
+                    Header = "Task Title",
+                    Width = 150,
+                    Binding = new Binding(nameof(FilterResultItem.TaskTitle)),
+                });
+
+            // A factory because each row will generate a button
+            var viewButtonFactory = new FrameworkElementFactory(typeof(Button));
+            viewButtonFactory.SetValue(Button.ContentProperty, "View");
+            // mcbtodo: viewButtonFactory.AddHandler(Button.ClickEvent, new RoutedEventHandler(btnEditTask_Click));
+            dataGridTasks.Columns.Add(new DataGridTemplateColumn
+            {
+                Header = "View Task",
+                CellTemplate = new DataTemplate()
+                {
+                    VisualTree = viewButtonFactory
+                }
+            });
+
+            dataGridTasks.ItemsSource = filterResults;
+
+            // Note: This is a set of view-only filtered results, no edits allowed here.
+        }
+
+        private TreeViewItem GetTVI_AllSystems()
+        {
+            var allSystemsTVI = new TreeViewItem()
+            {
+                Header = "All Systems",
+                Tag = null, // There is no tag here because there is no need to show any UI at this level.
+            };
+
+            // Add the context menu
+            // There is no context menu actions currently for task factories
+            var contextMenu = new ContextMenu();
+            contextMenu.Visibility = Visibility.Hidden;
+            allSystemsTVI.ContextMenu = contextMenu;
+
+            allSystemsTVI.Selected += TreeFilter_NodeSelected; // Still keep the onSelected event so the UI can clear what may be there when selected
+
+            return allSystemsTVI;
+        }
+
+        /// <summary>
+        /// Gets the currently selected TreeView tag item.
+        /// </summary>
+        /// <returns></returns>
+        private TreeViewTag GetSelectedFilterTreeViewTag()
+        {
+            // mcbtodo: turn this into an extension method on the treeView. Delete the dupe function in Config.xaml.cs also.
+            // mcbtodo: there are also a couple more functions that can be consolidated like this such as the right click select and visual tree finder code
+
+            var selectedNode = treeFilter.SelectedItem;
+            if (selectedNode == null || !(selectedNode is TreeViewItem))
+            {
+                return default(TreeViewTag);
+            }
+
+            var selectedTreeViewItem = (selectedNode as TreeViewItem);
+            if (selectedTreeViewItem?.Tag == null)
+            {
+                return default(TreeViewTag);
+            }
+
+            return selectedTreeViewItem.Tag as TreeViewTag;
+        }
+
+        private void TreeFilter_NodeSelected(object sender, RoutedEventArgs e)
+        {
+            filterResults.Clear();
+
+            // Default is to list tasks in all systems/features/states
+            // mcbtodo: Provide a different GetAll_AsLookupById that gives back a dictionary<int, CMSystem> and re-write the .first() logic below so it doesn't need to scan through the entire results on each row creation
+            var systemsLookup = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll();
+            var featuresLookup = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll(false);
+            var systemStatesLookup = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll();
+
+            // mcbtodo: add a way to query for just task instances that are open
+            var filteredTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll(false);
+
+            var attachedTag = GetSelectedFilterTreeViewTag();
+
+            int filterSystemId = 0;
+            int filterSystemStateId = 0;
+
+            if (attachedTag?.Dto == null)
+            {
+                // list everything
+            }
+            else
+            {
+                switch (attachedTag.DtoTypeName)
+                {
+                    case nameof(CMSystemDto):
+                        var filterSystem = attachedTag.Dto as CMSystemDto;
+                        filterSystemId = filterSystem.Id;
+                        break;
+                    case nameof(CMSystemStateDto):
+                        var filterSystemState = attachedTag.Dto as CMSystemStateDto;
+                        filterSystemStateId = filterSystemState.Id;
+                        break;
+                }
+            }
+
+            // mcbtodo: apply ordering for tasks here
+
+            // Show the results
+            foreach (var cmTask in filteredTasks)
+            {
+                // Filter out tasks in system state if filter is set
+                if (filterSystemStateId != 0 && cmTask.CMSystemStateId != filterSystemStateId)
+                {
+                    continue;
+                }
+
+                var featureRef = featuresLookup.First(f => f.Id == cmTask.CMFeatureId);
+                var systemRef = systemsLookup.First(s => s.Id == featureRef.CMSystemId);
+
+                // Filter out tasks in system if filter is set
+                if (filterSystemId != 0 && systemRef.Id != filterSystemId)
+                {
+                    continue;
+                }
+
+                var systemStateRef = systemStatesLookup.First(s => s.Id == cmTask.CMSystemStateId);
+
+                filterResults.Add(new FilterResultItem()
+                {
+                    SystemName = systemRef.Name,
+                    SystemStateName = systemStateRef.Name,
+                    FeatureName = featureRef.Name,
+                    TaskTitle = cmTask.Title,
+                    TaskId = cmTask.Id
+                });
             }
         }
 
@@ -111,6 +288,9 @@ namespace CyberMigrate
 
             return cmSystemStateTVI;
         }
+
+
+
 
         /// <summary>
         /// Call this after the data store path has been set, or verified that it is set after startup.

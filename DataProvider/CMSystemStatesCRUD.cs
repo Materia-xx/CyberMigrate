@@ -27,6 +27,16 @@ namespace DataProvider
         }
 
         /// <summary>
+        /// Gets system states for all systems
+        /// </summary>
+        /// <returns></returns>
+        public new IEnumerable<CMSystemStateDto> GetAll()
+        {
+            var results = base.GetAll();
+            return results;
+        }
+
+        /// <summary>
         /// Get all system states that exist within the specified system.
         /// </summary>
         /// <param name="cmSystemId"></param>

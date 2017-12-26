@@ -22,7 +22,7 @@
 
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
 
-            <DockPanel x:Name="summaryPanel" Grid.Column="2" Margin="8" />
+            <DataGrid x:Name="dataGridTasks" Grid.Row="5" Grid.Column="2" />
 
         </Grid>
     </DockPanel>
