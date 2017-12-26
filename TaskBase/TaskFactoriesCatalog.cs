@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dto;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
@@ -90,37 +91,37 @@ namespace TaskBase
             return TaskFactoriesByTaskType[taskTypeName];
         }
 
-        public CMTaskBase GetTask(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId)
+        public CMTaskBase GetTask(CMTaskTypeDto cmTaskType, CMSystemDto cmSystem, CMFeatureDto cmFeature, CMTaskDto cmTask)
         {
-            var taskFactory = GetTaskFactory(taskTypeName);
-            var createdTask = taskFactory.GetTask(taskTypeName, cmSystemId, cmFeatureId, cmTaskId);
+            var taskFactory = GetTaskFactory(cmTaskType.Name);
+            var createdTask = taskFactory.GetTask(cmTaskType, cmSystem, cmFeature, cmTask);
             return createdTask;
         }
 
         /// <summary>
         /// Gets the user control meant to configure the task type
         /// </summary>
-        /// <param name="taskTypeName"></param>
+        /// <param name="cmTaskType"></param>
         /// <returns></returns>
-        public UserControl GetTaskConfigUI(string taskTypeName)
+        public UserControl GetTaskConfigUI(CMTaskTypeDto cmTaskType)
         {
-            var taskFactory = GetTaskFactory(taskTypeName);
-            var configUC = taskFactory.GetTaskConfigUI(taskTypeName);
+            var taskFactory = GetTaskFactory(cmTaskType.Name);
+            var configUC = taskFactory.GetTaskConfigUI(cmTaskType);
             return configUC;
         }
 
         /// <summary>
         /// Gets the user control meant to edit or view a particular task
         /// </summary>
-        /// <param name="taskTypeName"></param>
-        /// <param name="cmSystemId"></param>
-        /// <param name="cmFeatureId"></param>
-        /// <param name="cmTaskId"></param>
+        /// <param name="cmTaskType"></param>
+        /// <param name="cmSystem"></param>
+        /// <param name="cmFeature"></param>
+        /// <param name="cmTask"></param>
         /// <returns></returns>
-        public UserControl GetTaskUI(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId)
+        public UserControl GetTaskUI(CMTaskTypeDto cmTaskType, CMSystemDto cmSystem, CMFeatureDto cmFeature, CMTaskDto cmTask)
         {
-            var taskFactory = GetTaskFactory(taskTypeName);
-            var taskUC = taskFactory.GetTaskUI(taskTypeName, cmSystemId, cmFeatureId, cmTaskId);
+            var taskFactory = GetTaskFactory(cmTaskType.Name);
+            var taskUC = taskFactory.GetTaskUI(cmTaskType, cmSystem, cmFeature, cmTask);
             return taskUC;
         }
 
@@ -128,24 +129,23 @@ namespace TaskBase
         /// Called when instancing a task. A <see cref="CMTaskDto"/> will have already been created and is passed in.
         /// The task factory should create any task data for this new task and take care of updating the database.
         /// </summary>
-        /// <param name="taskTypeName"></param>
-        /// <param name="cmTaskInstanceId">The id of the newly created CMTaskDto instance that was created from the template</param>
-        public void CreateTaskDataInstance(string taskTypeName, int cmTaskInstanceId)
+        /// <param name="cmTaskType"></param>
+        /// <param name="cmTaskInstance">The id of the newly created CMTaskDto instance that was created from the template</param>
+        public void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskInstance)
         {
-            var taskFactory = GetTaskFactory(taskTypeName);
-            taskFactory.CreateTaskDataInstance(taskTypeName, cmTaskInstanceId);
+            var taskFactory = GetTaskFactory(cmTaskType.Name);
+            taskFactory.CreateTaskDataInstance(cmTaskType, cmTaskInstance);
         }
 
         /// <summary>
         /// Deletes task data for the specified task
         /// </summary>
-        /// <param name="taskTypeName"></param>
-        /// <param name="cmTaskId"></param>
-        public void DeleteTaskData(string taskTypeName, int cmTaskId)
+        /// <param name="cmTaskType"></param>
+        /// <param name="deletedTaskId"></param>
+        public void DeleteTaskData(CMTaskTypeDto cmTaskType, int deletedTaskId)
         {
-            var taskFactory = GetTaskFactory(taskTypeName);
-            taskFactory.DeleteTaskData(taskTypeName, cmTaskId);
+            var taskFactory = GetTaskFactory(cmTaskType.Name);
+            taskFactory.DeleteTaskData(cmTaskType, deletedTaskId);
         }
-
     }
 }

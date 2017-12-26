@@ -37,7 +37,7 @@ namespace CyberMigrate.Configuration
         {
             Init_TaskStatesGrid();
 
-            var taskTypeUc = TaskFactoriesCatalog.Instance.GetTaskConfigUI(cmTaskType.Name);
+            var taskTypeUc = TaskFactoriesCatalog.Instance.GetTaskConfigUI(cmTaskType);
             if (taskTypeUc != null)
             {
                 TaskTypePluginUC.Children.Add(taskTypeUc);

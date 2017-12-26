@@ -1,4 +1,5 @@
 ﻿using DataProvider;
+using Dto;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -28,11 +29,11 @@ namespace Tasks.BuiltIn
             return taskTypes;
         }
 
-        public override List<string> GetRequiredTaskStates(string taskTypeName)
+        public override List<string> GetRequiredTaskStates(CMTaskTypeDto cmTaskType)
         {
             var requiredStates = new List<string>();
 
-            switch (taskTypeName)
+            switch (cmTaskType.Name)
             {
                 case nameof(FeatureDependencyTask):
                     requiredStates.Add("WaitingOnDependency");
@@ -42,24 +43,24 @@ namespace Tasks.BuiltIn
             return requiredStates;
         }
 
-        public override CMTaskBase GetTask(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId)
+        public override CMTaskBase GetTask(CMTaskTypeDto cmTaskType, CMSystemDto cmSystem, CMFeatureDto cmFeature, CMTaskDto cmTask)
         {
-            switch (taskTypeName)
+            switch (cmTaskType.Name)
             {
                 case nameof(FeatureDependencyTask):
                     var featureTask = new FeatureDependencyTask();
-                    featureTask.CmSystemId = cmSystemId;
-                    featureTask.CmFeatureId = cmFeatureId;
-                    featureTask.CmTaskId = cmTaskId;
+                    featureTask.CmSystemId = cmSystem.Id;
+                    featureTask.CmFeatureId = cmFeature.Id;
+                    featureTask.CmTaskId = cmTask.Id;
                     return featureTask;
             }
 
             return null;
         }
 
-        public override UserControl GetTaskConfigUI(string taskTypeName)
+        public override UserControl GetTaskConfigUI(CMTaskTypeDto cmTaskType)
         {
-            switch (taskTypeName)
+            switch (cmTaskType.Name)
             {
                 case nameof(FeatureDependencyTask):
                     var configUI = new FeatureDependencyConfigUC();
@@ -69,35 +70,34 @@ namespace Tasks.BuiltIn
             return null;
         }
 
-        public override UserControl GetTaskUI(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId)
+        public override UserControl GetTaskUI(CMTaskTypeDto cmTaskType, CMSystemDto cmSystem, CMFeatureDto cmFeature, CMTaskDto cmTask)
         {
-            switch (taskTypeName)
+            switch (cmTaskType.Name)
             {
                 case nameof(FeatureDependencyTask):
-                    var configUI = new FeatureDependencyUC(cmSystemId, cmFeatureId, cmTaskId);
+                    var configUI = new FeatureDependencyUC(cmSystem, cmFeature, cmTask);
                     return configUI;
             }
 
             return null;
         }
 
-        public override void CreateTaskDataInstance(string taskTypeName, int cmTaskInstanceId)
+        public override void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskInstance)
         {
-            switch (taskTypeName)
+            switch (cmTaskType.Name)
             {
                 case nameof(FeatureDependencyTask):
-                    FeatureDependency_CreateTaskDataInstance(cmTaskInstanceId);
+                    FeatureDependency_CreateTaskDataInstance(cmTaskInstance);
                     break;
             }
         }
 
-        private void FeatureDependency_CreateTaskDataInstance(int cmTaskInstanceId)
+        private void FeatureDependency_CreateTaskDataInstance(CMTaskDto cmTaskInstance)
         {
-            // The new task Dto instance that was created
-            var taskDto = CMDataProvider.DataStore.Value.CMTasks.Value.Get(cmTaskInstanceId);
+            // The new task Dto instance that was created is passed in
 
             // The task Dto template that the above task Dto instance was created from
-            var taskDtoTemplate = CMDataProvider.DataStore.Value.CMTasks.Value.Get(taskDto.CMParentTaskTemplateId);
+            var taskDtoTemplate = CMDataProvider.DataStore.Value.CMTasks.Value.Get(cmTaskInstance.CMParentTaskTemplateId);
 
             // The task data for the dependency that was defined for the Dto template
             var taskDataTemplate = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(taskDtoTemplate.Id);
@@ -125,7 +125,7 @@ namespace Tasks.BuiltIn
             {
                 CMFeatureId = clonedFeatureInstance.Id,
                 CMTargetSystemStateId = taskDataTemplate.CMTargetSystemStateId,
-                TaskId = cmTaskInstanceId
+                TaskId = cmTaskInstance.Id
             };
 
             var opResult = BuildInTasksDataProviders.FeatureDependencyDataProvider.Insert(taskData);
@@ -135,12 +135,12 @@ namespace Tasks.BuiltIn
             }
         }
 
-        public override void DeleteTaskData(string taskTypeName, int cmTaskId)
+        public override void DeleteTaskData(CMTaskTypeDto cmTaskType, int deletedTaskId)
         {
-            switch (taskTypeName)
+            switch (cmTaskType.Name)
             {
                 case nameof(FeatureDependencyTask):
-                    BuildInTasksDataProviders.FeatureDependencyDataProvider.Delete_ForTaskId(cmTaskId);
+                    BuildInTasksDataProviders.FeatureDependencyDataProvider.Delete_ForTaskId(deletedTaskId);
                     break;
             }
         }

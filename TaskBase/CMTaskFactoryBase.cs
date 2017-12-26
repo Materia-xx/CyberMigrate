@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Dto;
+using System.Collections.Generic;
 using System.Windows.Controls;
 
 namespace TaskBase
@@ -19,7 +20,7 @@ namespace TaskBase
         /// </summary>
         /// <param name="taskType"></param>
         /// <returns></returns>
-        public abstract List<string> GetRequiredTaskStates(string taskType);
+        public abstract List<string> GetRequiredTaskStates(CMTaskTypeDto cmTaskType);
 
         /// <summary>
         /// Get a list of task types that the task factory supports creating.
@@ -30,29 +31,29 @@ namespace TaskBase
         /// <summary>
         /// Called when the program needs an instance of the task in order to call task specific methods.
         /// </summary>
-        /// <param name="taskTypeName"></param>
-        /// <param name="cmSystemId"></param>
-        /// <param name="cmFeatureId"></param>
-        /// <param name="cmTaskId"></param>
+        /// <param name="cmTaskType"></param>
+        /// <param name="cmSystem"></param>
+        /// <param name="cmFeature"></param>
+        /// <param name="cmTask"></param>
         /// <returns></returns>
-        public abstract CMTaskBase GetTask(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId); // mcbtodo: why not just pass the 4 Dtos on these functions instead ?
+        public abstract CMTaskBase GetTask(CMTaskTypeDto cmTaskType, CMSystemDto cmSystem, CMFeatureDto cmFeature, CMTaskDto cmTask);
 
         /// <summary>
         /// The UI that is shown when editing a task
         /// </summary>
-        /// <param name="taskTypeName"></param>
-        /// <param name="cmSystemId"></param>
-        /// <param name="cmFeatureId"></param>
-        /// <param name="cmTaskId"></param>
+        /// <param name="cmTaskType"></param>
+        /// <param name="cmSystem"></param>
+        /// <param name="cmFeature"></param>
+        /// <param name="cmTask"></param>
         /// <returns></returns>
-        public abstract UserControl GetTaskUI(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId);
+        public abstract UserControl GetTaskUI(CMTaskTypeDto cmTaskType, CMSystemDto cmSystem, CMFeatureDto cmFeature, CMTaskDto cmTask);
 
         /// <summary>
         /// Gets a configuration UI that can be used to configure each task type that are supplied by this task factory.
         /// It is optional for the task factory to implement this. A blank panel will be used by default.
         /// </summary>
         /// <returns></returns>
-        public virtual UserControl GetTaskConfigUI(string taskTypeName)
+        public virtual UserControl GetTaskConfigUI(CMTaskTypeDto cmTaskType)
         {
             return new UserControl();
         }
@@ -61,15 +62,15 @@ namespace TaskBase
         /// Called when instancing a task. A <see cref="CMTaskDto"/> will have already been created and is passed in.
         /// The task factory should create any task data for this new task and take care of updating the database.
         /// </summary>
-        /// <param name="taskTypeName"></param>
-        /// <param name="cmTaskInstanceId">The id of the newly created CMTaskDto instance that was created from the template</param>
-        public abstract void CreateTaskDataInstance(string taskTypeName, int cmTaskInstanceId);
+        /// <param name="cmTaskType"></param>
+        /// <param name="cmTaskInstance">The id of the newly created CMTaskDto instance that was created from the template</param>
+        public abstract void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskInstance);
 
         /// <summary>
         /// Deletes task data for the specified task
         /// </summary>
-        /// <param name="taskTypeName"></param>
-        /// <param name="cmTaskId"></param>
-        public abstract void DeleteTaskData(string taskTypeName, int cmTaskId);
+        /// <param name="cmTaskType"></param>
+        /// <param name="deletedTaskId"></param>
+        public abstract void DeleteTaskData(CMTaskTypeDto cmTaskType, int deletedTaskId);
     }
 }

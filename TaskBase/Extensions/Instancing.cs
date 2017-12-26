@@ -38,8 +38,8 @@ namespace TaskBase.Extensions
             {
                 var taskTemplateType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(taskTemplate.CMTaskTypeId);
 
-                // We can clone the task Dto here
-                var taskDto = new CMTaskDto()
+                // We can clone the task template to instance here
+                var cmTaskInstance = new CMTaskDto()
                 {
                     CMParentTaskTemplateId = taskTemplate.Id,
                     CMFeatureId = featureDto.Id,
@@ -49,14 +49,14 @@ namespace TaskBase.Extensions
                     IsTemplate = false,
                     Title = taskTemplate.Title // mcbtodo: apply template vars here when they are implemented
                 };
-                var opResultTask = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(taskDto);
+                var opResultTask = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(cmTaskInstance);
                 if (opResultTask.Errors.Any())
                 {
                     throw new Exception(opResultTask.ErrorsCombined);
                 }
 
                 // For the task data we revert to the task factory to provide it
-                TaskFactoriesCatalog.Instance.CreateTaskDataInstance(taskTemplateType.Name, taskDto.Id);
+                TaskFactoriesCatalog.Instance.CreateTaskDataInstance(taskTemplateType, cmTaskInstance);
             }
 
             return featureDto;

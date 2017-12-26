@@ -37,7 +37,7 @@ namespace CyberMigrate
 
         private void LoadTaskUI()
         {
-            var taskUC = TaskFactoriesCatalog.Instance.GetTaskUI(ref_TaskTypeDto.Name, ref_SystemDto.Id, ref_FeatureDto.Id, cmTaskDto.Id);
+            var taskUC = TaskFactoriesCatalog.Instance.GetTaskUI(ref_TaskTypeDto, ref_SystemDto, ref_FeatureDto, cmTaskDto);
             taskUI.Children.Add(taskUC);
         }
 

@@ -13,10 +13,8 @@ namespace Tasks.BuiltIn.FeatureDependency
     /// </summary>
     public partial class FeatureDependencyUC : UserControl
     {
-        private int cmSystemId;
-        private int cmFeatureId;
-        private int cmTaskId;
-
+        private CMSystemDto cmSystem;
+        private CMFeatureDto cmFeature;
         private CMTaskDto cmTask;
 
         private FeatureDependencyDto TaskData;
@@ -27,21 +25,19 @@ namespace Tasks.BuiltIn.FeatureDependency
 
         private ObservableCollection<CMSystemStateDto> ComboBox_States = new ObservableCollection<CMSystemStateDto>();
 
-        public FeatureDependencyUC(int cmSystemId, int cmFeatureId, int cmTaskId)
+        public FeatureDependencyUC(CMSystemDto cmSystem, CMFeatureDto cmFeature, CMTaskDto cmTask)
         {
             InitializeComponent();
 
-            this.cmSystemId = cmSystemId;
-            this.cmFeatureId = cmFeatureId;
-            this.cmTaskId = cmTaskId;
-
-            cmTask = CMDataProvider.DataStore.Value.CMTasks.Value.Get(cmTaskId);
+            this.cmSystem = cmSystem;
+            this.cmFeature = cmFeature;
+            this.cmTask = cmTask;
 
             ComboBox_Systems.Clear();
             var cmSystems = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll();
-            foreach (var cmSystem in cmSystems)
+            foreach (var combobox_cmSystem in cmSystems)
             {
-                ComboBox_Systems.Add(cmSystem);
+                ComboBox_Systems.Add(combobox_cmSystem);
             }
 
             cboSystem.ItemsSource = ComboBox_Systems;
@@ -93,7 +89,7 @@ namespace Tasks.BuiltIn.FeatureDependency
 
         private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            TaskData = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(cmTaskId);
+            TaskData = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(cmTask.Id);
 
             if (TaskData != null)
             {
@@ -149,12 +145,12 @@ namespace Tasks.BuiltIn.FeatureDependency
             {
                 var taskDataDto = new FeatureDependencyDto()
                 {
-                    TaskId = cmTaskId,
+                    TaskId = cmTask.Id,
                     CMFeatureId = selectedFeature.Id,
                     CMTargetSystemStateId = selectedState.Id
                 };
                 BuildInTasksDataProviders.FeatureDependencyDataProvider.Insert(taskDataDto);
-                TaskData = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(cmTaskId);
+                TaskData = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(cmTask.Id);
             }
             else
             {
