@@ -106,7 +106,7 @@ namespace CyberMigrate
             };
 
             var contextMenu = new ContextMenu();
-            // mcbtodo: figure out how to make this not show a context menu with no menu items in it.
+            contextMenu.Visibility = Visibility.Hidden;
             cmSystemStateTVI.ContextMenu = contextMenu;
 
             return cmSystemStateTVI;

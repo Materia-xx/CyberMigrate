@@ -92,7 +92,10 @@ namespace CyberMigrate
             };
 
             // Add the context menu
-            taskFactoriesTreeViewItem.ContextMenu = new ContextMenu(); // There is no context menu actions currently for task factories
+            // There is no context menu actions currently for task factories
+            var contextMenu = new ContextMenu();
+            contextMenu.Visibility = Visibility.Hidden;
+            taskFactoriesTreeViewItem.ContextMenu = contextMenu; 
 
             taskFactoriesTreeViewItem.Selected += TreeConfiguration_NodeSelected; // Still keep the onSelected event so the UI can clear what may be there when selected
 
@@ -108,7 +111,10 @@ namespace CyberMigrate
             };
 
             // Add the context menu
-            taskFactoryTVI.ContextMenu = new ContextMenu(); // There is no context menu actions currently for task factories
+            // There is no context menu actions currently for task factories
+            var contextMenu = new ContextMenu();
+            contextMenu.Visibility = Visibility.Hidden;
+            taskFactoryTVI.ContextMenu = contextMenu;
 
             taskFactoryTVI.Selected += TreeConfiguration_NodeSelected;
 
@@ -124,7 +130,10 @@ namespace CyberMigrate
             };
 
             // Add the context menu
-            taskTypeTVI.ContextMenu = new ContextMenu(); // There is no context menu actions currently for task types
+            // There is no context menu actions currently for task types
+            var contextMenu = new ContextMenu();
+            contextMenu.Visibility = Visibility.Hidden;
+            taskTypeTVI.ContextMenu = contextMenu; 
 
             taskTypeTVI.Selected += TreeConfiguration_NodeSelected;
 
