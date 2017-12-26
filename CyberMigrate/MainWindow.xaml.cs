@@ -88,7 +88,7 @@ namespace CyberMigrate
                 addNewFeature.Items.Add(newFeatureSubMenu);
                 addNewFeature.Click += (sender, e) =>
                 {
-                    var newFeature = cmFeatureTemplate.CreateFeatureInstance();
+                    var newFeature = cmFeatureTemplate.CreateFeatureInstance(0);
                 };
             }
 

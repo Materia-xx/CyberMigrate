@@ -131,10 +131,10 @@ namespace TaskBase
         /// </summary>
         /// <param name="cmTaskType"></param>
         /// <param name="cmTaskInstance">The id of the newly created CMTaskDto instance that was created from the template</param>
-        public void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskInstance)
+        public void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskInstance, int featureDepth)
         {
             var taskFactory = GetTaskFactory(cmTaskType.Name);
-            taskFactory.CreateTaskDataInstance(cmTaskType, cmTaskInstance);
+            taskFactory.CreateTaskDataInstance(cmTaskType, cmTaskInstance, featureDepth);
         }
 
         /// <summary>

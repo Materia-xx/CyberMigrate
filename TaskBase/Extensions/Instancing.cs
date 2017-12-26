@@ -10,11 +10,28 @@ namespace TaskBase.Extensions
 {
     public static class TaskExtensions
     {
-        public static CMFeatureDto CreateFeatureInstance(this CMFeatureDto featureTemplate)
+        /// <summary>
+        /// Creates an instance of a feature template.
+        /// </summary>
+        /// <param name="featureTemplate"></param>
+        /// <param name="featureDepth">
+        /// For situations where we clone entire branches of feature templates, this indicates how many features from the starting 
+        /// point we are currently at. If the depth goes over a threshhold the program will halt the cloning operation to 
+        /// prevent a never-ending loop.
+        /// </param>
+        /// <returns></returns>
+        public static CMFeatureDto CreateFeatureInstance(this CMFeatureDto featureTemplate, int featureDepth)
         {
             if (!featureTemplate.IsTemplate)
             {
                 throw new InvalidOperationException("Cannot create an instance of an already instanced feature.");
+            }
+
+            featureDepth++;
+            if (featureDepth > 10) // mcbtodo: make this configurable in the master options
+            {
+                // mcbtodo: this will leave a mess of features and records that needs to be cleaned up, make that easier to deal with.
+                throw new StackOverflowException("Unable to clone a feature template that is more than 10 levels deep. Check the feature for errors and try again.");
             }
 
             // Clone the feature template to a feature instance
@@ -56,7 +73,7 @@ namespace TaskBase.Extensions
                 }
 
                 // For the task data we revert to the task factory to provide it
-                TaskFactoriesCatalog.Instance.CreateTaskDataInstance(taskTemplateType, cmTaskInstance);
+                TaskFactoriesCatalog.Instance.CreateTaskDataInstance(taskTemplateType, cmTaskInstance, featureDepth);
             }
 
             return featureDto;

@@ -64,7 +64,7 @@ namespace TaskBase
         /// </summary>
         /// <param name="cmTaskType"></param>
         /// <param name="cmTaskInstance">The id of the newly created CMTaskDto instance that was created from the template</param>
-        public abstract void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskInstance);
+        public abstract void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskInstance, int featureDepth);
 
         /// <summary>
         /// Deletes task data for the specified task

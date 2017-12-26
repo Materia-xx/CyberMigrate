@@ -82,17 +82,17 @@ namespace Tasks.BuiltIn
             return null;
         }
 
-        public override void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskInstance)
+        public override void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskInstance, int featureDepth)
         {
             switch (cmTaskType.Name)
             {
                 case nameof(FeatureDependencyTask):
-                    FeatureDependency_CreateTaskDataInstance(cmTaskInstance);
+                    FeatureDependency_CreateTaskDataInstance(cmTaskInstance, featureDepth);
                     break;
             }
         }
 
-        private void FeatureDependency_CreateTaskDataInstance(CMTaskDto cmTaskInstance)
+        private void FeatureDependency_CreateTaskDataInstance(CMTaskDto cmTaskInstance, int featureDepth)
         {
             // The new task Dto instance that was created is passed in
 
@@ -111,14 +111,11 @@ namespace Tasks.BuiltIn
             // The feature template that the dependency template is pointing at
             var featureTemplate = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(taskDataTemplate.CMFeatureId);
 
-            // mcbtodo: there needs to be some sort of recursion/max depth detection to avoid tasks that depend on features in a loop that never
-            // mcbtodo: ends and maxes cpu and eventually fills up the disk or something.
-
             // Clone the target feature template into a new feature instance so the cloned dependency can point at a real instance also.
             // At this point each dependency found will create a new instance of the target feature
             // I had the idea of adding more functionality and allowing several dependency tasks to point at different states of the
             // same feature. But it's a v2 thing.
-            var clonedFeatureInstance = featureTemplate.CreateFeatureInstance();
+            var clonedFeatureInstance = featureTemplate.CreateFeatureInstance(featureDepth);
 
             // Now we can create new task data that points at the new feature instance
             var taskData = new FeatureDependencyDto()
