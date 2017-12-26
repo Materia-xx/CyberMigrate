@@ -54,9 +54,6 @@ namespace TaskBase
         /// <returns></returns>
         public virtual UserControl GetTaskConfigUI(string taskTypeName)
         {
-            // mcbtodo: flesh out the way that task factories will store their configuration data. It is assumed to be of a different structure for each task factory
-            // mcbtodo: If there is a way to store it in the db, I'd like to do that.. and just feed some sort of base class type back and forth to the config ui
-            // mcbtodo: This will make it easier on the task factory development in that it doesn't need to read a file and go through a deserializiation process
             return new UserControl();
         }
 

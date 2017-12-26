@@ -68,7 +68,5 @@ namespace DataProvider
 
             return base.Update(updatingObject);
         }
-
-        //    // mcbtodo: Add an override to delete in the Tasks provider that takes care of also deleting any associated task data when a delete happens.
     }
 }

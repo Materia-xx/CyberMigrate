@@ -11,11 +11,5 @@ namespace Tasks.BuiltIn.FeatureDependency
             // mcbtodo:
             throw new NotImplementedException();
         }
-
-        public override UserControl GetUI() // mcbtodo: remove, don't need this for raw task processing, the factory can give it when needed
-        {
-            // mcbtodo:
-            throw new NotImplementedException();
-        }
     }
 }

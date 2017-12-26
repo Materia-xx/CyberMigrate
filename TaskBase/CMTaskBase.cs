@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.Composition;
-using System.Windows.Controls;
-
-namespace TaskBase
+﻿namespace TaskBase
 {
     /// <summary>
     /// All tasks should inherit from this base class in order to be recognized as tasks that can be used by the program
@@ -25,12 +22,5 @@ namespace TaskBase
         /// it will be in the "Instance" state.
         /// </summary>
         public abstract void AutoProgress();
-
-        /// <summary>
-        /// Returns the user control that should be rendered in the main UI that represents this task item.
-        /// Note that the state of a task should not be included in this UI, as this is provided by the main program.
-        /// </summary>
-        /// <returns></returns>
-        public abstract UserControl GetUI();
     }
 }
