@@ -194,32 +194,11 @@ TODO: Add in the concept of choice based workflows. The ability to query the use
 
 * Different types of tasks can be configured in the program via managed extensibility framework (MEF)
     e.g. each task type would be a new project which implements the required interfaces
-    * Tasks states are different than SystemStates. Task states are hardcoded within the task type itself and cannot be configured through the tool.
+    * Tasks states are different than SystemStates.
     * See TaskBase.cs for a list of base methods available to tasks.
 
         DONE: do we need a callback for when the user changes the state of a task.. to let the task know ?
             Conclusion: no.. The next AutoProgress call can query this info if it needs to.
-
-    * A task should have access to a shared library of features meant to be used by task addins, planned features in this library are:
-
-        * GetFeatureState(int systemId, int featureid)
-            Returns the current state that the given feature is in. This is a calculation done by the main program and cannot be set.
-            Note: Needed by the "dependency" task to determine if a dependant feature has met the required state.
-
-        * SetTaskData(int systemId, int featureId, int taskId, string taskData)
-            Needs all 3 ids because I plan to store this json data in a folder structure 
-            like \systemid\featureid\taskid\taskdata.json
-            taskdata can be whatever format the task wants to store its data in. I plan on storing this data in serialized json (for the build-in tasks)
-
-        * GetTaskData(int systemId, int featureId, int taskId)
-            Returns the stored task data string from where it is stored on disk. It is up to the task to deserialize and work with this data.
-
-        * SetTaskState(int systemId, int featureId, int taskId, string state)
-            Tasks can set their own state by calling this. The main program should keep a master indexed list of the systems/features/tasks and states
-            so that queries, dependency checks or other scanning needs can be done quickly without needing to load or query the task itself.
-
-        * GetTaskState(int systemId, int featureId, int taskId)
-            Returns the current task state.
 
     * There will be a few default Task types
         * FreeForm - Holds free form text with no other features
@@ -227,7 +206,6 @@ TODO: Add in the concept of choice based workflows. The ability to query the use
         * FeatureDependency - The FeatureDependency task holds a reference to another Feature.
             A FeatureDependency has 2 task states, Waiting and the reserved task state of "Complete".
             A feature reference contains
-                * The System id
                 * An id of the feature that is referenced
                 * The trigger SystemState that the feature must be in in order for the FeatureDependency task to move to the Complete state.
             AutoProgress() -

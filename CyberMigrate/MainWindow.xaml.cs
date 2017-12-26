@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using TaskBase;
+using TaskBase.Extensions;
 
 namespace CyberMigrate
 {
@@ -85,8 +86,10 @@ namespace CyberMigrate
                     Header = cmFeatureTemplate.Name
                 };
                 addNewFeature.Items.Add(newFeatureSubMenu);
-
-                // mcbtodo: add click event that will instance a new feature
+                addNewFeature.Click += (sender, e) =>
+                {
+                    var newFeature = cmFeatureTemplate.CreateFeatureInstance();
+                };
             }
 
             cmSystemTreeViewItem.ContextMenu = contextMenu;

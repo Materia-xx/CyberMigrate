@@ -13,6 +13,12 @@
         public int CMTaskTypeId { get; set; }
 
         /// <summary>
+        /// The parent task template id that this task was created from (If it is a task instance)
+        /// 0 If this is a task template
+        /// </summary>
+        public int CMParentTaskTemplateId { get; set; }
+
+        /// <summary>
         /// Indicates if this is a task template or an actual implementation of a task
         /// </summary>
         public bool IsTemplate { get; set; }

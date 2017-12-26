@@ -8,6 +8,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using TaskBase;
 
 namespace CyberMigrate.Configuration
 {
@@ -403,7 +404,9 @@ namespace CyberMigrate.Configuration
                     // So make sure it has a valid id first before trying to delete it.
                     if (gridTask.Id > 0)
                     {
-                        var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Delete(gridTask.Id);
+                        var deletingTask = CMDataProvider.DataStore.Value.CMTasks.Value.Get(gridTask.Id);
+
+                        var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Delete(deletingTask.Id);
                         if (opResult.Errors.Any())
                         {
                             MessageBox.Show(opResult.ErrorsCombined);
@@ -411,6 +414,10 @@ namespace CyberMigrate.Configuration
                             Reload_TaskTemplates();
                             return;
                         }
+
+                        // Call into the task factory and have it delete any associated task data as well.
+                        var taskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(deletingTask.CMTaskTypeId);
+                        TaskFactoriesCatalog.Instance.DeleteTaskData(taskType.Name, deletingTask.Id);
                     }
 
                     // The row will already be correctly removed from the tasks datagrid so no need at this point to refresh the tasks grid.

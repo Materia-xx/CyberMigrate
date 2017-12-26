@@ -1,15 +1,8 @@
 Upcoming:
 
-    - Does the feature dto need a way to store the current system state, did I miss that ?
-    - Start fleshing out the cloning routine that will need to happen against feature templates (and all task templates
-        when they are instanced). Plus the interface method that the task factory will need to be able to perform to clone
-        task data.
-        Note: The cloning routine will need to have the Feature vars design in it somehow. May be easier to just shoehorn this in later.
-        Note: It is the Feature template that will carry the knowledge of the state transition rules (and not the feature itself), so
-                cloned features will need to carry the feature template id they were cloned from so they can look up this information.
-                This pattern may be good to carry into the task template -> task instance cloning routine as well.
-                There may be something we can do here to just auto-calculate the IsTemplate field from this point by detecting if the
-                templatedParentId is set to 0, There would need to be a way to tell the litedb to ignore the property.
+    - See if there is something we can do to just auto-calculate the IsTemplate field based on the parentTemplateId
+        If it's a bool property in the DTO there would need to be a way to tell the litedb to ignore the property.
+    - Add in feature vars
     - Update the dependency task to display correctly for a task that has been instanced.
             During template editing mode it should allow setting dependencies on feature templates. 
             If not template then it should only list features that are not a template.

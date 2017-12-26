@@ -16,6 +16,8 @@ namespace TaskBase
         [ImportMany(typeof(CMTaskFactoryBase))]
         public IEnumerable<CMTaskFactoryBase> TaskFactories { get; set; }
 
+        public Dictionary<string, CMTaskFactoryBase> TaskFactoriesByTaskType { get; set; } = new Dictionary<string, CMTaskFactoryBase>();
+
         public static TaskFactoriesCatalog Instance
         {
             get
@@ -64,21 +66,28 @@ namespace TaskBase
                 // mcbtodo: might as well blow up with the full and correct stack trace.
                 throw;
             }
+
+            foreach (var taskFactory in TaskFactories)
+            {
+                foreach (var taskType in taskFactory.GetTaskTypes())
+                {
+                    if (TaskFactoriesByTaskType.ContainsKey(taskType))
+                    {
+                        throw new InvalidOperationException($"Unable to register task of type '{taskType}'. There are more than 1 task factories that support this type.");
+                    }
+
+                    TaskFactoriesByTaskType[taskType] = taskFactory;
+                }
+            }
         }
 
         private CMTaskFactoryBase GetTaskFactory(string taskTypeName)
         {
-            var supportingFactories = TaskFactories.Where(f => f.GetTaskTypes().Contains(taskTypeName));
-            if (!supportingFactories.Any())
+            if (!TaskFactoriesByTaskType.ContainsKey(taskTypeName))
             {
                 throw new InvalidOperationException($"Unable to create a task of type '{taskTypeName}'. The task factory for this task was not found.");
             }
-            else if (supportingFactories.Count() > 1)
-            {
-                throw new InvalidOperationException($"Unable to create a task of type '{taskTypeName}'. There are more than 1 task factories that support this type.");
-            }
-
-            return supportingFactories.First();
+            return TaskFactoriesByTaskType[taskTypeName];
         }
 
         public CMTaskBase GetTask(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId)
@@ -114,5 +123,29 @@ namespace TaskBase
             var taskUC = taskFactory.GetTaskUI(taskTypeName, cmSystemId, cmFeatureId, cmTaskId);
             return taskUC;
         }
+
+        /// <summary>
+        /// Called when instancing a task. A <see cref="CMTaskDto"/> will have already been created and is passed in.
+        /// The task factory should create any task data for this new task and take care of updating the database.
+        /// </summary>
+        /// <param name="taskTypeName"></param>
+        /// <param name="cmTaskInstanceId">The id of the newly created CMTaskDto instance that was created from the template</param>
+        public void CreateTaskDataInstance(string taskTypeName, int cmTaskInstanceId)
+        {
+            var taskFactory = GetTaskFactory(taskTypeName);
+            taskFactory.CreateTaskDataInstance(taskTypeName, cmTaskInstanceId);
+        }
+
+        /// <summary>
+        /// Deletes task data for the specified task
+        /// </summary>
+        /// <param name="taskTypeName"></param>
+        /// <param name="cmTaskId"></param>
+        public void DeleteTaskData(string taskTypeName, int cmTaskId)
+        {
+            var taskFactory = GetTaskFactory(taskTypeName);
+            taskFactory.DeleteTaskData(taskTypeName, cmTaskId);
+        }
+
     }
 }

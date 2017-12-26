@@ -17,8 +17,6 @@ namespace Tasks.BuiltIn.FeatureDependency
         private int cmFeatureId;
         private int cmTaskId;
 
-        private CMTaskDataCRUD<FeatureDependencyDto> TaskDataProvider;
-
         private CMTaskDto cmTask;
 
         private FeatureDependencyDto TaskData;
@@ -38,7 +36,6 @@ namespace Tasks.BuiltIn.FeatureDependency
             this.cmTaskId = cmTaskId;
 
             cmTask = CMDataProvider.DataStore.Value.CMTasks.Value.Get(cmTaskId);
-            TaskDataProvider = CMDataProvider.GetTaskTypeDataProvider<FeatureDependencyDto>();
 
             ComboBox_Systems.Clear();
             var cmSystems = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll();
@@ -96,7 +93,7 @@ namespace Tasks.BuiltIn.FeatureDependency
 
         private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            TaskData = TaskDataProvider.Get_ForTaskId(cmTaskId);
+            TaskData = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(cmTaskId);
 
             if (TaskData != null)
             {
@@ -156,14 +153,14 @@ namespace Tasks.BuiltIn.FeatureDependency
                     CMFeatureId = selectedFeature.Id,
                     CMTargetSystemStateId = selectedState.Id
                 };
-                TaskDataProvider.Insert(taskDataDto);
-                TaskData = TaskDataProvider.Get_ForTaskId(cmTaskId);
+                BuildInTasksDataProviders.FeatureDependencyDataProvider.Insert(taskDataDto);
+                TaskData = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(cmTaskId);
             }
             else
             {
                 TaskData.CMFeatureId = selectedFeature.Id;
                 TaskData.CMTargetSystemStateId = selectedState.Id;
-                TaskDataProvider.Update(TaskData);
+                BuildInTasksDataProviders.FeatureDependencyDataProvider.Update(TaskData);
             }
         }
     }

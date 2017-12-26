@@ -19,6 +19,17 @@ namespace DataProvider
             return results.FirstOrDefault();
         }
 
+        public CMCUDResult Delete_ForTaskId(int taskId)
+        {
+            var opResult = new CMCUDResult();
+            var result = Get_ForTaskId(taskId);
+            if (result == null)
+            {
+                return opResult;
+            }
+            return base.Delete(result.Id);
+        }
+
         private CMCUDResult CommonUpsertChecks(CMCUDResult opResult, T dto)
         {
             if (dto.TaskId == 0)

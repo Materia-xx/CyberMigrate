@@ -35,7 +35,7 @@ namespace TaskBase
         /// <param name="cmFeatureId"></param>
         /// <param name="cmTaskId"></param>
         /// <returns></returns>
-        public abstract CMTaskBase GetTask(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId);
+        public abstract CMTaskBase GetTask(string taskTypeName, int cmSystemId, int cmFeatureId, int cmTaskId); // mcbtodo: why not just pass the 4 Dtos on these functions instead ?
 
         /// <summary>
         /// The UI that is shown when editing a task
@@ -59,5 +59,20 @@ namespace TaskBase
             // mcbtodo: This will make it easier on the task factory development in that it doesn't need to read a file and go through a deserializiation process
             return new UserControl();
         }
+
+        /// <summary>
+        /// Called when instancing a task. A <see cref="CMTaskDto"/> will have already been created and is passed in.
+        /// The task factory should create any task data for this new task and take care of updating the database.
+        /// </summary>
+        /// <param name="taskTypeName"></param>
+        /// <param name="cmTaskInstanceId">The id of the newly created CMTaskDto instance that was created from the template</param>
+        public abstract void CreateTaskDataInstance(string taskTypeName, int cmTaskInstanceId);
+
+        /// <summary>
+        /// Deletes task data for the specified task
+        /// </summary>
+        /// <param name="taskTypeName"></param>
+        /// <param name="cmTaskId"></param>
+        public abstract void DeleteTaskData(string taskTypeName, int cmTaskId);
     }
 }
