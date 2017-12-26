@@ -1,7 +1,5 @@
 Upcoming:
 
-    - See if there is something we can do to just auto-calculate the IsTemplate field based on the parentTemplateId
-        If it's a bool property in the DTO there would need to be a way to tell the litedb to ignore the property.
     - Add in feature vars
     - Update the dependency task to display correctly for a task that has been instanced.
             During template editing mode it should allow setting dependencies on feature templates. 

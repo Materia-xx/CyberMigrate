@@ -39,7 +39,6 @@ namespace TaskBase.Extensions
             {
                 CMParentFeatureTemplateId = featureTemplate.Id,
                 CMSystemId = featureTemplate.CMSystemId,
-                IsTemplate = false,
                 Name = featureTemplate.Name // mcbtodo: apply template vars here when they are implemented
             };
 
@@ -63,7 +62,6 @@ namespace TaskBase.Extensions
                     CMSystemStateId = taskTemplate.CMSystemStateId,
                     CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(CMTaskStatesCRUD.InternalState_Instance, taskTemplateType.Id).Id,
                     CMTaskTypeId = taskTemplate.CMTaskTypeId,
-                    IsTemplate = false,
                     Title = taskTemplate.Title // mcbtodo: apply template vars here when they are implemented
                 };
                 var opResultTask = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(cmTaskInstance);

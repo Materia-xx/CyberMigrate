@@ -16,7 +16,13 @@
         /// <summary>
         /// Indicates if this is a feature template or an actual implementation of a feature
         /// </summary>
-        public bool IsTemplate { get; set; }
+        public bool IsTemplate
+        {
+            get
+            {
+                return CMParentFeatureTemplateId == 0;
+            }
+        }
 
         /// <summary>
         /// The name of the feature template

@@ -436,7 +436,6 @@ namespace CyberMigrate.Configuration
                 {
                     var gridTask = (CMTaskDto)addedTask;
                     gridTask.CMFeatureId = cmFeatureTemplate.Id;
-                    gridTask.IsTemplate = true;
                 }
             }
         }

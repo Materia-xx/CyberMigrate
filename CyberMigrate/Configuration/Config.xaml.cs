@@ -200,7 +200,6 @@ namespace CyberMigrate
             {
                 var newCMFeatureTemplate = new CMFeatureDto()
                 {
-                    IsTemplate = true,
                     Name = "New Feature Template",
                     CMSystemId = cmSystem.Id
                 };

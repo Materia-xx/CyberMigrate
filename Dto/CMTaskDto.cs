@@ -21,7 +21,13 @@
         /// <summary>
         /// Indicates if this is a task template or an actual implementation of a task
         /// </summary>
-        public bool IsTemplate { get; set; }
+        public bool IsTemplate
+        {
+            get
+            {
+                return CMParentTaskTemplateId == 0;
+            }
+        }
 
         /// <summary>
         /// The system state that this task exists under
