@@ -18,8 +18,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataProvider", "DataProvide
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dto", "Dto\Dto.csproj", "{6ADF08EC-74F6-40D7-B4F5-634C1BA45A53}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CyberMigrateCommon", "CyberMigrateCommon\CyberMigrateCommon.csproj", "{F60428D5-EE92-4D00-8053-EAE3B6C26F54}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasks.BuiltIn", "Tasks.BuiltIn\Tasks.BuiltIn.csproj", "{81E40048-0749-46CF-B68B-3E26913F1064}"
 EndProject
 Global
@@ -44,10 +42,6 @@ Global
 		{6ADF08EC-74F6-40D7-B4F5-634C1BA45A53}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6ADF08EC-74F6-40D7-B4F5-634C1BA45A53}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6ADF08EC-74F6-40D7-B4F5-634C1BA45A53}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F60428D5-EE92-4D00-8053-EAE3B6C26F54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F60428D5-EE92-4D00-8053-EAE3B6C26F54}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F60428D5-EE92-4D00-8053-EAE3B6C26F54}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F60428D5-EE92-4D00-8053-EAE3B6C26F54}.Release|Any CPU.Build.0 = Release|Any CPU
 		{81E40048-0749-46CF-B68B-3E26913F1064}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{81E40048-0749-46CF-B68B-3E26913F1064}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81E40048-0749-46CF-B68B-3E26913F1064}.Release|Any CPU.ActiveCfg = Release|Any CPU

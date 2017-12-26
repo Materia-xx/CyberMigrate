@@ -60,10 +60,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CyberMigrateCommon\CyberMigrateCommon.csproj">
-      <Project>{f60428d5-ee92-4d00-8053-eae3b6c26f54}</Project>
-      <Name>CyberMigrateCommon</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Dto\Dto.csproj">
       <Project>{6adf08ec-74f6-40d7-b4f5-634c1ba45a53}</Project>
       <Name>Dto</Name>

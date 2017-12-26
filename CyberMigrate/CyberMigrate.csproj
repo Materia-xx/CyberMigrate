@@ -137,10 +137,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CyberMigrateCommon\CyberMigrateCommon.csproj">
-      <Project>{f60428d5-ee92-4d00-8053-eae3b6c26f54}</Project>
-      <Name>CyberMigrateCommon</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DataProvider\DataProvider.csproj">
       <Project>{0bad30f4-dd06-4acb-9292-bd1e855fd5eb}</Project>
       <Name>DataProvider</Name>
