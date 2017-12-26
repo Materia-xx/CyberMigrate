@@ -45,23 +45,13 @@ namespace DataProvider
             return results;
         }
 
-        private CMCUDResult CommonUpsertChecks(CMCUDResult opResult, CMFeatureDto dto)
-        {
-            if (Get_ForName(dto.Name, dto.CMSystemId, dto.IsTemplate) != null)
-            {
-                opResult.Errors.Add($"A feature with the name '{dto.Name}' already exists within the system. Rename that one first.");
-            }
-
-            return opResult;
-        }
-
         public override CMCUDResult Insert(CMFeatureDto insertingObject)
         {
             var opResult = new CMCUDResult();
 
-            opResult = CommonUpsertChecks(opResult, insertingObject);
-            if (opResult.Errors.Any())
+            if (Get_ForName(insertingObject.Name, insertingObject.CMSystemId, insertingObject.IsTemplate) != null)
             {
+                opResult.Errors.Add($"A feature with the name '{insertingObject.Name}' already exists within the system. Rename that one first.");
                 return opResult;
             }
 
@@ -72,9 +62,16 @@ namespace DataProvider
         {
             var opResult = new CMCUDResult();
 
-            opResult = CommonUpsertChecks(opResult, updatingObject);
-            if (opResult.Errors.Any())
+            // Find a record with the same name that is not this one
+            var dupeResults = Find(f =>
+                f.Id != updatingObject.Id
+                && f.IsTemplate == updatingObject.IsTemplate
+                && f.CMSystemId == updatingObject.CMSystemId
+                && f.Name.Equals(updatingObject.Name, System.StringComparison.Ordinal)); // Note: case 'sensitive' compare so we allow renames to upper/lower case
+
+            if (dupeResults.Any())
             {
+                opResult.Errors.Add($"A feature with the name '{updatingObject.Name}' already exists within the system.");
                 return opResult;
             }
 

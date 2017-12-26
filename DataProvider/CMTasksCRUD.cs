@@ -25,11 +25,11 @@ namespace DataProvider
         /// </summary>
         /// <param name="opResult"></param>
         /// <returns></returns>
-        private CMCUDResult UpsertChecks(CMCUDResult opResult, CMTaskDto dto) // mcbtodo: do this in all CRUD
+        private CMCUDResult UpsertChecks(CMCUDResult opResult, CMTaskDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Title))
             {
-                opResult.Errors.Add($"Name cannot be empty when inserting a new item into {CollectionName}");
+                opResult.Errors.Add($"Name cannot be empty for an item in {CollectionName}");
             }
 
             if (dto.CMTaskTypeId == 0)

@@ -37,19 +37,31 @@ namespace DataProvider
             return results.FirstOrDefault();
         }
 
+        /// <summary>
+        /// Checks that apply to both insert and update operations
+        /// </summary>
+        /// <param name="opResult"></param>
+        /// <returns></returns>
+        private CMCUDResult UpsertChecks(CMCUDResult opResult, CMTaskStateDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.InternalName) || string.IsNullOrWhiteSpace(dto.DisplayName))
+            {
+                opResult.Errors.Add($"Name cannot be empty for an item in {CollectionName}");
+            }
+            if (dto.TaskTypeId == 0)
+            {
+                opResult.Errors.Add($"An item in {CollectionName} must have the task type specified.");
+            }
+
+            return opResult;
+        }
+
         public override CMCUDResult Insert(CMTaskStateDto insertingObject)
         {
             var opResult = new CMCUDResult();
-
-            if (string.IsNullOrWhiteSpace(insertingObject.InternalName) || string.IsNullOrWhiteSpace(insertingObject.DisplayName))
+            opResult = UpsertChecks(opResult, insertingObject);
+            if (opResult.Errors.Any())
             {
-                opResult.Errors.Add($"Cannot insert a new item into {CollectionName} because the name is empty.");
-                return opResult;
-            }
-
-            if (insertingObject.TaskTypeId == 0)
-            {
-                opResult.Errors.Add($"Cannot insert a new item into {CollectionName} because the task type is not specified.");
                 return opResult;
             }
 

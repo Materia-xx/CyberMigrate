@@ -54,7 +54,13 @@ namespace DataProvider
         {
             var opResult = new CMCUDResult();
 
-            if (Get_ForSystemName(updatingObject.Name) != null)
+            // Look for systems with this name that are not this record
+            var dupeResults = Find(s =>
+                s.Id != updatingObject.Id
+                && s.Name.Equals(updatingObject.Name, System.StringComparison.Ordinal) // Note: case 'sensitive' compare so we allow renames to upper/lower case
+            );
+
+            if (dupeResults.Any())
             {
                 opResult.Errors.Add($"A system with the name '{updatingObject.Name}' already exists.");
                 return opResult;

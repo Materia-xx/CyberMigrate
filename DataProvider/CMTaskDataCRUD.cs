@@ -30,7 +30,7 @@ namespace DataProvider
             return base.Delete(result.Id);
         }
 
-        private CMCUDResult CommonUpsertChecks(CMCUDResult opResult, T dto)
+        private CMCUDResult UpsertChecks(CMCUDResult opResult, T dto)
         {
             if (dto.TaskId == 0)
             {
@@ -43,7 +43,7 @@ namespace DataProvider
         public override CMCUDResult Insert(T insertingObject)
         {
             var opResult = new CMCUDResult();
-            opResult = CommonUpsertChecks(opResult, insertingObject);
+            opResult = UpsertChecks(opResult, insertingObject);
             if (opResult.Errors.Any())
             {
                 return opResult;
@@ -61,7 +61,7 @@ namespace DataProvider
         public override CMCUDResult Update(T updatingObject)
         {
             var opResult = new CMCUDResult();
-            opResult = CommonUpsertChecks(opResult, updatingObject);
+            opResult = UpsertChecks(opResult, updatingObject);
             if (opResult.Errors.Any())
             {
                 return opResult;

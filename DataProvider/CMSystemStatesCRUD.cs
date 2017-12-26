@@ -71,13 +71,29 @@ namespace DataProvider
             return validStates;
         }
 
+        /// <summary>
+        /// Checks that apply to both insert and update operations
+        /// </summary>
+        /// <param name="opResult"></param>
+        /// <returns></returns>
+        private CMCUDResult UpsertChecks(CMCUDResult opResult, CMSystemStateDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                opResult.Errors.Add($"Name cannot be empty for an item in {CollectionName}");
+            }
+
+            return opResult;
+        }
+
+
+
         public override CMCUDResult Insert(CMSystemStateDto insertingObject)
         {
             var opResult = new CMCUDResult();
-            
-            if (string.IsNullOrWhiteSpace(insertingObject.Name))
+            opResult = UpsertChecks(opResult, insertingObject);
+            if (opResult.Errors.Any())
             {
-                opResult.Errors.Add($"Cannot insert an item into {CollectionName} with an empty name.");
                 return opResult;
             }
 
@@ -93,10 +109,9 @@ namespace DataProvider
         public override CMCUDResult Update(CMSystemStateDto updatingObject)
         {
             var opResult = new CMCUDResult();
-
-            if (string.IsNullOrWhiteSpace(updatingObject.Name))
+            opResult = UpsertChecks(opResult, updatingObject);
+            if (opResult.Errors.Any())
             {
-                opResult.Errors.Add($"Cannot update an item in {CollectionName} to have an empty name.");
                 return opResult;
             }
 

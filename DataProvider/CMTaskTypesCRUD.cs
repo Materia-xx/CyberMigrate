@@ -22,13 +22,27 @@ namespace DataProvider
             return results.FirstOrDefault();
         }
 
+        /// <summary>
+        /// Checks that apply to both insert and update operations
+        /// </summary>
+        /// <param name="opResult"></param>
+        /// <returns></returns>
+        private CMCUDResult UpsertChecks(CMCUDResult opResult, CMTaskTypeDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                opResult.Errors.Add($"Name cannot be empty for an item in {CollectionName}");
+            }
+
+            return opResult;
+        }
+
         public override CMCUDResult Insert(CMTaskTypeDto insertingObject)
         {
             var opResult = new CMCUDResult();
-
-            if (string.IsNullOrWhiteSpace(insertingObject.Name))
+            opResult = UpsertChecks(opResult, insertingObject);
+            if (opResult.Errors.Any())
             {
-                opResult.Errors.Add($"Cannot insert a new item into {CollectionName} because the name is empty.");
                 return opResult;
             }
 
