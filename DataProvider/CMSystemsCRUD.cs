@@ -18,7 +18,7 @@ namespace DataProvider
         /// Returns all systems in the datastore
         /// </summary>
         /// <returns></returns>
-        public new IEnumerable<CMSystemDto> GetAll()
+        public override IEnumerable<CMSystemDto> GetAll()
         {
             var results = base.GetAll();
             return results.OrderBy(s => s.Name);

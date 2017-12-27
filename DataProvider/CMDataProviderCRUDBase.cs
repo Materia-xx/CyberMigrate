@@ -1,4 +1,5 @@
-﻿using Dto;
+﻿using DataProvider.Events;
+using Dto;
 using LiteDB;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,14 @@ namespace DataProvider
         private LiteDatabase db;
         protected string CollectionName { get; set; }
         private LiteCollection<T> cmCollection;
+
+        public delegate void CUDEvent(CMCUDEventArgs cmCUDEventArgs);
+
+        /// <summary>
+        /// For Create and Update operations the event is raised after the operation, and only if the operation was successful.
+        /// for Delete the event is raised immediately *before* the operation.
+        /// </summary>
+        public CUDEvent OnCUD;
 
         public CMDataProviderCRUDBase(LiteDatabase liteDatabase, string collectionName)
         {
@@ -61,16 +70,33 @@ namespace DataProvider
             }
 
             cmCollection.Insert(insertingObject);
+            OnCUD?.Invoke(
+                new CMCUDEventArgs()
+                {
+                    ActionType = CMCUDActionType.Create,
+                    DtoType = typeof(T),
+                    Id = insertingObject.Id
+                });
+
             return opResult;
         }
 
         public virtual CMCUDResult Update(T updatingObject)
         {
             var opResult = new CMCUDResult();
+
             if (cmCollection.Update(updatingObject) == false)
             {
                 opResult.Errors.Add($"An item in {CollectionName} with id {updatingObject.Id} was not found to update.");
             }
+            OnCUD?.Invoke(
+                new CMCUDEventArgs()
+                {
+                    ActionType = CMCUDActionType.Update,
+                    DtoType = typeof(T),
+                    Id = updatingObject.Id
+                });
+
             return opResult;
         }
 
@@ -78,6 +104,13 @@ namespace DataProvider
         {
             var opResult = new CMCUDResult();
 
+            OnCUD?.Invoke(
+                new CMCUDEventArgs()
+                {
+                    ActionType = CMCUDActionType.Delete,
+                    DtoType = typeof(T),
+                    Id = deletingId
+                });
             if (!cmCollection.Delete(deletingId))
             {
                 opResult.Errors.Add($"{CollectionName} with id {deletingId} was not found to delete.");

@@ -112,10 +112,7 @@ namespace CyberMigrate
             var allTaskInstances = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_Instances();
             foreach (var taskInstance in allTaskInstances)
             {
-                var taskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(taskInstance.CMTaskTypeId);
-
                 CMDataProvider.DataStore.Value.CMTasks.Value.Delete(taskInstance.Id);
-                TaskFactoriesCatalog.Instance.DeleteTaskData(taskType, taskInstance.Id);
             }
 
             var allFeatureInstances = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll_Instances();

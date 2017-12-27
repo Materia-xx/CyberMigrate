@@ -67,10 +67,8 @@ namespace TaskBase
         public abstract void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskInstance, int featureDepth);
 
         /// <summary>
-        /// Deletes task data for the specified task
+        /// If the task needs to know when any database item is Created, Updated or Deleted then register callbacks here.
         /// </summary>
-        /// <param name="cmTaskType"></param>
-        /// <param name="deletedTaskId"></param>
-        public abstract void DeleteTaskData(CMTaskTypeDto cmTaskType, int deletedTaskId);
+        public abstract void RegisterCMCUDCallbacks();
     }
 }

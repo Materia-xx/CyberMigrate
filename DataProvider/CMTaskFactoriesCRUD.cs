@@ -11,11 +11,6 @@ namespace DataProvider
         {
         }
 
-        public new IEnumerable<CMTaskFactoryDto> GetAll()
-        {
-            return base.GetAll();
-        }
-
         public CMTaskFactoryDto Get_ForName(string taskFactoryName)
         {
             var results = Find(f => f.Name.Equals(taskFactoryName, System.StringComparison.OrdinalIgnoreCase));

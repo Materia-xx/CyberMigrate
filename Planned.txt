@@ -1,6 +1,5 @@
 Upcoming:
 
-    - Add in the ability for features to calculate their current system state according to the state transition rules
     - Update the main UI to only show tasks for the current feature state and not all feature states
       But when a specific system state is selected, show all un-closed tasks within that state.
     - Add more filter tools in the main UI

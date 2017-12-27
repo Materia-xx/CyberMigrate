@@ -1,6 +1,8 @@
 ﻿using CyberMigrate.Extensions;
 using DataProvider;
+using DataProvider.Events;
 using Dto;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -19,6 +21,17 @@ namespace CyberMigrate
     public partial class MainWindow : Window
     {
         private ObservableCollection<FilterResultItem> filterResults = new ObservableCollection<FilterResultItem>();
+
+        /// <summary>
+        /// Keeps track if each tack factory has been called to register its callback events or not so we
+        /// don't end up calling the same factory 2 times and double registering callbacks.
+        /// </summary>
+        private Dictionary<string, bool> taskFactoryRegisteredCallbacks = new Dictionary<string, bool>();
+
+        /// <summary>
+        /// Keeps track if the state calculation callback events have been registered yet.
+        /// </summary>
+        private bool stateCalculationCallbacksRegistered = false;
 
         public MainWindow()
         {
@@ -117,7 +130,7 @@ namespace CyberMigrate
                 new DataGridTextColumn()
                 {
                     Header = "Task Title",
-                    Width = 250,
+                    Width = 200,
                     Binding = new Binding(nameof(FilterResultItem.TaskTitle)),
                 });
 
@@ -323,7 +336,7 @@ namespace CyberMigrate
         /// </summary>
         public void DataStorePathSet()
         {
-            var registerError = RegisterTaskFactories();
+            var registerError = RegisterTaskFactories_InDatabase();
             if (!string.IsNullOrWhiteSpace(registerError))
             {
                 // If there is any errors with registering the task types then close the main window
@@ -332,13 +345,50 @@ namespace CyberMigrate
                 this.Close();
                 return;
             }
+            RegisterTaskFactory_Callbacks();
+            RegisterStateCalculation_Callbacks();
+        }
+
+        private void RegisterStateCalculation_Callbacks()
+        {
+            if (stateCalculationCallbacksRegistered)
+            {
+                return;
+            }
+            stateCalculationCallbacksRegistered = true;
+
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnCUD += OnCUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnCUD += OnCUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnCUD += OnCUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnCUD += OnCUD_StateCalcLookupsRefreshNeeded;
+        }
+
+        private void OnCUD_StateCalcLookupsRefreshNeeded(CMCUDEventArgs cmCUDEventArgs)
+        {
+            StateCalculations.LookupsRefreshNeeded = true;
+        }
+
+        private void RegisterTaskFactory_Callbacks()
+        {
+            var taskFactories = TaskFactoriesCatalog.Instance.TaskFactories.ToList();
+
+            foreach (var taskFactory in taskFactories)
+            {
+                if (taskFactoryRegisteredCallbacks.ContainsKey(taskFactory.Name))
+                {
+                    continue;
+                }
+
+                taskFactoryRegisteredCallbacks[taskFactory.Name] = true;
+                taskFactory.RegisterCMCUDCallbacks();
+            }
         }
 
         /// <summary>
         /// Taskes care of scanning for task factories and registering them in the database if needed.
         /// </summary>
         /// <returns></returns>
-        private string RegisterTaskFactories()
+        private string RegisterTaskFactories_InDatabase()
         {
             var taskFactories = TaskFactoriesCatalog.Instance.TaskFactories.ToList();
 

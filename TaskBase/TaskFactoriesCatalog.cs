@@ -136,16 +136,5 @@ namespace TaskBase
             var taskFactory = GetTaskFactory(cmTaskType.Name);
             taskFactory.CreateTaskDataInstance(cmTaskType, cmTaskInstance, featureDepth);
         }
-
-        /// <summary>
-        /// Deletes task data for the specified task
-        /// </summary>
-        /// <param name="cmTaskType"></param>
-        /// <param name="deletedTaskId"></param>
-        public void DeleteTaskData(CMTaskTypeDto cmTaskType, int deletedTaskId)
-        {
-            var taskFactory = GetTaskFactory(cmTaskType.Name);
-            taskFactory.DeleteTaskData(cmTaskType, deletedTaskId);
-        }
     }
 }

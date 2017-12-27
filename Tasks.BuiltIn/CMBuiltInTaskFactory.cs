@@ -1,4 +1,5 @@
 ﻿using DataProvider;
+using DataProvider.Events;
 using Dto;
 using System;
 using System.Collections.Generic;
@@ -182,15 +183,40 @@ namespace Tasks.BuiltIn
             }
         }
 
-        public override void DeleteTaskData(CMTaskTypeDto cmTaskType, int deletedTaskId)
+        public override void RegisterCMCUDCallbacks()
         {
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnCUD += OnTaskCUD;
+        }
+
+        private void OnTaskCUD(CMCUDEventArgs cmCUDEventArgs)
+        {
+            // We're only interested in delete operations here
+            if (cmCUDEventArgs.ActionType != CMCUDActionType.Delete)
+            {
+                return;
+            }
+
+            // Try to get a ref to the task being affected
+            var cmTask = CMDataProvider.DataStore.Value.CMTasks.Value.Get(cmCUDEventArgs.Id);
+            if (cmTask == null)
+            {
+                return;
+            }
+
+            // Try to figure out what the task type is
+            var cmTaskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(cmTask.CMTaskTypeId); // mcbtodo: create a function to try and get this directly from the task id in the tasktype crud provider
+            if (cmTaskType == null)
+            {
+                return;
+            }
+
             switch (cmTaskType.Name)
             {
                 case nameof(FeatureDependencyTask):
-                    BuildInTasksDataProviders.FeatureDependencyDataProvider.Delete_ForTaskId(deletedTaskId);
+                    BuildInTasksDataProviders.FeatureDependencyDataProvider.Delete_ForTaskId(cmCUDEventArgs.Id);
                     break;
                 case nameof(NoteTask):
-                    BuildInTasksDataProviders.NoteDataProvider.Delete_ForTaskId(deletedTaskId);
+                    BuildInTasksDataProviders.NoteDataProvider.Delete_ForTaskId(cmCUDEventArgs.Id);
                     break;
             }
         }

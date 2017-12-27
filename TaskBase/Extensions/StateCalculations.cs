@@ -16,10 +16,6 @@ namespace TaskBase.Extensions
 
         /// <summary>
         /// Indicates that the lookup references need to be refreshed.
-        /// mcbtodo: other parts of the program that insert/update the data in the lookups above should set this to true
-        /// mcbtodo: I'd like the add a way to do callbacks in the CRUD providers so when an update happens in a certain table
-        /// mcbtodo: a registered callback that will set this to true can happen. The same type of callback may work for deleting
-        /// mcbtodo: task data when a task is deleted.
         /// </summary>
         public static bool LookupsRefreshNeeded { get; set; } = true;
 
@@ -197,6 +193,5 @@ namespace TaskBase.Extensions
 
             LookupsRefreshNeeded = false;
         }
-
     }
 }

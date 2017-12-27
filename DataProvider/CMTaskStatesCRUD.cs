@@ -22,12 +22,6 @@ namespace DataProvider
         {
         }
 
-        public new IEnumerable<CMTaskStateDto> GetAll()
-        {
-            var results = base.GetAll();
-            return results;
-        }
-
         public IEnumerable<CMTaskStateDto> GetAll_ForTaskType(int cmTaskTypeId)
         {
             var results = base.Find(s => s.TaskTypeId == cmTaskTypeId);

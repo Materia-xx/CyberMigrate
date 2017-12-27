@@ -414,10 +414,6 @@ namespace CyberMigrate.Configuration
                             Reload_TaskTemplates();
                             return;
                         }
-
-                        // Call into the task factory and have it delete any associated task data as well.
-                        var taskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(deletingTask.CMTaskTypeId);
-                        TaskFactoriesCatalog.Instance.DeleteTaskData(taskType, deletingTask.Id);
                     }
 
                     // The row will already be correctly removed from the tasks datagrid so no need at this point to refresh the tasks grid.

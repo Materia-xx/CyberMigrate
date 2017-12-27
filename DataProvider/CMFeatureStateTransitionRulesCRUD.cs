@@ -11,11 +11,6 @@ namespace DataProvider
         {
         }
 
-        public new IEnumerable<CMFeatureStateTransitionRuleDto> GetAll() // mcbtodo: there are so many new GetAll, just expose it from the base
-        {
-            return base.GetAll();
-        }
-
         public IEnumerable<CMFeatureStateTransitionRuleDto> GetAll_ForFeatureTemplate(int cmFeatureId)
         {
             var featureTemplate = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(cmFeatureId);

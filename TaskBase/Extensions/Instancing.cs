@@ -69,7 +69,6 @@ namespace TaskBase.Extensions
                     Title = taskTemplate.Title // mcbtodo: apply template vars here when they are implemented
                 };
                 var opResultTask = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(cmTaskInstance);
-                StateCalculations.LookupsRefreshNeeded = true; // mcbtodo: move this into a callback that happens upon task insert
                 if (opResultTask.Errors.Any())
                 {
                     throw new Exception(opResultTask.ErrorsCombined);

@@ -57,6 +57,8 @@
     <Compile Include="CMSystemStatesCRUD.cs" />
     <Compile Include="CMSystemsCRUD.cs" />
     <Compile Include="CMDataProvider.cs" />
+    <Compile Include="Events\CMCUDActionType.cs" />
+    <Compile Include="Events\CMCUDEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
