@@ -8,6 +8,11 @@
         public int CMSystemId { get; set; }
 
         /// <summary>
+        /// The system state that the feature is currently in
+        /// </summary>
+        public int CMSystemStateId { get; set; }
+
+        /// <summary>
         /// The parent feature template that this feature was created from (if this is an instanced feature)
         /// Otherwise this will be set to 0 if it is a feature template
         /// </summary>

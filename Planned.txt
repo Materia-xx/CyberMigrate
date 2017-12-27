@@ -1,5 +1,11 @@
 Upcoming:
 
+    - Add in the ability for features to calculate their current system state according to the state transition rules
+    - Update the main UI to only show tasks for the current feature state and not all feature states
+      But when a specific system state is selected, show all un-closed tasks within that state.
+    - Add more filter tools in the main UI
+        - Checkbox to Show closed items
+        - Textbox to search through titles, names and possibly task data and perform a customized search
     - Shows the tasks sorted in the way the design plan indicates
     - Add the ability to add instanced tasks ad-hoc to already created features
     - Be able to click on the task "View" button in the main UI and see the task instance UI
