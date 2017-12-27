@@ -1,5 +1,6 @@
 ﻿using DataProvider;
 using Tasks.BuiltIn.FeatureDependency;
+using Tasks.BuiltIn.Note;
 
 namespace Tasks.BuiltIn
 {
@@ -17,5 +18,18 @@ namespace Tasks.BuiltIn
             }
         }
         private static CMTaskDataCRUD<FeatureDependencyDto> featureDependencyDataProvider;
+
+        internal static CMTaskDataCRUD<NoteDto> NoteDataProvider
+        {
+            get
+            {
+                if (noteDataProvider == null)
+                {
+                    noteDataProvider = CMDataProvider.GetTaskTypeDataProvider<NoteDto>();
+                }
+                return noteDataProvider;
+            }
+        }
+        private static CMTaskDataCRUD<NoteDto> noteDataProvider;
     }
 }

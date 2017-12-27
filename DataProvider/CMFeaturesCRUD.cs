@@ -21,7 +21,7 @@ namespace DataProvider
         public CMFeatureDto Get_ForName(string featureName, int cmSystemId, bool isTemplate)
         {
             var results = Find(f => 
-                isTemplate ? f.CMParentFeatureTemplateId == 0 : f.CMParentFeatureTemplateId != 0 // Don't use IsTemplate Dto property here b/c this queries BSON data directly
+                (isTemplate ? f.CMParentFeatureTemplateId == 0 : f.CMParentFeatureTemplateId != 0) // Don't use IsTemplate Dto property here b/c this queries BSON data directly
              && f.CMSystemId == cmSystemId
              && f.Name.Equals(featureName, System.StringComparison.Ordinal)); // Note: case 'sensitive' compare so we allow renames to upper/lower case
 
@@ -31,7 +31,7 @@ namespace DataProvider
         public IEnumerable<CMFeatureDto> GetAll(bool isTemplate)
         {
             var results = Find(f =>
-                isTemplate ? f.CMParentFeatureTemplateId == 0 : f.CMParentFeatureTemplateId != 0 // Don't use IsTemplate Dto property here b/c this queries BSON data directly
+                (isTemplate ? f.CMParentFeatureTemplateId == 0 : f.CMParentFeatureTemplateId != 0) // Don't use IsTemplate Dto property here b/c this queries BSON data directly
             );
 
             return results;
@@ -40,7 +40,7 @@ namespace DataProvider
         public IEnumerable<CMFeatureDto> GetAll_ForSystem(int cmSystemId, bool isTemplate)
         {
             var results = Find(f =>
-                isTemplate ? f.CMParentFeatureTemplateId == 0 : f.CMParentFeatureTemplateId != 0 // Don't use IsTemplate Dto property here b/c this queries BSON data directly
+                (isTemplate ? f.CMParentFeatureTemplateId == 0 : f.CMParentFeatureTemplateId != 0) // Don't use IsTemplate Dto property here b/c this queries BSON data directly
              && f.CMSystemId == cmSystemId);
 
             return results.OrderBy(f => f.Name);
@@ -74,7 +74,7 @@ namespace DataProvider
             // Find a record with the same name that is not this one
             var dupeResults = Find(f =>
                 f.Id != updatingObject.Id
-                && updatingObject.IsTemplate ? f.CMParentFeatureTemplateId == 0 : f.CMParentFeatureTemplateId != 0 // Don't use IsTemplate Dto property here b/c this queries BSON data directly
+                && (updatingObject.IsTemplate ? f.CMParentFeatureTemplateId == 0 : f.CMParentFeatureTemplateId != 0) // Don't use IsTemplate Dto property here b/c this queries BSON data directly
                 && f.CMSystemId == updatingObject.CMSystemId
                 && f.Name.Equals(updatingObject.Name, System.StringComparison.Ordinal)); // Note: case 'sensitive' compare so we allow renames to upper/lower case
 

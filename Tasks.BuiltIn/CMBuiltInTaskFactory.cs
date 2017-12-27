@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using TaskBase;
 using TaskBase.Extensions;
 using Tasks.BuiltIn.FeatureDependency;
+using Tasks.BuiltIn.Note;
 
 namespace Tasks.BuiltIn
 {
@@ -26,6 +27,7 @@ namespace Tasks.BuiltIn
         {
             var taskTypes = new List<string>();
             taskTypes.Add(nameof(FeatureDependencyTask));
+            taskTypes.Add(nameof(NoteTask));
             return taskTypes;
         }
 
@@ -37,6 +39,9 @@ namespace Tasks.BuiltIn
             {
                 case nameof(FeatureDependencyTask):
                     requiredStates.Add("WaitingOnDependency");
+                    break;
+                case nameof(NoteTask):
+                    // No required states in the note task
                     break;
             }
 
@@ -53,6 +58,12 @@ namespace Tasks.BuiltIn
                     featureTask.CmFeatureId = cmFeature.Id;
                     featureTask.CmTaskId = cmTask.Id;
                     return featureTask;
+                case nameof(NoteTask):
+                    var noteTask = new NoteTask();
+                    noteTask.CmSystemId = cmSystem.Id;
+                    noteTask.CmFeatureId = cmFeature.Id;
+                    noteTask.CmTaskId = cmTask.Id;
+                    return noteTask;
             }
 
             return null;
@@ -65,6 +76,9 @@ namespace Tasks.BuiltIn
                 case nameof(FeatureDependencyTask):
                     var configUI = new FeatureDependencyConfigUC();
                     return configUI;
+                case nameof(NoteTask):
+                    // No config UI for the note task
+                    return null;
             }
 
             return null;
@@ -75,8 +89,11 @@ namespace Tasks.BuiltIn
             switch (cmTaskType.Name)
             {
                 case nameof(FeatureDependencyTask):
-                    var configUI = new FeatureDependencyUC(cmSystem, cmFeature, cmTask);
-                    return configUI;
+                    var featureDependencyTaskUI = new FeatureDependencyUC(cmSystem, cmFeature, cmTask);
+                    return featureDependencyTaskUI;
+                case nameof(NoteTask):
+                    var noteTaskUI = new NoteUC(cmSystem, cmFeature, cmTask);
+                    return noteTaskUI;
             }
 
             return null;
@@ -88,6 +105,9 @@ namespace Tasks.BuiltIn
             {
                 case nameof(FeatureDependencyTask):
                     FeatureDependency_CreateTaskDataInstance(cmTaskInstance, featureDepth);
+                    break;
+                case nameof(NoteTask):
+                    Note_CreateTaskDataInstance(cmTaskInstance, featureDepth);
                     break;
             }
         }
@@ -132,12 +152,45 @@ namespace Tasks.BuiltIn
             }
         }
 
+        private void Note_CreateTaskDataInstance(CMTaskDto cmTaskInstance, int featureDepth)
+        {
+            // The new task Dto instance that was created is passed in
+
+            // The task Dto template that the above task Dto instance was created from
+            var taskDtoTemplate = CMDataProvider.DataStore.Value.CMTasks.Value.Get(cmTaskInstance.CMParentTaskTemplateId);
+            // mcbtodo: this seems like it will be a common pattern to also get the task template, so pass that in by default
+
+            // The task data note template that we'll clone
+            var taskDataTemplate = BuildInTasksDataProviders.NoteDataProvider.Get_ForTaskId(taskDtoTemplate.Id);
+
+            // If there was no task data template defined then just return without creating data for the instance
+            if (taskDataTemplate == null)
+            {
+                return;
+            }
+
+            // Now we can create new task data note
+            var taskData = new NoteDto()
+            {
+                Note = taskDataTemplate.Note // mcbtodo: apply feature vars here when they are available
+            };
+
+            var opResult = BuildInTasksDataProviders.NoteDataProvider.Insert(taskData);
+            if (opResult.Errors.Any())
+            {
+                throw new Exception(opResult.ErrorsCombined);
+            }
+        }
+
         public override void DeleteTaskData(CMTaskTypeDto cmTaskType, int deletedTaskId)
         {
             switch (cmTaskType.Name)
             {
                 case nameof(FeatureDependencyTask):
                     BuildInTasksDataProviders.FeatureDependencyDataProvider.Delete_ForTaskId(deletedTaskId);
+                    break;
+                case nameof(NoteTask):
+                    BuildInTasksDataProviders.NoteDataProvider.Delete_ForTaskId(deletedTaskId);
                     break;
             }
         }

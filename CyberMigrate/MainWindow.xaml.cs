@@ -38,10 +38,34 @@ namespace CyberMigrate
             // Everything past this point depends on the data store being set up already
             DataStorePathSet();
             Init_TasksGrid();
+
+            // Debugging function to clean out instanced tasks and features
+            Debug_DeleteAllTaskAndFeatureInstances(); // mcbtodo: remove debugging function 
+
             // Select the node that is hovered over when right clicking and before showing the context menu
             treeFilter.PreviewMouseRightButtonDown += TreeViewExtensions.TreeView_PreviewMouseRightButtonDown_SelectNode;
             RedrawFilterTreeView();
             RedrawMainMenu();
+        }
+
+        private void Debug_DeleteAllTaskAndFeatureInstances()
+        {
+            MessageBox.Show("Press OK to delete all task and feature instance data or close the program now.");
+
+            var allTaskInstances = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll(false);
+            foreach (var taskInstance in allTaskInstances)
+            {
+                var taskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(taskInstance.CMTaskTypeId);
+
+                CMDataProvider.DataStore.Value.CMTasks.Value.Delete(taskInstance.Id);
+                TaskFactoriesCatalog.Instance.DeleteTaskData(taskType, taskInstance.Id);
+            }
+
+            var allFeatureInstances = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll(false);
+            foreach (var featureInstance in allFeatureInstances)
+            {
+                CMDataProvider.DataStore.Value.CMFeatures.Value.Delete(featureInstance.Id);
+            }
         }
 
         private void RedrawFilterTreeView()
@@ -148,6 +172,11 @@ namespace CyberMigrate
         }
 
         private void TreeFilter_NodeSelected(object sender, RoutedEventArgs e)
+        {
+            ShowFilteredTasks();
+        }
+
+        private void ShowFilteredTasks()
         {
             filterResults.Clear();
 
@@ -258,6 +287,7 @@ namespace CyberMigrate
                 addNewFeature.Click += (sender, e) =>
                 {
                     var newFeature = cmFeatureTemplate.CreateFeatureInstance(0);
+                    ShowFilteredTasks();
                 };
             }
 

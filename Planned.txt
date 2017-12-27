@@ -1,6 +1,7 @@
 Upcoming:
 
     - Shows the tasks sorted in the way the design plan indicates
+    - Add the ability to add instanced tasks ad-hoc to already created features
     - Be able to click on the task "View" button in the main UI and see the task instance UI
     - Add in feature vars
     - Update the dependency task to display correctly for a task that has been instanced.

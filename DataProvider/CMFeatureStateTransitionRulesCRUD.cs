@@ -18,7 +18,7 @@ namespace DataProvider
             // If the feature doesn't exist or it isn't a template then don't even look at the available state transition rules
             if (featureTemplate == null || featureTemplate.IsTemplate == false)
             {
-                return default(IEnumerable<CMFeatureStateTransitionRuleDto>);
+                return Enumerable.Empty<CMFeatureStateTransitionRuleDto>();
             }
 
             var results = Find(r =>

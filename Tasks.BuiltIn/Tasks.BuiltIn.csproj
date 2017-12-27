@@ -57,6 +57,11 @@
     <Compile Include="FeatureDependency\FeatureDependencyUC.xaml.cs">
       <DependentUpon>FeatureDependencyUC.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Note\NoteUC.xaml.cs">
+      <DependentUpon>NoteUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Note\NoteDto.cs" />
+    <Compile Include="Note\NoteTask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -81,6 +86,10 @@
     <Page Include="FeatureDependency\FeatureDependencyUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Note\NoteUC.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
