@@ -156,6 +156,7 @@ namespace CyberMigrate
             var systemsLookup = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll();
             var featuresLookup = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll(false);
             var systemStatesLookup = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll();
+            var taskStatesLookup = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll();
 
             // mcbtodo: add a way to query for just task instances that are open
             var filteredTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll(false);
@@ -184,9 +185,8 @@ namespace CyberMigrate
                 }
             }
 
-            // mcbtodo: apply ordering for tasks here
-
             // Show the results
+            var unsortedResults = new List<FilterResultItem>();
             foreach (var cmTask in filteredTasks)
             {
                 // Filter out tasks in system state if filter is set
@@ -205,15 +205,29 @@ namespace CyberMigrate
                 }
 
                 var systemStateRef = systemStatesLookup.First(s => s.Id == cmTask.CMSystemStateId);
+                var taskStateRef = taskStatesLookup.First(ts => ts.Id == cmTask.CMTaskStateId);
 
-                filterResults.Add(new FilterResultItem()
+                unsortedResults.Add(new FilterResultItem()
                 {
                     SystemName = systemRef.Name,
                     SystemStateName = systemStateRef.Name,
+                    SystemStatePriorityId = systemStateRef.Priority,
                     FeatureName = featureRef.Name,
                     TaskTitle = cmTask.Title,
-                    TaskId = cmTask.Id
+                    TaskId = cmTask.Id,
+                    TaskStatePriorityId = taskStateRef.Priority
                 });
+            }
+
+            // Order the results
+            var sortedResults = unsortedResults
+                .OrderBy(r => r.SystemStatePriorityId)
+                .ThenBy(r => r.TaskStatePriorityId);
+
+            // Add the sorted results to the collection that the grid is watching
+            foreach (var sortedResult in sortedResults)
+            {
+                filterResults.Add(sortedResult);
             }
         }
 

@@ -16,6 +16,11 @@
         public string SystemStateName { get; set; }
 
         /// <summary>
+        /// The priority of the system state that this task is under
+        /// </summary>
+        public int SystemStatePriorityId { get; set; }
+
+        /// <summary>
         /// The name of the feature that the task exists in
         /// </summary>
         public string FeatureName { get; set; }
@@ -29,5 +34,10 @@
         /// The task Id
         /// </summary>
         public int TaskId { get; set; }
+
+        /// <summary>
+        /// The priority of the task state for this task
+        /// </summary>
+        public int TaskStatePriorityId { get; set; }
     }
 }
