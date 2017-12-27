@@ -26,10 +26,9 @@ namespace DataProvider
 
         /// <summary>
         /// Returns all elements of the collection.
-        /// Use <see cref="Find(Query)"/> instead if the intention is the filter the returned results.
         /// </summary>
         /// <returns></returns>
-        protected virtual IEnumerable<T> GetAll()
+        public virtual IEnumerable<T> GetAll()
         {
             var results = cmCollection.FindAll();
             return results;

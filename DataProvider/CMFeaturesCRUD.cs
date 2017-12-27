@@ -28,12 +28,15 @@ namespace DataProvider
             return results.FirstOrDefault();
         }
 
-        public IEnumerable<CMFeatureDto> GetAll(bool isTemplate)
+        public IEnumerable<CMFeatureDto> GetAll_Templates()
         {
-            var results = Find(f =>
-                (isTemplate ? f.CMParentFeatureTemplateId == 0 : f.CMParentFeatureTemplateId != 0) // Don't use IsTemplate Dto property here b/c this queries BSON data directly
-            );
+            var results = Find(f => f.CMParentFeatureTemplateId == 0);
+            return results;
+        }
 
+        public IEnumerable<CMFeatureDto> GetAll_Instances()
+        {
+            var results = Find(f => f.CMParentFeatureTemplateId != 0);
             return results;
         }
 
@@ -54,13 +57,47 @@ namespace DataProvider
             return results;
         }
 
+        /// <summary>
+        /// Checks that apply to both insert and update operations
+        /// </summary>
+        /// <param name="opResult"></param>
+        /// <returns></returns>
+        private CMCUDResult UpsertChecks(CMCUDResult opResult, CMFeatureDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                opResult.Errors.Add($"Name cannot be empty for an item in {CollectionName}");
+            }
+
+            if (dto.CMSystemId == 0)
+            {
+                opResult.Errors.Add($"An item in {CollectionName} must have a valid {nameof(CMFeatureDto.CMSystemId)}");
+            }
+
+            // Only instances are required to have a valid system state
+            if (dto.CMParentFeatureTemplateId != 0)
+            {
+                if (dto.CMSystemStateId == 0)
+                {
+                    opResult.Errors.Add($"An item in {CollectionName} must have a valid {nameof(CMFeatureDto.CMSystemStateId)}");
+                }
+            }
+
+            return opResult;
+        }
+
         public override CMCUDResult Insert(CMFeatureDto insertingObject)
         {
+            var opResult = new CMCUDResult();
+            opResult = UpsertChecks(opResult, insertingObject);
+            if (opResult.Errors.Any())
+            {
+                return opResult;
+            }
+
             // Require that template names are distinct. Instances can have duplicate names.
             if (insertingObject.IsTemplate)
             {
-                var opResult = new CMCUDResult();
-
                 if (Get_ForName(insertingObject.Name, insertingObject.CMSystemId, insertingObject.IsTemplate) != null)
                 {
                     opResult.Errors.Add($"A feature with the name '{insertingObject.Name}' already exists within the system. Rename that one first.");
@@ -73,11 +110,16 @@ namespace DataProvider
 
         public override CMCUDResult Update(CMFeatureDto updatingObject)
         {
+            var opResult = new CMCUDResult();
+            opResult = UpsertChecks(opResult, updatingObject);
+            if (opResult.Errors.Any())
+            {
+                return opResult;
+            }
+
             // Require that template names are distinct. Instances can have duplicate names.
             if (updatingObject.IsTemplate)
             {
-                var opResult = new CMCUDResult();
-
                 // Find a record with the same name that is not this one
                 var dupeResults = Find(f =>
                     f.Id != updatingObject.Id

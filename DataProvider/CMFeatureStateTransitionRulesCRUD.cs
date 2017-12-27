@@ -11,6 +11,11 @@ namespace DataProvider
         {
         }
 
+        public new IEnumerable<CMFeatureStateTransitionRuleDto> GetAll() // mcbtodo: there are so many new GetAll, just expose it from the base
+        {
+            return base.GetAll();
+        }
+
         public IEnumerable<CMFeatureStateTransitionRuleDto> GetAll_ForFeatureTemplate(int cmFeatureId)
         {
             var featureTemplate = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(cmFeatureId);
@@ -46,7 +51,7 @@ namespace DataProvider
 
             var cmRule = Get(deletingId);
 
-            // How many other transition rule states in this feature refer to the state that is being deleted ?
+            // How many other transition rules in this feature refer to the state ?
             var matchingRules = Find(r => 
                 r.ToCMSystemStateId == cmRule.ToCMSystemStateId
                 && r.CMFeatureId == cmRule.CMFeatureId
@@ -59,7 +64,9 @@ namespace DataProvider
                 var taskTemplates = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(cmRule.CMFeatureId, true);
                 if (taskTemplates.Any(t => t.CMSystemStateId == cmRule.ToCMSystemStateId))
                 {
-                    opResult.Errors.Add($"Cannot delete item from {CollectionName} with id {deletingId} because there are currently task templates in the state it referrs to.");
+                    var targetSystemState = CMDataProvider.DataStore.Value.CMSystemStates.Value.Get(cmRule.ToCMSystemStateId);
+
+                    opResult.Errors.Add($"Cannot delete item from {CollectionName} with id {deletingId} that has a target state of {targetSystemState.Name} because there are currently task templates in the state it referrs to.");
                     return opResult;
                 }
             }

@@ -7,7 +7,7 @@ namespace DataProvider
 {
     public class CMTaskStatesCRUD : CMDataProviderCRUDBase<CMTaskStateDto>
     {
-        public const string InternalState_Complete = "Complete";
+        public const string InternalState_Complete = "Complete"; // mcbtodo: I think a better internal state to represent this would be "Closed"
         public const string InternalState_Template = "Template";
         public const string InternalState_Instance = "Instance";
 

@@ -37,35 +37,19 @@ namespace CyberMigrate
 
             // Everything past this point depends on the data store being set up already
             DataStorePathSet();
-            Init_TasksGrid();
 
             // Debugging function to clean out instanced tasks and features
-            //Debug_DeleteAllTaskAndFeatureInstances(); // mcbtodo: remove debugging function 
+            DBMaintenance.RunMaintenanceRoutines();
+
+            Init_TasksGrid();
+
+            // mcbtodo: Move call to correct places
+            //StateCalculations.CalculateAllFeatureStates();
 
             // Select the node that is hovered over when right clicking and before showing the context menu
             treeFilter.PreviewMouseRightButtonDown += TreeViewExtensions.TreeView_PreviewMouseRightButtonDown_SelectNode;
             RedrawFilterTreeView();
             RedrawMainMenu();
-        }
-
-        private void Debug_DeleteAllTaskAndFeatureInstances()
-        {
-            MessageBox.Show("Press OK to delete all task and feature instance data or close the program now.");
-
-            var allTaskInstances = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll(false);
-            foreach (var taskInstance in allTaskInstances)
-            {
-                var taskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(taskInstance.CMTaskTypeId);
-
-                CMDataProvider.DataStore.Value.CMTasks.Value.Delete(taskInstance.Id);
-                TaskFactoriesCatalog.Instance.DeleteTaskData(taskType, taskInstance.Id);
-            }
-
-            var allFeatureInstances = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll(false);
-            foreach (var featureInstance in allFeatureInstances)
-            {
-                CMDataProvider.DataStore.Value.CMFeatures.Value.Delete(featureInstance.Id);
-            }
         }
 
         private void RedrawFilterTreeView()
@@ -109,32 +93,48 @@ namespace CyberMigrate
                 new DataGridTextColumn()
                 {
                     Header = "System",
-                    Width = 175,
+                    Width = 150,
                     Binding = new Binding(nameof(FilterResultItem.SystemName)),
                 });
 
             dataGridTasks.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = "System State",
-                    Width = 175,
-                    Binding = new Binding(nameof(FilterResultItem.SystemStateName)),
-                });
-
-            dataGridTasks.Columns.Add(
-                new DataGridTextColumn()
-                {
                     Header = "Feature",
-                    Width = 175,
+                    Width = 150,
                     Binding = new Binding(nameof(FilterResultItem.FeatureName)),
                 });
 
             dataGridTasks.Columns.Add(
                 new DataGridTextColumn()
                 {
+                    Header = "Feature System State",
+                    Width = 150,
+                    Binding = new Binding(nameof(FilterResultItem.FeatureSystemStateName)),
+                });
+
+            dataGridTasks.Columns.Add(
+                new DataGridTextColumn()
+                {
                     Header = "Task Title",
-                    Width = 300,
+                    Width = 250,
                     Binding = new Binding(nameof(FilterResultItem.TaskTitle)),
+                });
+
+            dataGridTasks.Columns.Add(
+                new DataGridTextColumn()
+                {
+                    Header = "Task System State",
+                    Width = 150,
+                    Binding = new Binding(nameof(FilterResultItem.TaskSystemStateName)),
+                });
+
+            dataGridTasks.Columns.Add(
+                new DataGridTextColumn()
+                {
+                    Header = "Task State",
+                    Width = 150,
+                    Binding = new Binding(nameof(FilterResultItem.TaskStateName)),
                 });
 
             // A factory because each row will generate a button
@@ -186,12 +186,12 @@ namespace CyberMigrate
             // Default is to list tasks in all systems/features/states
             // mcbtodo: Provide a different GetAll_AsLookupById that gives back a dictionary<int, CMSystem> and re-write the .first() logic below so it doesn't need to scan through the entire results on each row creation
             var systemsLookup = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll();
-            var featuresLookup = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll(false);
+            var featureInstancesLookup = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll_Instances();
             var systemStatesLookup = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll();
             var taskStatesLookup = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll();
 
             // mcbtodo: add a way to query for just task instances that are open
-            var filteredTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll(false);
+            var filteredTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_Instances();
 
             var attachedTag = treeFilter.GetSelectedTreeViewTag();
 
@@ -227,7 +227,7 @@ namespace CyberMigrate
                     continue;
                 }
 
-                var featureRef = featuresLookup.First(f => f.Id == cmTask.CMFeatureId);
+                var featureRef = featureInstancesLookup.First(f => f.Id == cmTask.CMFeatureId);
                 var systemRef = systemsLookup.First(s => s.Id == featureRef.CMSystemId);
 
                 // Filter out tasks in system if filter is set
@@ -236,18 +236,21 @@ namespace CyberMigrate
                     continue;
                 }
 
-                var systemStateRef = systemStatesLookup.First(s => s.Id == cmTask.CMSystemStateId);
+                var taskSystemStateRef = systemStatesLookup.First(s => s.Id == cmTask.CMSystemStateId);
                 var taskStateRef = taskStatesLookup.First(ts => ts.Id == cmTask.CMTaskStateId);
+                var featureSystemStateRef = systemStatesLookup.First(s => s.Id == featureRef.CMSystemStateId);
 
                 unsortedResults.Add(new FilterResultItem()
                 {
                     SystemName = systemRef.Name,
-                    SystemStateName = systemStateRef.Name,
-                    SystemStatePriorityId = systemStateRef.Priority,
+                    TaskSystemStateName = taskSystemStateRef.Name,
+                    SystemStatePriorityId = taskSystemStateRef.Priority,
                     FeatureName = featureRef.Name,
+                    FeatureSystemStateName = featureSystemStateRef.Name,
                     TaskTitle = cmTask.Title,
                     TaskId = cmTask.Id,
-                    TaskStatePriorityId = taskStateRef.Priority
+                    TaskStatePriorityId = taskStateRef.Priority,
+                    TaskStateName = taskStateRef.DisplayName
                 });
             }
 

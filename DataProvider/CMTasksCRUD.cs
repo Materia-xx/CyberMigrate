@@ -11,11 +11,16 @@ namespace DataProvider
         {
         }
 
-        public IEnumerable<CMTaskDto> GetAll(bool isTemplate)
+        public IEnumerable<CMTaskDto> GetAll_Templates()
         {
-            var results = Find(t =>
-                (isTemplate ? t.CMParentTaskTemplateId == 0 : t.CMParentTaskTemplateId != 0) // Don't use IsTemplate Dto property here b/c this queries BSON data directly
-             );
+            var results = Find(t => t.CMParentTaskTemplateId == 0);
+
+            return results;
+        }
+
+        public IEnumerable<CMTaskDto> GetAll_Instances()
+        {
+            var results = Find(t => t.CMParentTaskTemplateId != 0);
 
             return results;
         }
@@ -41,14 +46,24 @@ namespace DataProvider
                 opResult.Errors.Add($"Name cannot be empty for an item in {CollectionName}");
             }
 
-            if (dto.CMTaskTypeId == 0)
+            if (dto.CMFeatureId == 0)
             {
-                opResult.Errors.Add($"A task must have a task type set in {CollectionName}");
+                opResult.Errors.Add($"A task must be assigned to a feature in {CollectionName}");
+            }
+
+            if (dto.CMSystemStateId == 0)
+            {
+                opResult.Errors.Add($"A task must be assigned to a system state in {CollectionName}");
             }
 
             if (dto.CMTaskStateId == 0)
             {
                 opResult.Errors.Add($"A task must have a task state set in {CollectionName}");
+            }
+
+            if (dto.CMTaskTypeId == 0)
+            {
+                opResult.Errors.Add($"A task must have a task type set in {CollectionName}");
             }
 
             return opResult;

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TaskBase.Extensions
 {
-    public static class TaskExtensions
+    public static class InstancingExtensions
     {
         /// <summary>
         /// Creates an instance of a feature template.
@@ -42,6 +42,10 @@ namespace TaskBase.Extensions
                 Name = featureTemplate.Name // mcbtodo: apply template vars here when they are implemented
             };
 
+            // Calculate a default feature state, which is needed to insert into the db
+            // Due to the fact that the feature has no cloned tasks yet, this state is likely temporary and will be updated again below
+            featureDto.RecalculateSystemState();
+
             var opResultFeature = CMDataProvider.DataStore.Value.CMFeatures.Value.Insert(featureDto);
             if (opResultFeature.Errors.Any())
             {
@@ -65,6 +69,7 @@ namespace TaskBase.Extensions
                     Title = taskTemplate.Title // mcbtodo: apply template vars here when they are implemented
                 };
                 var opResultTask = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(cmTaskInstance);
+                StateCalculations.LookupsRefreshNeeded = true; // mcbtodo: move this into a callback that happens upon task insert
                 if (opResultTask.Errors.Any())
                 {
                     throw new Exception(opResultTask.ErrorsCombined);
@@ -73,6 +78,9 @@ namespace TaskBase.Extensions
                 // For the task data we revert to the task factory to provide it
                 TaskFactoriesCatalog.Instance.CreateTaskDataInstance(taskTemplateType, cmTaskInstance, featureDepth);
             }
+
+            // Recalculate the current system state again after the feature has tasks assigned
+            featureDto.RecalculateSystemState();
 
             return featureDto;
         }
