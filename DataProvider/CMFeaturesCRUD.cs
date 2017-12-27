@@ -56,12 +56,16 @@ namespace DataProvider
 
         public override CMCUDResult Insert(CMFeatureDto insertingObject)
         {
-            var opResult = new CMCUDResult();
-
-            if (Get_ForName(insertingObject.Name, insertingObject.CMSystemId, insertingObject.IsTemplate) != null)
+            // Require that template names are distinct. Instances can have duplicate names.
+            if (insertingObject.IsTemplate)
             {
-                opResult.Errors.Add($"A feature with the name '{insertingObject.Name}' already exists within the system. Rename that one first.");
-                return opResult;
+                var opResult = new CMCUDResult();
+
+                if (Get_ForName(insertingObject.Name, insertingObject.CMSystemId, insertingObject.IsTemplate) != null)
+                {
+                    opResult.Errors.Add($"A feature with the name '{insertingObject.Name}' already exists within the system. Rename that one first.");
+                    return opResult;
+                }
             }
 
             return base.Insert(insertingObject);
@@ -69,19 +73,23 @@ namespace DataProvider
 
         public override CMCUDResult Update(CMFeatureDto updatingObject)
         {
-            var opResult = new CMCUDResult();
-
-            // Find a record with the same name that is not this one
-            var dupeResults = Find(f =>
-                f.Id != updatingObject.Id
-                && (updatingObject.IsTemplate ? f.CMParentFeatureTemplateId == 0 : f.CMParentFeatureTemplateId != 0) // Don't use IsTemplate Dto property here b/c this queries BSON data directly
-                && f.CMSystemId == updatingObject.CMSystemId
-                && f.Name.Equals(updatingObject.Name, System.StringComparison.Ordinal)); // Note: case 'sensitive' compare so we allow renames to upper/lower case
-
-            if (dupeResults.Any())
+            // Require that template names are distinct. Instances can have duplicate names.
+            if (updatingObject.IsTemplate)
             {
-                opResult.Errors.Add($"A feature with the name '{updatingObject.Name}' already exists within the system.");
-                return opResult;
+                var opResult = new CMCUDResult();
+
+                // Find a record with the same name that is not this one
+                var dupeResults = Find(f =>
+                    f.Id != updatingObject.Id
+                    && (updatingObject.IsTemplate ? f.CMParentFeatureTemplateId == 0 : f.CMParentFeatureTemplateId != 0) // Don't use IsTemplate Dto property here b/c this queries BSON data directly
+                    && f.CMSystemId == updatingObject.CMSystemId
+                    && f.Name.Equals(updatingObject.Name, System.StringComparison.Ordinal)); // Note: case 'sensitive' compare so we allow renames to upper/lower case
+
+                if (dupeResults.Any())
+                {
+                    opResult.Errors.Add($"A feature with the name '{updatingObject.Name}' already exists within the system.");
+                    return opResult;
+                }
             }
 
             return base.Update(updatingObject);

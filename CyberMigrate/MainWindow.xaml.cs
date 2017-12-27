@@ -40,7 +40,7 @@ namespace CyberMigrate
             Init_TasksGrid();
 
             // Debugging function to clean out instanced tasks and features
-            Debug_DeleteAllTaskAndFeatureInstances(); // mcbtodo: remove debugging function 
+            //Debug_DeleteAllTaskAndFeatureInstances(); // mcbtodo: remove debugging function 
 
             // Select the node that is hovered over when right clicking and before showing the context menu
             treeFilter.PreviewMouseRightButtonDown += TreeViewExtensions.TreeView_PreviewMouseRightButtonDown_SelectNode;
@@ -94,6 +94,9 @@ namespace CyberMigrate
 
                 cmSystemTVI.ExpandSubtree();
             }
+
+            // Show all tasks by default in the filter grid by selecting the 'All Systems' node.
+            allSystemsTVI.IsSelected = true;
         }
 
         private void Init_TasksGrid()
@@ -106,7 +109,7 @@ namespace CyberMigrate
                 new DataGridTextColumn()
                 {
                     Header = "System",
-                    Width = 150,
+                    Width = 175,
                     Binding = new Binding(nameof(FilterResultItem.SystemName)),
                 });
 
@@ -114,7 +117,7 @@ namespace CyberMigrate
                 new DataGridTextColumn()
                 {
                     Header = "System State",
-                    Width = 150,
+                    Width = 175,
                     Binding = new Binding(nameof(FilterResultItem.SystemStateName)),
                 });
 
@@ -122,7 +125,7 @@ namespace CyberMigrate
                 new DataGridTextColumn()
                 {
                     Header = "Feature",
-                    Width = 150,
+                    Width = 175,
                     Binding = new Binding(nameof(FilterResultItem.FeatureName)),
                 });
 
@@ -130,7 +133,7 @@ namespace CyberMigrate
                 new DataGridTextColumn()
                 {
                     Header = "Task Title",
-                    Width = 150,
+                    Width = 300,
                     Binding = new Binding(nameof(FilterResultItem.TaskTitle)),
                 });
 
