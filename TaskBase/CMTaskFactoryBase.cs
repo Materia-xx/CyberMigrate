@@ -63,8 +63,10 @@ namespace TaskBase
         /// The task factory should create any task data for this new task and take care of updating the database.
         /// </summary>
         /// <param name="cmTaskType"></param>
-        /// <param name="cmTaskInstance">The id of the newly created CMTaskDto instance that was created from the template</param>
-        public abstract void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskInstance, int featureDepth);
+        /// <param name="cmTaskTemplate">The task template that the task was created from</param>
+        /// <param name="cmTaskInstance">The new task that was created</param>
+        /// <param name="featureDepth">The current depth of feature if the creating routing is recursing through linked features</param>
+        public abstract void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance, int featureDepth);
 
         /// <summary>
         /// If the task needs to know when any database item is Created, Updated or Deleted then register callbacks here.

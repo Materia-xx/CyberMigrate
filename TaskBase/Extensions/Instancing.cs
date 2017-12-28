@@ -54,19 +54,19 @@ namespace TaskBase.Extensions
 
             // Clone each task in the feature template
             var taskTemplates = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(featureTemplate.Id, true);
-            foreach (var taskTemplate in taskTemplates)
+            foreach (var cmTaskTemplate in taskTemplates)
             {
-                var taskTemplateType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(taskTemplate.CMTaskTypeId);
+                var taskTemplateType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(cmTaskTemplate.CMTaskTypeId);
 
                 // We can clone the task template to instance here
                 var cmTaskInstance = new CMTaskDto()
                 {
-                    CMParentTaskTemplateId = taskTemplate.Id,
+                    CMParentTaskTemplateId = cmTaskTemplate.Id,
                     CMFeatureId = featureDto.Id,
-                    CMSystemStateId = taskTemplate.CMSystemStateId,
+                    CMSystemStateId = cmTaskTemplate.CMSystemStateId,
                     CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Instance, taskTemplateType.Id).Id,
-                    CMTaskTypeId = taskTemplate.CMTaskTypeId,
-                    Title = taskTemplate.Title // mcbtodo: apply template vars here when they are implemented
+                    CMTaskTypeId = cmTaskTemplate.CMTaskTypeId,
+                    Title = cmTaskTemplate.Title // mcbtodo: apply template vars here when they are implemented
                 };
                 var opResultTask = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(cmTaskInstance);
                 if (opResultTask.Errors.Any())
@@ -75,7 +75,7 @@ namespace TaskBase.Extensions
                 }
 
                 // For the task data we revert to the task factory to provide it
-                TaskFactoriesCatalog.Instance.CreateTaskDataInstance(taskTemplateType, cmTaskInstance, featureDepth);
+                TaskFactoriesCatalog.Instance.CreateTaskDataInstance(taskTemplateType, cmTaskTemplate, cmTaskInstance, featureDepth);
             }
 
             // Recalculate the current system state again after the feature has tasks assigned

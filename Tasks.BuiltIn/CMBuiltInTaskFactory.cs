@@ -100,28 +100,23 @@ namespace Tasks.BuiltIn
             return null;
         }
 
-        public override void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskInstance, int featureDepth)
+        public override void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance, int featureDepth)
         {
             switch (cmTaskType.Name)
             {
                 case nameof(FeatureDependencyTask):
-                    FeatureDependency_CreateTaskDataInstance(cmTaskInstance, featureDepth);
+                    FeatureDependency_CreateTaskDataInstance(cmTaskTemplate, cmTaskInstance, featureDepth);
                     break;
                 case nameof(NoteTask):
-                    Note_CreateTaskDataInstance(cmTaskInstance, featureDepth);
+                    Note_CreateTaskDataInstance(cmTaskTemplate, cmTaskInstance, featureDepth);
                     break;
             }
         }
 
-        private void FeatureDependency_CreateTaskDataInstance(CMTaskDto cmTaskInstance, int featureDepth)
+        private void FeatureDependency_CreateTaskDataInstance(CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance, int featureDepth)
         {
-            // The new task Dto instance that was created is passed in
-
-            // The task Dto template that the above task Dto instance was created from
-            var taskDtoTemplate = CMDataProvider.DataStore.Value.CMTasks.Value.Get(cmTaskInstance.CMParentTaskTemplateId);
-
-            // The task data for the dependency that was defined for the Dto template
-            var taskDataTemplate = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(taskDtoTemplate.Id);
+            // The task data (template) to clone
+            var taskDataTemplate = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(cmTaskTemplate.Id);
 
             // If there was no task data template defined then just return without creating data for the instance
             if (taskDataTemplate == null)
@@ -153,16 +148,10 @@ namespace Tasks.BuiltIn
             }
         }
 
-        private void Note_CreateTaskDataInstance(CMTaskDto cmTaskInstance, int featureDepth)
+        private void Note_CreateTaskDataInstance(CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance, int featureDepth)
         {
-            // The new task Dto instance that was created is passed in
-
-            // The task Dto template that the above task Dto instance was created from
-            var taskDtoTemplate = CMDataProvider.DataStore.Value.CMTasks.Value.Get(cmTaskInstance.CMParentTaskTemplateId);
-            // mcbtodo: this seems like it will be a common pattern to also get the task template, so pass that in by default
-
-            // The task data note template that we'll clone
-            var taskDataTemplate = BuildInTasksDataProviders.NoteDataProvider.Get_ForTaskId(taskDtoTemplate.Id);
+            // The task data (template) to clone
+            var taskDataTemplate = BuildInTasksDataProviders.NoteDataProvider.Get_ForTaskId(cmTaskTemplate.Id);
 
             // If there was no task data template defined then just return without creating data for the instance
             if (taskDataTemplate == null)
