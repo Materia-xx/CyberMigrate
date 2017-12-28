@@ -39,7 +39,6 @@ namespace CyberMigrate
             }
         }
 
-
         /// <summary>
         /// Updates the BSON data stored in the db to match the current properties available in the Dto
         /// Run this after the Dto has been changed

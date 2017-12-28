@@ -56,9 +56,6 @@ namespace CyberMigrate
 
             Init_TasksGrid();
 
-            // mcbtodo: Move call to correct places
-            //StateCalculations.CalculateAllFeatureStates();
-
             // Select the node that is hovered over when right clicking and before showing the context menu
             treeFilter.PreviewMouseRightButtonDown += TreeViewExtensions.TreeView_PreviewMouseRightButtonDown_SelectNode;
             RedrawFilterTreeView();
@@ -356,15 +353,62 @@ namespace CyberMigrate
             }
             stateCalculationCallbacksRegistered = true;
 
+            // All things that should result in refreshing the cached lookup tables used for state calculation 
             CMDataProvider.DataStore.Value.CMTasks.Value.OnCUD += OnCUD_StateCalcLookupsRefreshNeeded;
             CMDataProvider.DataStore.Value.CMFeatures.Value.OnCUD += OnCUD_StateCalcLookupsRefreshNeeded;
             CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnCUD += OnCUD_StateCalcLookupsRefreshNeeded;
             CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnCUD += OnCUD_StateCalcLookupsRefreshNeeded;
+
+            // All things that should result in the re-calculation of *all* current feature system states
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnCUD += OnCUD_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnCUD += OnCUD_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnCUD += OnCUD_CalculateAllFeatureStates;
         }
 
+        /// <summary>
+        /// Call by the CRUD providers when the lookups used by the state calculation routines need to be refreshed
+        /// </summary>
+        /// <param name="cmCUDEventArgs"></param>
         private void OnCUD_StateCalcLookupsRefreshNeeded(CMCUDEventArgs cmCUDEventArgs)
         {
             StateCalculations.LookupsRefreshNeeded = true;
+        }
+
+        /// <summary>
+        /// Called by the CRUD providers when the current system state of features need to be recalculated
+        /// </summary>
+        /// <param name="cmCUDEventArgs"></param>
+        private void OnCUD_CalculateAllFeatureStates(CMCUDEventArgs cmCUDEventArgs)
+        {
+            switch (cmCUDEventArgs.DtoType.Name)
+            {
+                case nameof(CMFeatureStateTransitionRuleDto):
+                    // Recalc on any CUD of the rule
+                    break;
+                case nameof(CMTaskDto):
+                    // Recalc on any CUD of a task
+                    break;
+                case nameof(CMFeatureDto):
+                    switch (cmCUDEventArgs.ActionType)
+                    {
+                        case CMCUDActionType.Create:
+                            // Updating the feature state for a new feature is handled during the creation of the feature
+                            return;
+                        case CMCUDActionType.Update:
+                            // If the code is right this shouldn't cause a stack overflow if the depth of features isn't too deep, so let this one go through.
+                            break;
+                        case CMCUDActionType.Delete:
+                            // If a feature is deleted and there is a dependency task pointing at it, it may cause the dependency task to calculate its task state differently
+                            // However the method below to calc all feature states does not call in to calculate task states first so we ignore deletes here.
+                            return;
+                    }
+                    break;
+                default:
+                    // I want to explicitly handle each Dto type, so if I miss one in the switch above ...
+                    throw new Exception($"Unknown Dto type {cmCUDEventArgs.DtoType.Name} is routing to {nameof(OnCUD_CalculateAllFeatureStates)}. A case handler needs to be added for this.");
+            }
+
+            StateCalculations.CalculateAllFeatureStates();
         }
 
         private void RegisterTaskFactory_Callbacks()
