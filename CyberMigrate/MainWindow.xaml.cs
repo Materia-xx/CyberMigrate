@@ -197,11 +197,10 @@ namespace CyberMigrate
             filterResults.Clear();
 
             // Default is to list tasks in all systems/features/states
-            // mcbtodo: Provide a different GetAll_AsLookupById that gives back a dictionary<int, CMSystem> and re-write the .first() logic below so it doesn't need to scan through the entire results on each row creation
-            var systemsLookup = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll();
-            var featureInstancesLookup = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll_Instances();
-            var systemStatesLookup = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll();
-            var taskStatesLookup = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll();
+            var systemsLookup = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll_AsLookup();
+            var featureInstancesLookup = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll_Instances_AsLookup();
+            var systemStatesLookup = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_AsLookup();
+            var taskStatesLookup = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll_AsLookup();
 
             // mcbtodo: add a way to query for just task instances that are open
             var filteredTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_Instances();
@@ -240,8 +239,8 @@ namespace CyberMigrate
                     continue;
                 }
 
-                var featureRef = featureInstancesLookup.First(f => f.Id == cmTask.CMFeatureId);
-                var systemRef = systemsLookup.First(s => s.Id == featureRef.CMSystemId);
+                var featureRef = featureInstancesLookup[cmTask.CMFeatureId];
+                var systemRef = systemsLookup[featureRef.CMSystemId];
 
                 // Filter out tasks in system if filter is set
                 if (filterSystemId != 0 && systemRef.Id != filterSystemId)
@@ -249,9 +248,9 @@ namespace CyberMigrate
                     continue;
                 }
 
-                var taskSystemStateRef = systemStatesLookup.First(s => s.Id == cmTask.CMSystemStateId);
-                var taskStateRef = taskStatesLookup.First(ts => ts.Id == cmTask.CMTaskStateId);
-                var featureSystemStateRef = systemStatesLookup.First(s => s.Id == featureRef.CMSystemStateId);
+                var taskSystemStateRef = systemStatesLookup[cmTask.CMSystemStateId];
+                var taskStateRef = taskStatesLookup[cmTask.CMTaskStateId];
+                var featureSystemStateRef = systemStatesLookup[featureRef.CMSystemStateId];
 
                 unsortedResults.Add(new FilterResultItem()
                 {

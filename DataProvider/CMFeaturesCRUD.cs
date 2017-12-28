@@ -40,6 +40,19 @@ namespace DataProvider
             return results;
         }
 
+        public Dictionary<int, CMFeatureDto> GetAll_Instances_AsLookup()
+        {
+            var lookup = new Dictionary<int, CMFeatureDto>();
+
+            var results = Find(f => f.CMParentFeatureTemplateId != 0);
+            foreach (var item in results)
+            {
+                lookup[item.Id] = item;
+            }
+
+            return lookup;
+        }
+
         public IEnumerable<CMFeatureDto> GetAll_ForSystem(int cmSystemId, bool isTemplate)
         {
             var results = Find(f =>
