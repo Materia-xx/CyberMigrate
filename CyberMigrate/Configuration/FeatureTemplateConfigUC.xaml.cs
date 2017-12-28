@@ -362,7 +362,7 @@ namespace CyberMigrate.Configuration
                 if (gridTask.CMTaskTypeId > 0)
                 {
                     var selectedTaskType = ComboBox_TaskTypes.Single(t => t.Id == gridTask.CMTaskTypeId);
-                    gridTask.CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(CMTaskStatesCRUD.InternalState_Template, selectedTaskType.Id).Id;
+                    gridTask.CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Template, selectedTaskType.Id).Id;
                 }
 
                 // If the item already exists in the db

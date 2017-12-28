@@ -445,7 +445,7 @@ namespace CyberMigrate
 
                     // Make sure the task states for this task type are registered
                     // First make sure the built in states are present
-                    var reservedInternalTaskStates = CMDataProvider.DataStore.Value.CMTaskStates.Value.InternalStates;
+                    var reservedInternalTaskStates = ReservedTaskStates.States;
                     var reservedTaskPluginStates = taskFactory.GetRequiredTaskStates(cmTaskType);
                     var invalidPluginStates = reservedTaskPluginStates.Intersect(reservedInternalTaskStates);
                     if (invalidPluginStates.Any())

@@ -60,6 +60,7 @@
     <Compile Include="Events\CMCUDActionType.cs" />
     <Compile Include="Events\CMCUDEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReservedTaskStates.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dto\Dto.csproj">

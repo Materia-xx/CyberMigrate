@@ -64,7 +64,7 @@ namespace TaskBase.Extensions
                     CMParentTaskTemplateId = taskTemplate.Id,
                     CMFeatureId = featureDto.Id,
                     CMSystemStateId = taskTemplate.CMSystemStateId,
-                    CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(CMTaskStatesCRUD.InternalState_Instance, taskTemplateType.Id).Id,
+                    CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Instance, taskTemplateType.Id).Id,
                     CMTaskTypeId = taskTemplate.CMTaskTypeId,
                     Title = taskTemplate.Title // mcbtodo: apply template vars here when they are implemented
                 };

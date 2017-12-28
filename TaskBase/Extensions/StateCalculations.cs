@@ -187,7 +187,7 @@ namespace TaskBase.Extensions
 
             foreach (var taskType in allTaskTypes)
             {
-                var closedState = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(CMTaskStatesCRUD.InternalState_Closed, taskType.Id);
+                var closedState = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Closed, taskType.Id);
                 closedTaskStateByTaskTypeId[taskType.Id] = closedState.Id;
             }
 

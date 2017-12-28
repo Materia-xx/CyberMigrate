@@ -46,7 +46,7 @@ namespace CyberMigrate
             var taskStates = new List<CMTaskStateDto>();
             if (cmTaskDto.IsTemplate)
             {
-                var taskStateTemplate = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(CMTaskStatesCRUD.InternalState_Template, cmTaskDto.CMTaskTypeId);
+                var taskStateTemplate = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Template, cmTaskDto.CMTaskTypeId);
                 taskStates.Add(taskStateTemplate);
             }
             else

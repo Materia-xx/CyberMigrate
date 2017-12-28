@@ -7,17 +7,6 @@ namespace DataProvider
 {
     public class CMTaskStatesCRUD : CMDataProviderCRUDBase<CMTaskStateDto>
     {
-        public const string InternalState_Closed = "Closed";
-        public const string InternalState_Template = "Template";
-        public const string InternalState_Instance = "Instance";
-
-        public List<string> InternalStates { get; set; } = new List<string>()
-        {
-            InternalState_Template,
-            InternalState_Instance,
-            InternalState_Closed
-        };
-
         public CMTaskStatesCRUD(LiteDatabase liteDatabase, string collectionName) : base(liteDatabase, collectionName)
         {
         }
