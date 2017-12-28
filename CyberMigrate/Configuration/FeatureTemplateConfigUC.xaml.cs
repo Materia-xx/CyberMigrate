@@ -23,7 +23,7 @@ namespace CyberMigrate.Configuration
 
         private List<BoolBasedComboBoxEntry> ComboBox_ConditionAllAnyChoices { get; set; } = new List<BoolBasedComboBoxEntry>();
 
-        private List<BoolBasedComboBoxEntry> ComboBox_ConditionAreCompleteChoices { get; set; } = new List<BoolBasedComboBoxEntry>();
+        private List<BoolBasedComboBoxEntry> ComboBox_ConditionAreClosedChoices { get; set; } = new List<BoolBasedComboBoxEntry>();
 
         private List<CMSystemStateDto> ComboBox_FeatureTemplateSystemStates { get; set; } = new List<CMSystemStateDto>();
 
@@ -79,9 +79,9 @@ namespace CyberMigrate.Configuration
             ComboBox_ConditionAllAnyChoices.Add(new BoolBasedComboBoxEntry(true, "All"));
             ComboBox_ConditionAllAnyChoices.Add(new BoolBasedComboBoxEntry(false, "Any"));
 
-            ComboBox_ConditionAreCompleteChoices.Clear();
-            ComboBox_ConditionAreCompleteChoices.Add(new BoolBasedComboBoxEntry(true, "Are complete"));
-            ComboBox_ConditionAreCompleteChoices.Add(new BoolBasedComboBoxEntry(false, "Are not complete"));
+            ComboBox_ConditionAreClosedChoices.Clear();
+            ComboBox_ConditionAreClosedChoices.Add(new BoolBasedComboBoxEntry(true, "Are closed"));
+            ComboBox_ConditionAreClosedChoices.Add(new BoolBasedComboBoxEntry(false, "Are not closed"));
 
             ComboBox_CurrentSystemStates.Clear();
             ComboBox_CurrentSystemStates.AddRange(
@@ -145,10 +145,10 @@ namespace CyberMigrate.Configuration
                     Width = 150,
 
                     // Where to store the selected value
-                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.ConditionTaskComplete)),
+                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.ConditionTaskClosed)),
 
                     // Instructions on how to interact with the "lookup" list
-                    ItemsSource = ComboBox_ConditionAreCompleteChoices,
+                    ItemsSource = ComboBox_ConditionAreClosedChoices,
                     SelectedValuePath = nameof(BoolBasedComboBoxEntry.Value),
                     DisplayMemberPath = nameof(BoolBasedComboBoxEntry.Name),
                 });

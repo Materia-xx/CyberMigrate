@@ -217,7 +217,7 @@ namespace CyberMigrate
                 // Add a set of default transition rules that match the current system states
                 int rulePriority = 1;
                 var systemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id).ToList();
-                // These are the rules that detect that an un-complete task exists and to snap back into that state in priority order
+                // These are the rules that detect that an un-closed task exists and to snap back into that state in priority order
                 for (int i = systemStates.Count() - 1; i >= 0; i--)
                 {
                     var currentState = systemStates[i];
@@ -227,7 +227,7 @@ namespace CyberMigrate
                         CMFeatureId = newCMFeatureTemplate.Id,
                         ConditionAllTasks = false,
                         ConditionQuerySystemStateId = currentState.Id,
-                        ConditionTaskComplete = false,
+                        ConditionTaskClosed = false,
                         Priority = rulePriority++,
                         ToCMSystemStateId = currentState.Id
                     };
@@ -251,7 +251,7 @@ namespace CyberMigrate
                         CMFeatureId = newCMFeatureTemplate.Id,
                         ConditionAllTasks = true,
                         ConditionQuerySystemStateId = currentState.Id,
-                        ConditionTaskComplete = true,
+                        ConditionTaskClosed = true,
                         Priority = rulePriority++,
                         ToCMSystemStateId = nextState.Id
                     };

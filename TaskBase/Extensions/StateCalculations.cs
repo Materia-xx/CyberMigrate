@@ -12,7 +12,7 @@ namespace TaskBase.Extensions
     {
         private static Dictionary<int, List<CMFeatureStateTransitionRuleDto>> transitionRulesByFeatureId;
         private static Dictionary<int, List<CMTaskDto>> tasksByFeatureId;
-        private static Dictionary<int, int> completeTaskStateByTaskTypeId;
+        private static Dictionary<int, int> closedTaskStateByTaskTypeId;
 
         /// <summary>
         /// Indicates that the lookup references need to be refreshed.
@@ -91,10 +91,10 @@ namespace TaskBase.Extensions
                     new List<CMTaskDto>();
 
                 // Defaults for when there are no tasks
-                // - Any tasks that are complete: false
-                // - Any tasks that are not complete: false
-                // - All tasks are complete: false
-                // - All tasks are not complete: false
+                // - Any tasks that are closed: false
+                // - Any tasks that are not closed: false
+                // - All tasks are closed: false
+                // - All tasks are not closed: false
                 // Therefore a system state with no tasks will never meet the condition
                 bool meetsRuleCondition = false;
                 if (tasksInQuerySystemState.Any())
@@ -103,9 +103,9 @@ namespace TaskBase.Extensions
 
                     foreach (var cmTask in tasksInQuerySystemState)
                     {
-                        var completeTaskStateId = completeTaskStateByTaskTypeId[cmTask.CMTaskTypeId];
+                        var closedTaskStateId = closedTaskStateByTaskTypeId[cmTask.CMTaskTypeId];
 
-                        if ((cmTask.CMTaskStateId == completeTaskStateId) == transitionRule.ConditionTaskComplete)
+                        if ((cmTask.CMTaskStateId == closedTaskStateId) == transitionRule.ConditionTaskClosed)
                         {
                             meetsConditionCount++;
 
@@ -161,7 +161,7 @@ namespace TaskBase.Extensions
 
             transitionRulesByFeatureId = new Dictionary<int, List<CMFeatureStateTransitionRuleDto>>();
             tasksByFeatureId = new Dictionary<int, List<CMTaskDto>>();
-            completeTaskStateByTaskTypeId = new Dictionary<int, int>();
+            closedTaskStateByTaskTypeId = new Dictionary<int, int>();
 
             var allStateTransitionRules = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.GetAll();
             var allFeatureTemplates = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll_Templates();
@@ -187,8 +187,8 @@ namespace TaskBase.Extensions
 
             foreach (var taskType in allTaskTypes)
             {
-                var closedState = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(CMTaskStatesCRUD.InternalState_Complete, taskType.Id);
-                completeTaskStateByTaskTypeId[taskType.Id] = closedState.Id;
+                var closedState = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(CMTaskStatesCRUD.InternalState_Closed, taskType.Id);
+                closedTaskStateByTaskTypeId[taskType.Id] = closedState.Id;
             }
 
             LookupsRefreshNeeded = false;

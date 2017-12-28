@@ -1,11 +1,6 @@
 ﻿using DataProvider;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using TaskBase;
 
 namespace CyberMigrate
 {
@@ -15,12 +10,35 @@ namespace CyberMigrate
         {
             //Upgrade_TaskDto();
             //Upgrade_FeatureDto();
+            //Upgrade_TransitionRuleDto();
 
             // mcbtodo: These are only cleanup routines I'm using to clean up the db during dev and won't be needed in the released version
             //Debug_DeleteTasksNotInAFeature();
             //Debug_DeleteInvalidFeatureTransitionRules();
-            Debug_DeleteAllTaskAndFeatureInstances();
+            //Debug_DeleteAllTaskAndFeatureInstances();
         }
+
+        private static void Upgrade_TransitionRuleDto()
+        {
+            MessageBox.Show("Press OK upgrade transition rule Dto records in the database, and delete currently invalid records.");
+
+            var allRules = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.GetAll();
+            foreach (var cmRule in allRules)
+            {
+                //cmRule.ConditionTaskClosed = cmRule.ConditionTaskComplete;
+
+                var opResult = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.Update(cmRule);
+                if (opResult.Errors.Any())
+                {
+                    var opDelResult = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.Delete(cmRule.Id);
+                    if (opDelResult.Errors.Any())
+                    {
+                        MessageBox.Show(opDelResult.ErrorsCombined);
+                    }
+                }
+            }
+        }
+
 
         /// <summary>
         /// Updates the BSON data stored in the db to match the current properties available in the Dto

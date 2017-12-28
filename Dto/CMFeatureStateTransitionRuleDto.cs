@@ -28,8 +28,8 @@
         public int ConditionQuerySystemStateId { get; set; }
 
         /// <summary>
-        /// If true, then the rule looks for task(s) that are complete. Otherwise it looks for tasks that are not complete.
+        /// If true, then the rule looks for task(s) that are closed. Otherwise it looks for tasks that are not closed.
         /// </summary>
-        public bool ConditionTaskComplete { get; set; }
+        public bool ConditionTaskClosed { get; set; }
     }
 }

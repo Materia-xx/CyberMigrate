@@ -14,7 +14,7 @@ namespace TaskBase
         /// <summary>
         /// Gets a list of task states that the specified task type will set at any point.
         /// This list should not include the following reserved states, which are automatically added for all states.
-        ///     * Complete  - Represents a task that is complete.
+        ///     * Closed  - Represents a task that is closed.
         ///     * Template  - A task that is a template will have this state
         ///     * Instance - When a task is copied from a template to an instance the instance will be at this state initially
         /// </summary>
