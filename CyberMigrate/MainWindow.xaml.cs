@@ -54,7 +54,7 @@ namespace CyberMigrate
             // Debugging function to clean out instanced tasks and features
             DBMaintenance.RunMaintenanceRoutines();
 
-            Init_TasksGrid();
+            dataGridTasks.ItemsSource = filterResults;
 
             // Select the node that is hovered over when right clicking and before showing the context menu
             treeFilter.PreviewMouseRightButtonDown += TreeViewExtensions.TreeView_PreviewMouseRightButtonDown_SelectNode;
@@ -91,78 +91,6 @@ namespace CyberMigrate
 
             // Show all tasks by default in the filter grid by selecting the 'All Systems' node.
             allSystemsTVI.IsSelected = true;
-        }
-
-        private void Init_TasksGrid()
-        {
-            dataGridTasks.AutoGenerateColumns = false;
-            dataGridTasks.CanUserAddRows = false;
-            dataGridTasks.Columns.Clear();
-
-            dataGridTasks.Columns.Add(
-                new DataGridTextColumn()
-                {
-                    Header = "System",
-                    Width = 150,
-                    Binding = new Binding(nameof(FilterResultItem.SystemName)),
-                });
-
-            dataGridTasks.Columns.Add(
-                new DataGridTextColumn()
-                {
-                    Header = "Feature",
-                    Width = 150,
-                    Binding = new Binding(nameof(FilterResultItem.FeatureName)),
-                });
-
-            dataGridTasks.Columns.Add(
-                new DataGridTextColumn()
-                {
-                    Header = "Feature System State",
-                    Width = 150,
-                    Binding = new Binding(nameof(FilterResultItem.FeatureSystemStateName)),
-                });
-
-            dataGridTasks.Columns.Add(
-                new DataGridTextColumn()
-                {
-                    Header = "Task Title",
-                    Width = 200,
-                    Binding = new Binding(nameof(FilterResultItem.TaskTitle)),
-                });
-
-            dataGridTasks.Columns.Add(
-                new DataGridTextColumn()
-                {
-                    Header = "Task System State",
-                    Width = 150,
-                    Binding = new Binding(nameof(FilterResultItem.TaskSystemStateName)),
-                });
-
-            dataGridTasks.Columns.Add(
-                new DataGridTextColumn()
-                {
-                    Header = "Task State",
-                    Width = 150,
-                    Binding = new Binding(nameof(FilterResultItem.TaskStateName)),
-                });
-
-            // A factory because each row will generate a button
-            var viewButtonFactory = new FrameworkElementFactory(typeof(Button));
-            viewButtonFactory.SetValue(Button.ContentProperty, "View");
-            // mcbtodo: viewButtonFactory.AddHandler(Button.ClickEvent, new RoutedEventHandler(btnEditTask_Click));
-            dataGridTasks.Columns.Add(new DataGridTemplateColumn
-            {
-                Header = "View Task",
-                CellTemplate = new DataTemplate()
-                {
-                    VisualTree = viewButtonFactory
-                }
-            });
-
-            dataGridTasks.ItemsSource = filterResults;
-
-            // Note: This is a set of view-only filtered results, no edits allowed here.
         }
 
         private TreeViewItem GetTVI_AllSystems()
@@ -206,6 +134,7 @@ namespace CyberMigrate
 
             int filterSystemId = 0;
             int filterSystemStateId = 0;
+            bool filterOnlyShowTasksInCurrentFeatureState = true;
 
             if (attachedTag?.Dto == null)
             {
@@ -245,22 +174,31 @@ namespace CyberMigrate
                     continue;
                 }
 
+                var featureSystemStateRef = systemStatesLookup[featureRef.CMSystemStateId];
+                bool taskIsInCurrentFeatureState = featureSystemStateRef.Id == cmTask.CMSystemStateId;
+                // Filter out tasks that are not in the current feature state
+                if (filterOnlyShowTasksInCurrentFeatureState && !taskIsInCurrentFeatureState)
+                {
+                    continue;
+                }
+
                 var taskSystemStateRef = systemStatesLookup[cmTask.CMSystemStateId];
                 var taskStateRef = taskStatesLookup[cmTask.CMTaskStateId];
-                var featureSystemStateRef = systemStatesLookup[featureRef.CMSystemStateId];
 
-                unsortedResults.Add(new FilterResultItem()
+                var filterRow = new FilterResultItem()
                 {
-                    SystemName = systemRef.Name,
-                    TaskSystemStateName = taskSystemStateRef.Name,
                     SystemStatePriorityId = taskSystemStateRef.Priority,
                     FeatureName = featureRef.Name,
-                    FeatureSystemStateName = featureSystemStateRef.Name,
                     TaskTitle = cmTask.Title,
                     TaskId = cmTask.Id,
                     TaskStatePriorityId = taskStateRef.Priority,
-                    TaskStateName = taskStateRef.DisplayName
-                });
+                    TaskStateName = taskStateRef.DisplayName,
+                    SystemName = systemRef.Name,
+                    TaskSystemStateName = taskSystemStateRef.Name,
+                    FeatureSystemStateName = featureSystemStateRef.Name,
+                };
+
+                unsortedResults.Add(filterRow);
             }
 
             // Order the results
@@ -600,6 +538,11 @@ namespace CyberMigrate
                 ShowConfigurationUI();
             };
             MainMenu.Items.Add(configurationMenu);
+        }
+
+        private void btnViewTask_Click(object sender, RoutedEventArgs e)
+        {
+            // mcbtodo: write code to view the currently selected task
         }
     }
 }

@@ -1,10 +1,6 @@
 Upcoming:
 
-    - Update the main UI to only show tasks for the current feature state and not all feature states
-      But when a specific system state is selected, show all un-closed tasks within that state.
-    - Split up the main rows shown in the filter grid to be a main row that represents the feature
-      with expanded sub-rows for the tasks, maybe with another level in between that represent the system state
-      Only expand the current feature system state. 
+    - Update the main UI to show for different system states when those are selected in the filter tree.
     - Add more filter tools in the main UI
         - Checkbox to Show closed items
         - Textbox to search through titles, names and possibly task data and perform a customized search

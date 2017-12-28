@@ -22,7 +22,49 @@
 
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
 
-            <DataGrid x:Name="dataGridTasks" Grid.Row="5" Grid.Column="2" />
+            <DataGrid x:Name="dataGridTasks" Grid.Row="5" Grid.Column="2" AutoGenerateColumns="False" CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Feature" Binding="{Binding FeatureName}" Width="150"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Task Title" Binding="{Binding TaskTitle}" Width="200"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Task State" Binding="{Binding TaskStateName}" Width="150"></DataGridTextColumn>
+                    <DataGridTemplateColumn Header="View Task">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Click="btnViewTask_Click">View</Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+                <DataGrid.RowDetailsTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="0" Background="BlanchedAlmond" Padding="10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="20"/>
+                                    <RowDefinition Height="5"/>
+                                    <RowDefinition Height="20"/>
+                                    <RowDefinition Height="5"/>
+                                    <RowDefinition Height="20"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock FontSize="12" Text="System" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0" />
+                                <TextBlock FontSize="16" Foreground="MidnightBlue" Text="{Binding SystemName}" Grid.Column="2" Grid.Row="0" />
+
+                                <TextBlock FontSize="12" Text="Feature System State" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="2"  />
+                                <TextBlock FontSize="16" Foreground="MidnightBlue" Text="{Binding FeatureSystemStateName}" Grid.Column="2" Grid.Row="2" />
+
+                                <TextBlock FontSize="12" Text="Task System State" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="4" />
+                                <TextBlock FontSize="16" Foreground="MidnightBlue" Text="{Binding TaskSystemStateName}" Grid.Column="2" Grid.Row="4" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </DataGrid.RowDetailsTemplate>
+            </DataGrid>
 
         </Grid>
     </DockPanel>
