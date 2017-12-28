@@ -196,15 +196,8 @@ namespace Tasks.BuiltIn
                 return;
             }
 
-            // Try to get a ref to the task being affected
-            var cmTask = CMDataProvider.DataStore.Value.CMTasks.Value.Get(cmCUDEventArgs.Id);
-            if (cmTask == null)
-            {
-                return;
-            }
-
             // Try to figure out what the task type is
-            var cmTaskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(cmTask.CMTaskTypeId); // mcbtodo: create a function to try and get this directly from the task id in the tasktype crud provider
+            var cmTaskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get_ForTaskId(cmCUDEventArgs.Id);
             if (cmTaskType == null)
             {
                 return;

@@ -18,6 +18,25 @@ namespace DataProvider
         }
 
         /// <summary>
+        /// Attempts to get the task type record from a task id
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
+        public CMTaskTypeDto Get_ForTaskId(int taskId)
+        {
+            // Try to get a ref to the task
+            var cmTask = CMDataProvider.DataStore.Value.CMTasks.Value.Get(taskId);
+            if (cmTask == null)
+            {
+                return null;
+            }
+
+            // Try to figure out what the task type is
+            var cmTaskType = Get(cmTask.CMTaskTypeId);
+            return cmTaskType;
+        }
+
+        /// <summary>
         /// Checks that apply to both insert and update operations
         /// </summary>
         /// <param name="opResult"></param>
