@@ -84,10 +84,16 @@ namespace CyberMigrate
 
             var selectedState = selectedStateObj as CMTaskStateDto;
 
-
-
-            MessageBox.Show($"new state is {selectedState.DisplayName}"); // mcbtodo:
-            
+            // If the task state changed, then update it
+            if (cmTaskDto.CMTaskStateId != selectedState.Id)
+            {
+                cmTaskDto.CMTaskStateId = selectedState.Id;
+                var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Update(cmTaskDto);
+                if (opResult.Errors.Any())
+                {
+                    MessageBox.Show(opResult.ErrorsCombined);
+                }
+            }
         }
     }
 }

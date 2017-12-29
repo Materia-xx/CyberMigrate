@@ -3,6 +3,9 @@ Upcoming:
     - Update the main UI to show for different system states when those are selected in the filter tree.
     - Add more filter tools in the main UI
         - Checkbox to Show closed items
+        - Checkbox to show hidden tasks 
+            a new concept for feature dependency tasks, which don't need work done by themselves, it's auto-calculated to can be hidden in the UI.
+            But the user may want to view it to reset the dependency details to another feature or just manually close it.
         - Textbox to search through titles, names and possibly task data and perform a customized search
     - Shows the tasks sorted in the way the design plan indicates
     - Add the ability to add instanced tasks ad-hoc to already created features
@@ -10,7 +13,6 @@ Upcoming:
     - Work on making the autoprogress methods of the tasks work and having the main program call this for the correct
             tasks on a regular interval
     - Put in the logic for the autoprogression of system state within a feature
-    - Ability to manually change the task state via the task dialog (when the task is an instance)
     - Verify that a Task.AutoProgress call works to update any open task dialog with the correct state.
 
 
