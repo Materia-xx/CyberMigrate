@@ -7,9 +7,6 @@ Upcoming:
     - Shows the tasks sorted in the way the design plan indicates
     - Add the ability to add instanced tasks ad-hoc to already created features
     - Add in feature vars
-    - Update the dependency task to display correctly for a task that has been instanced.
-            During template editing mode it should allow setting dependencies on feature templates. 
-            If not template then it should only list features that are not a template.
     - Work on making the autoprogress methods of the tasks work and having the main program call this for the correct
             tasks on a regular interval
     - Put in the logic for the autoprogression of system state within a feature

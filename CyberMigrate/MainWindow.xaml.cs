@@ -126,6 +126,7 @@ namespace CyberMigrate
             var featureInstancesLookup = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll_Instances_AsLookup();
             var systemStatesLookup = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_AsLookup();
             var taskStatesLookup = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll_AsLookup();
+            var taskTypesLookup = CMDataProvider.DataStore.Value.CMTaskTypes.Value.GetAll_AsLookup();
 
             // mcbtodo: add a way to query for just task instances that are open
             var filteredTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_Instances();
@@ -184,6 +185,7 @@ namespace CyberMigrate
 
                 var taskSystemStateRef = systemStatesLookup[cmTask.CMSystemStateId];
                 var taskStateRef = taskStatesLookup[cmTask.CMTaskStateId];
+                var taskTypeRef = taskTypesLookup[cmTask.CMTaskTypeId];
 
                 var filterRow = new FilterResultItem()
                 {
@@ -191,6 +193,7 @@ namespace CyberMigrate
                     FeatureName = featureRef.Name,
                     TaskTitle = cmTask.Title,
                     TaskId = cmTask.Id,
+                    TaskType = taskTypeRef.Name,
                     TaskStatePriorityId = taskStateRef.Priority,
                     TaskStateName = taskStateRef.DisplayName,
                     SystemName = systemRef.Name,

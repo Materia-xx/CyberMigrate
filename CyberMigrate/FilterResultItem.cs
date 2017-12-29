@@ -28,6 +28,11 @@ namespace CyberMigrate
         public int TaskId { get; set; }
 
         /// <summary>
+        /// The type of the task
+        /// </summary>
+        public string TaskType { get; set; }
+
+        /// <summary>
         /// The task state that the task is currently in
         /// </summary>
         public string TaskStateName { get; set; }

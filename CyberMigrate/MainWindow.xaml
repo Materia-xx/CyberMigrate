@@ -26,6 +26,7 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Feature" Binding="{Binding FeatureName}" Width="150"></DataGridTextColumn>
                     <DataGridTextColumn Header="Task Title" Binding="{Binding TaskTitle}" Width="200"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Task Type" Binding="{Binding TaskType}" Width="150"></DataGridTextColumn>
                     <DataGridTextColumn Header="Task State" Binding="{Binding TaskStateName}" Width="150"></DataGridTextColumn>
                     <DataGridTemplateColumn Header="View Task">
                         <DataGridTemplateColumn.CellTemplate>
