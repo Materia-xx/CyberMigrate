@@ -13,9 +13,23 @@ namespace CyberMigrate
             //Upgrade_TransitionRuleDto();
 
             // mcbtodo: These are only cleanup routines I'm using to clean up the db during dev and won't be needed in the released version
+            //Debug_DeleteAllTaskStates();
             //Debug_DeleteTasksNotInAFeature();
             //Debug_DeleteInvalidFeatureTransitionRules();
             //Debug_DeleteAllTaskAndFeatureInstances();
+        }
+
+        // Remove all task states, the program should load new ones from the tasks and defaults. Wipes out user defined states if possible
+        public static void Debug_DeleteAllTaskStates()
+        {
+            var allStates = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll();
+            foreach (var state in allStates)
+            {
+                if (state.InternalName == "Complete")
+                {
+                    CMDataProvider.DataStore.Value.CMTaskStates.Value.Delete(state.Id);
+                }
+            }
         }
 
         private static void Upgrade_TransitionRuleDto()

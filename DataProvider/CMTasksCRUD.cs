@@ -67,6 +67,20 @@ namespace DataProvider
                 opResult.Errors.Add($"A task must have a task type set in {CollectionName}");
             }
 
+            var taskStateTemplate = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Template, dto.CMTaskTypeId);
+
+            // The only state option for a template is "Template"
+            if (dto.IsTemplate && (dto.CMTaskStateId != taskStateTemplate.Id))
+            {
+                opResult.Errors.Add($"A task template task state must be set to the 'Template' state.");
+            }
+
+            // A task instance cannot be set to the "Template" state.
+            if (!dto.IsTemplate && (dto.CMTaskStateId == taskStateTemplate.Id))
+            {
+                opResult.Errors.Add($"A task instance cannot be set to the 'Template' state.");
+            }
+
             return opResult;
         }
 
