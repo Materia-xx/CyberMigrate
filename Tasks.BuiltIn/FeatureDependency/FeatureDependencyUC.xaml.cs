@@ -53,8 +53,6 @@ namespace Tasks.BuiltIn.FeatureDependency
             cboState.SelectedValuePath = nameof(CMSystemStateDto.Id);
         }
 
-        // mcbtodo: This code in this task still needs to be updated to handle the case when it is editing an instance task. Currently it only loads the correct dropdown values for a templated task.
-
         private void ReloadComboBox_Features()
         {
             ComboBox_Features.Clear();
@@ -80,7 +78,10 @@ namespace Tasks.BuiltIn.FeatureDependency
                 return;
             }
             var selectedFeature = selectedFeatureObj as CMFeatureDto;
-            var cmStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForFeatureTemplate(selectedFeature.Id);
+
+            // If this is a feature template then get the system states directly for it, otherwise get them for the parent feature template
+            var featureTemplateId = selectedFeature.CMParentFeatureTemplateId == 0 ? selectedFeature.Id : selectedFeature.CMParentFeatureTemplateId;
+            var cmStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForFeatureTemplate(featureTemplateId);
             foreach (var cmState in cmStates)
             {
                 ComboBox_States.Add(cmState);
