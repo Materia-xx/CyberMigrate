@@ -91,6 +91,7 @@ namespace DataProvider
                 {
                     ActionType = CMCUDActionType.Create,
                     DtoType = typeof(T),
+                    DtoAfter = insertingObject,
                     Id = insertingObject.Id
                 });
 
@@ -101,17 +102,22 @@ namespace DataProvider
         {
             var opResult = new CMCUDResult();
 
+            var cudEvent = new CMCUDEventArgs()
+            {
+                ActionType = CMCUDActionType.Update,
+                DtoType = typeof(T),
+                DtoBefore = Get(updatingObject.Id),
+                DtoAfter = updatingObject,
+                Id = updatingObject.Id
+            };
+
             if (cmCollection.Update(updatingObject) == false)
             {
                 opResult.Errors.Add($"An item in {CollectionName} with id {updatingObject.Id} was not found to update.");
+                return opResult;
             }
-            OnCUD?.Invoke(
-                new CMCUDEventArgs()
-                {
-                    ActionType = CMCUDActionType.Update,
-                    DtoType = typeof(T),
-                    Id = updatingObject.Id
-                });
+
+            OnCUD?.Invoke(cudEvent);
 
             return opResult;
         }
@@ -125,6 +131,7 @@ namespace DataProvider
                 {
                     ActionType = CMCUDActionType.Delete,
                     DtoType = typeof(T),
+                    DtoBefore = Get(deletingId),
                     Id = deletingId
                 });
             if (!cmCollection.Delete(deletingId))

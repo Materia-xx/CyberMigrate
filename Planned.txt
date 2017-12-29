@@ -1,5 +1,11 @@
 Upcoming:
 
+    - Consider taking the "All" rule condition out and only using Any rules. Plus add a new rule type that just blindly sets the state that can be used to 
+      set a feature to its final state if the rule processing makes it that far.
+    - Refresh the main UI filtered items when the items change, maybe refresh a second or so after there have been no updates for a coupld seconds
+      to void trying to rapidly refresh every time a record is updated during large sweeping updates.
+    - Add a way for task types to add details to the result grid in the details section
+    - Add a way to quickly mark a task as complete via the filter results grid
     - Update the main UI to show for different system states when those are selected in the filter tree.
     - Add more filter tools in the main UI
         - Checkbox to Show closed items
