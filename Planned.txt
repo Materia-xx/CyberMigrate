@@ -14,5 +14,3 @@ Upcoming:
             tasks on a regular interval
     - Put in the logic for the autoprogression of system state within a feature
     - Verify that a Task.AutoProgress call works to update any open task dialog with the correct state.
-
-

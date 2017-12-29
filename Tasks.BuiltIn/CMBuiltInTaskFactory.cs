@@ -162,6 +162,7 @@ namespace Tasks.BuiltIn
             // Now we can create new task data note
             var taskData = new NoteDto()
             {
+                TaskId = cmTaskInstance.Id,
                 Note = taskDataTemplate.Note // mcbtodo: apply feature vars here when they are available
             };
 

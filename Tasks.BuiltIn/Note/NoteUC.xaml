@@ -17,7 +17,7 @@
             <RowDefinition Height="25" />
         </Grid.RowDefinitions>
 
-        <TextBox x:Name="txtNote" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"></TextBox>
+        <TextBox x:Name="txtNote" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" SpellCheck.IsEnabled="True"></TextBox>
 
         <Button x:Name="btnUpdate" Grid.Row="2" Grid.Column="1" Click="btnUpdate_Click">Update</Button>
     </Grid>

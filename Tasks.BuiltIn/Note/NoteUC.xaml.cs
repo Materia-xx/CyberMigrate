@@ -51,6 +51,7 @@ namespace Tasks.BuiltIn.Note
             {
                 TaskData = new NoteDto()
                 {
+                    TaskId = cmTask.Id,
                     Note = txtNote.Text
                 };
             }
