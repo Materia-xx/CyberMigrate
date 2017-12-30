@@ -48,8 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildInTasksDataProvider.cs" />
+    <Compile Include="BuildInTaskTypes.cs" />
     <Compile Include="FeatureDependency\FeatureDependencyDto.cs" />
-    <Compile Include="FeatureDependency\FeatureDependencyTask.cs" />
     <Compile Include="CMBuiltInTaskFactory.cs" />
     <Compile Include="FeatureDependency\FeatureDependencyConfigUC.xaml.cs">
       <DependentUpon>FeatureDependencyConfigUC.xaml</DependentUpon>
@@ -61,7 +61,6 @@
       <DependentUpon>NoteUC.xaml</DependentUpon>
     </Compile>
     <Compile Include="Note\NoteDto.cs" />
-    <Compile Include="Note\NoteTask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

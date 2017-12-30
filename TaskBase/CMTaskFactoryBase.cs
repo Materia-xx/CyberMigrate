@@ -29,16 +29,6 @@ namespace TaskBase
         public abstract List<string> GetTaskTypes();
 
         /// <summary>
-        /// Called when the program needs an instance of the task in order to call task specific methods.
-        /// </summary>
-        /// <param name="cmTaskType"></param>
-        /// <param name="cmSystem"></param>
-        /// <param name="cmFeature"></param>
-        /// <param name="cmTask"></param>
-        /// <returns></returns>
-        public abstract CMTaskBase GetTask(CMTaskTypeDto cmTaskType, CMSystemDto cmSystem, CMFeatureDto cmFeature, CMTaskDto cmTask);
-
-        /// <summary>
         /// The UI that is shown when editing a task
         /// </summary>
         /// <param name="cmTaskType"></param>

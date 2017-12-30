@@ -91,13 +91,6 @@ namespace TaskBase
             return TaskFactoriesByTaskType[taskTypeName];
         }
 
-        public CMTaskBase GetTask(CMTaskTypeDto cmTaskType, CMSystemDto cmSystem, CMFeatureDto cmFeature, CMTaskDto cmTask)
-        {
-            var taskFactory = GetTaskFactory(cmTaskType.Name);
-            var createdTask = taskFactory.GetTask(cmTaskType, cmSystem, cmFeature, cmTask);
-            return createdTask;
-        }
-
         /// <summary>
         /// Gets the user control meant to configure the task type
         /// </summary>

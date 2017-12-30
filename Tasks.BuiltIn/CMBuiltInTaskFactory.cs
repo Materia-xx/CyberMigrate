@@ -31,8 +31,8 @@ namespace Tasks.BuiltIn
         public override List<string> GetTaskTypes()
         {
             var taskTypes = new List<string>();
-            taskTypes.Add(nameof(FeatureDependencyTask));
-            taskTypes.Add(nameof(NoteTask));
+            taskTypes.Add(nameof(BuildInTaskTypes.FeatureDependency));
+            taskTypes.Add(nameof(BuildInTaskTypes.Note));
             return taskTypes;
         }
 
@@ -42,10 +42,10 @@ namespace Tasks.BuiltIn
 
             switch (cmTaskType.Name)
             {
-                case nameof(FeatureDependencyTask):
+                case nameof(BuildInTaskTypes.FeatureDependency):
                     requiredStates.Add("WaitingOnDependency");
                     break;
-                case nameof(NoteTask):
+                case nameof(BuildInTaskTypes.Note):
                     // No required states in the note task
                     break;
             }
@@ -53,35 +53,36 @@ namespace Tasks.BuiltIn
             return requiredStates;
         }
 
-        public override CMTaskBase GetTask(CMTaskTypeDto cmTaskType, CMSystemDto cmSystem, CMFeatureDto cmFeature, CMTaskDto cmTask)
-        {
-            switch (cmTaskType.Name)
-            {
-                case nameof(FeatureDependencyTask):
-                    var featureTask = new FeatureDependencyTask();
-                    featureTask.CmSystemId = cmSystem.Id;
-                    featureTask.CmFeatureId = cmFeature.Id;
-                    featureTask.CmTaskId = cmTask.Id;
-                    return featureTask;
-                case nameof(NoteTask):
-                    var noteTask = new NoteTask();
-                    noteTask.CmSystemId = cmSystem.Id;
-                    noteTask.CmFeatureId = cmFeature.Id;
-                    noteTask.CmTaskId = cmTask.Id;
-                    return noteTask;
-            }
+        // mcbtodo: remove
+        //public override CMTaskBase GetTask(CMTaskTypeDto cmTaskType, CMSystemDto cmSystem, CMFeatureDto cmFeature, CMTaskDto cmTask)
+        //{
+        //    switch (cmTaskType.Name)
+        //    {
+        //        case nameof(FeatureDependencyTask):
+        //            var featureTask = new FeatureDependencyTask();
+        //            featureTask.CmSystemId = cmSystem.Id;
+        //            featureTask.CmFeatureId = cmFeature.Id;
+        //            featureTask.CmTaskId = cmTask.Id;
+        //            return featureTask;
+        //        case nameof(NoteTask):
+        //            var noteTask = new NoteTask();
+        //            noteTask.CmSystemId = cmSystem.Id;
+        //            noteTask.CmFeatureId = cmFeature.Id;
+        //            noteTask.CmTaskId = cmTask.Id;
+        //            return noteTask;
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
 
         public override UserControl GetTaskConfigUI(CMTaskTypeDto cmTaskType)
         {
             switch (cmTaskType.Name)
             {
-                case nameof(FeatureDependencyTask):
+                case nameof(BuildInTaskTypes.FeatureDependency):
                     var configUI = new FeatureDependencyConfigUC();
                     return configUI;
-                case nameof(NoteTask):
+                case nameof(BuildInTaskTypes.Note):
                     // No config UI for the note task
                     return null;
             }
@@ -93,10 +94,10 @@ namespace Tasks.BuiltIn
         {
             switch (cmTaskType.Name)
             {
-                case nameof(FeatureDependencyTask):
+                case nameof(BuildInTaskTypes.FeatureDependency):
                     var featureDependencyTaskUI = new FeatureDependencyUC(cmSystem, cmFeature, cmTask);
                     return featureDependencyTaskUI;
-                case nameof(NoteTask):
+                case nameof(BuildInTaskTypes.Note):
                     var noteTaskUI = new NoteUC(cmSystem, cmFeature, cmTask);
                     return noteTaskUI;
             }
@@ -108,10 +109,10 @@ namespace Tasks.BuiltIn
         {
             switch (cmTaskType.Name)
             {
-                case nameof(FeatureDependencyTask):
+                case nameof(BuildInTaskTypes.FeatureDependency):
                     FeatureDependency_CreateTaskDataInstance(cmTaskTemplate, cmTaskInstance, featureDepth);
                     break;
-                case nameof(NoteTask):
+                case nameof(BuildInTaskTypes.Note):
                     Note_CreateTaskDataInstance(cmTaskTemplate, cmTaskInstance, featureDepth);
                     break;
             }
@@ -182,7 +183,7 @@ namespace Tasks.BuiltIn
         public override void RegisterCMCUDCallbacks()
         {
             // mcbtodo: Not really the right place to do this, but it works
-            var featureDependencyTaskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get_ForName(nameof(FeatureDependencyTask));
+            var featureDependencyTaskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get_ForName(nameof(BuildInTaskTypes.FeatureDependency));
             FeatureDependency_TaskStates = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll_ForTaskType(featureDependencyTaskType.Id).ToList();
             FeatureDependency_TaskState_WaitingOnDependency = FeatureDependency_TaskStates.First(s => s.InternalName.Equals("WaitingOnDependency")); // mcbtodo: const this or something
             FeatureDependency_TaskState_Closed = FeatureDependency_TaskStates.First(s => s.InternalName.Equals(ReservedTaskStates.Closed));
@@ -209,10 +210,10 @@ namespace Tasks.BuiltIn
 
             switch (cmTaskType.Name)
             {
-                case nameof(FeatureDependencyTask):
+                case nameof(BuildInTaskTypes.FeatureDependency):
                     BuildInTasksDataProviders.FeatureDependencyDataProvider.Delete_ForTaskId(cmTaskDto.Id);
                     break;
-                case nameof(NoteTask):
+                case nameof(BuildInTaskTypes.Note):
                     BuildInTasksDataProviders.NoteDataProvider.Delete_ForTaskId(cmTaskDto.Id);
                     break;
             }
