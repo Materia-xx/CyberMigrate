@@ -43,7 +43,7 @@ namespace Tasks.BuiltIn
             switch (cmTaskType.Name)
             {
                 case nameof(BuildInTaskTypes.FeatureDependency):
-                    requiredStates.Add("WaitingOnDependency");
+                    requiredStates.Add(nameof(FeatureDependencyTaskStateNames.WaitingOnDependency));
                     break;
                 case nameof(BuildInTaskTypes.Note):
                     // No required states in the note task
@@ -162,7 +162,7 @@ namespace Tasks.BuiltIn
         {
             var featureDependencyTaskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get_ForName(nameof(BuildInTaskTypes.FeatureDependency));
             FeatureDependency_TaskStates = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll_ForTaskType(featureDependencyTaskType.Id).ToList();
-            FeatureDependency_TaskState_WaitingOnDependency = FeatureDependency_TaskStates.First(s => s.InternalName.Equals("WaitingOnDependency")); // mcbtodo: const this or something
+            FeatureDependency_TaskState_WaitingOnDependency = FeatureDependency_TaskStates.First(s => s.InternalName.Equals(nameof(FeatureDependencyTaskStateNames.WaitingOnDependency)));
             FeatureDependency_TaskState_Closed = FeatureDependency_TaskStates.First(s => s.InternalName.Equals(ReservedTaskStates.Closed));
 
             // mcbtodo: figure out why typing += <tab><tab> here doesn't do anything, but yet the events are working fine.

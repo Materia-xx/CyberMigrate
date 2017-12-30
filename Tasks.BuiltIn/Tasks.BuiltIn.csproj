@@ -54,6 +54,7 @@
     <Compile Include="FeatureDependency\FeatureDependencyConfigUC.xaml.cs">
       <DependentUpon>FeatureDependencyConfigUC.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FeatureDependency\FeatureDependencyTaskStates.cs" />
     <Compile Include="FeatureDependency\FeatureDependencyUC.xaml.cs">
       <DependentUpon>FeatureDependencyUC.xaml</DependentUpon>
     </Compile>
