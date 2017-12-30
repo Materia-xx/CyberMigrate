@@ -59,8 +59,10 @@ namespace TaskBase
         public abstract void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance, int featureDepth);
 
         /// <summary>
-        /// If the task needs to know when any database item is Created, Updated or Deleted then register callbacks here.
+        /// Called after registering the task types and states in the database.
+        /// Here the task can subscribe to data provider events and other things needed.
+        /// The Initialize function is called once at program startup for each task factory.
         /// </summary>
-        public abstract void RegisterCMCUDCallbacks();
+        public abstract void Initialize();
     }
 }

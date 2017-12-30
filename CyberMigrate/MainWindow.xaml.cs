@@ -23,10 +23,10 @@ namespace CyberMigrate
         private ObservableCollection<FilterResultItem> filterResults = new ObservableCollection<FilterResultItem>();
 
         /// <summary>
-        /// Keeps track if each tack factory has been called to register its callback events or not so we
-        /// don't end up calling the same factory 2 times and double registering callbacks.
+        /// Keeps track if each tack factory has been called to be initialized so we
+        /// don't end up calling the same factory 2 times.
         /// </summary>
-        private Dictionary<string, bool> taskFactoryRegisteredCallbacks = new Dictionary<string, bool>();
+        private Dictionary<string, bool> taskFactoryInitialized = new Dictionary<string, bool>();
 
         /// <summary>
         /// Keeps track if the state calculation callback events have been registered yet.
@@ -282,7 +282,7 @@ namespace CyberMigrate
                 this.Close();
                 return;
             }
-            RegisterTaskFactory_Callbacks();
+            TaskFactories_Init();
             RegisterStateCalculation_Callbacks();
         }
 
@@ -366,19 +366,19 @@ namespace CyberMigrate
             StateCalculations.CalculateAllFeatureStates();
         }
 
-        private void RegisterTaskFactory_Callbacks()
+        private void TaskFactories_Init()
         {
             var taskFactories = TaskFactoriesCatalog.Instance.TaskFactories.ToList();
 
             foreach (var taskFactory in taskFactories)
             {
-                if (taskFactoryRegisteredCallbacks.ContainsKey(taskFactory.Name))
+                if (taskFactoryInitialized.ContainsKey(taskFactory.Name))
                 {
                     continue;
                 }
 
-                taskFactoryRegisteredCallbacks[taskFactory.Name] = true;
-                taskFactory.RegisterCMCUDCallbacks();
+                taskFactoryInitialized[taskFactory.Name] = true;
+                taskFactory.Initialize();
             }
         }
 

@@ -53,28 +53,6 @@ namespace Tasks.BuiltIn
             return requiredStates;
         }
 
-        // mcbtodo: remove
-        //public override CMTaskBase GetTask(CMTaskTypeDto cmTaskType, CMSystemDto cmSystem, CMFeatureDto cmFeature, CMTaskDto cmTask)
-        //{
-        //    switch (cmTaskType.Name)
-        //    {
-        //        case nameof(FeatureDependencyTask):
-        //            var featureTask = new FeatureDependencyTask();
-        //            featureTask.CmSystemId = cmSystem.Id;
-        //            featureTask.CmFeatureId = cmFeature.Id;
-        //            featureTask.CmTaskId = cmTask.Id;
-        //            return featureTask;
-        //        case nameof(NoteTask):
-        //            var noteTask = new NoteTask();
-        //            noteTask.CmSystemId = cmSystem.Id;
-        //            noteTask.CmFeatureId = cmFeature.Id;
-        //            noteTask.CmTaskId = cmTask.Id;
-        //            return noteTask;
-        //    }
-
-        //    return null;
-        //}
-
         public override UserControl GetTaskConfigUI(CMTaskTypeDto cmTaskType)
         {
             switch (cmTaskType.Name)
@@ -180,9 +158,8 @@ namespace Tasks.BuiltIn
             }
         }
 
-        public override void RegisterCMCUDCallbacks()
+        public override void Initialize()
         {
-            // mcbtodo: Not really the right place to do this, but it works
             var featureDependencyTaskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get_ForName(nameof(BuildInTaskTypes.FeatureDependency));
             FeatureDependency_TaskStates = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll_ForTaskType(featureDependencyTaskType.Id).ToList();
             FeatureDependency_TaskState_WaitingOnDependency = FeatureDependency_TaskStates.First(s => s.InternalName.Equals("WaitingOnDependency")); // mcbtodo: const this or something
