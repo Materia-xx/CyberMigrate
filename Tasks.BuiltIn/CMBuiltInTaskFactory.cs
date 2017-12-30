@@ -231,8 +231,6 @@ namespace Tasks.BuiltIn
                 return;
             }
 
-            // mcbtodo: still has some kinks to work out because when instancing from a template that has a dep task in it, the dep task ends in in the "instance" state after creation instead of the "WaitingForDependency" state
-
             // For each dependency data that was watching this feature
             foreach (var linkedTaskData in linkedTaskDatas)
             {

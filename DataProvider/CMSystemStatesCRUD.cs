@@ -54,14 +54,14 @@ namespace DataProvider
 
             foreach (var rule in transitionRules)
             {
-                if (validStates.Any(s => s.Id == rule.ToCMSystemStateId))
+                if (validStates.Any(s => s.Id == rule.CMSystemStateId))
                 {
                     // The state is already in our list, no need to add duplicates
                     continue;
                 }
 
                 // Get the state
-                var state = CMDataProvider.DataStore.Value.CMSystemStates.Value.Get(rule.ToCMSystemStateId);
+                var state = CMDataProvider.DataStore.Value.CMSystemStates.Value.Get(rule.CMSystemStateId);
                 if (state != null)
                 {
                     validStates.Add(state);
@@ -140,7 +140,7 @@ namespace DataProvider
             var originalState = Get(deletingId);
 
             // See if there are any features that referenced this state before deleting it
-            var refStateTransitionRulesA = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.GetAll_ThatRef_ConditionQuerySystemStateId(originalState.Id);
+            var refStateTransitionRulesA = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.GetAll_ThatRef_SystemStateId(originalState.Id);
             var refStateTransitionRulesB = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.GetAll_ThatRef_ToCMSystemStateId(originalState.Id);
 
             if (refStateTransitionRulesA.Any() || refStateTransitionRulesB.Any())

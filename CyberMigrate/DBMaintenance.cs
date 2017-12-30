@@ -43,7 +43,7 @@ namespace CyberMigrate
             var allRules = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.GetAll();
             foreach (var cmRule in allRules)
             {
-                //cmRule.ConditionTaskClosed = cmRule.ConditionTaskComplete;
+                //cmRule.CMSystemStateId = cmRule.ToCMSystemStateId;
 
                 var opResult = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.Update(cmRule);
                 if (opResult.Errors.Any())

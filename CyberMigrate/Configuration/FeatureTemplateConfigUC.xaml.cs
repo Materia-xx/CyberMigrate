@@ -8,7 +8,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using TaskBase;
 
 namespace CyberMigrate.Configuration
 {
@@ -20,10 +19,6 @@ namespace CyberMigrate.Configuration
         private CMFeatureDto cmFeatureTemplate;
 
         private Config ConfigWindow { get; set; }
-
-        private List<BoolBasedComboBoxEntry> ComboBox_ConditionAllAnyChoices { get; set; } = new List<BoolBasedComboBoxEntry>();
-
-        private List<BoolBasedComboBoxEntry> ComboBox_ConditionAreClosedChoices { get; set; } = new List<BoolBasedComboBoxEntry>();
 
         private List<CMSystemStateDto> ComboBox_FeatureTemplateSystemStates { get; set; } = new List<CMSystemStateDto>();
 
@@ -75,14 +70,6 @@ namespace CyberMigrate.Configuration
         /// </summary>
         private void LoadComboBoxes_TransitionRules()
         {
-            ComboBox_ConditionAllAnyChoices.Clear();
-            ComboBox_ConditionAllAnyChoices.Add(new BoolBasedComboBoxEntry(true, "All"));
-            ComboBox_ConditionAllAnyChoices.Add(new BoolBasedComboBoxEntry(false, "Any"));
-
-            ComboBox_ConditionAreClosedChoices.Clear();
-            ComboBox_ConditionAreClosedChoices.Add(new BoolBasedComboBoxEntry(true, "Are closed"));
-            ComboBox_ConditionAreClosedChoices.Add(new BoolBasedComboBoxEntry(false, "Are not closed"));
-
             ComboBox_CurrentSystemStates.Clear();
             ComboBox_CurrentSystemStates.AddRange(
                 CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmFeatureTemplate.CMSystemId)
@@ -106,60 +93,17 @@ namespace CyberMigrate.Configuration
             dataGridStateTransitionRules.Columns.Add(
                 new DataGridTextColumn()
                 {
-                    Header = nameof(CMFeatureStateTransitionRuleDto.Priority),
-                    Binding = new Binding(nameof(CMFeatureStateTransitionRuleDto.Priority)),
+                    Header = nameof(CMFeatureStateTransitionRuleDto.Order),
+                    Binding = new Binding(nameof(CMFeatureStateTransitionRuleDto.Order)),
                 });
             dataGridStateTransitionRules.Columns.Add(
                 new DataGridComboBoxColumn()
                 {
-                    Header = "If (all / any) tasks",
-                    Width = 150,
-
-                    // Where to store the selected value
-                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.ConditionAllTasks)),
-
-                    // Instructions on how to interact with the "lookup" list
-                    ItemsSource = ComboBox_ConditionAllAnyChoices,
-                    SelectedValuePath = nameof(BoolBasedComboBoxEntry.Value),
-                    DisplayMemberPath = nameof(BoolBasedComboBoxEntry.Name),
-                });
-            dataGridStateTransitionRules.Columns.Add(
-                new DataGridComboBoxColumn()
-                {
-                    Header = "In state",
+                    Header = "System State",
                     Width = 200,
 
                     // Where to store the selected value
-                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.ConditionQuerySystemStateId)),
-
-                    // Instructions on how to interact with the "lookup" list
-                    ItemsSource = ComboBox_CurrentSystemStates,
-                    SelectedValuePath = nameof(CMSystemStateDto.Id),
-                    DisplayMemberPath = nameof(CMSystemStateDto.Name),
-                });
-
-            dataGridStateTransitionRules.Columns.Add(
-                new DataGridComboBoxColumn()
-                {
-                    Header = "Are ...",
-                    Width = 150,
-
-                    // Where to store the selected value
-                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.ConditionTaskClosed)),
-
-                    // Instructions on how to interact with the "lookup" list
-                    ItemsSource = ComboBox_ConditionAreClosedChoices,
-                    SelectedValuePath = nameof(BoolBasedComboBoxEntry.Value),
-                    DisplayMemberPath = nameof(BoolBasedComboBoxEntry.Name),
-                });
-            dataGridStateTransitionRules.Columns.Add(
-                new DataGridComboBoxColumn()
-                {
-                    Header = "Then move to state",
-                    Width = 200,
-
-                    // Where to store the selected value
-                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.ToCMSystemStateId)),
+                    SelectedValueBinding = new Binding(nameof(CMFeatureStateTransitionRuleDto.CMSystemStateId)),
 
                     // Instructions on how to interact with the "lookup" list
                     ItemsSource = ComboBox_CurrentSystemStates,

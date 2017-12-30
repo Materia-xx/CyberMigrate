@@ -62,94 +62,52 @@ namespace TaskBase.Extensions
                 transitionRulesByFeatureId[cmFeature.CMParentFeatureTemplateId] :
                 new List<CMFeatureStateTransitionRuleDto>();
 
-            // A feature that is not entered in the db yet is a special case.
-            // It won't have any tasks in any of the states and will resolve to false on all condition checks, falling completely through them all if we let it go through the loop below.
-            // Here we default it to the first highest priority state available if possible
-            if (cmFeature.Id == 0)
+            if (!transitionRules.Any())
             {
-                if (!transitionRules.Any())
-                {
-                    throw new Exception("Unable to set a default system state on the feature because no state transition rules are set up yet for this feature type.");
-                }
-
-                // The rules are already in order by the priority
-                var highestPriorityRule = transitionRules.First();
-
-                if (cmFeature.CMSystemStateId == highestPriorityRule.ToCMSystemStateId)
-                {
-                    return false;
-                }
-
-                cmFeature.CMSystemStateId = highestPriorityRule.ToCMSystemStateId;
-                return true;
+                throw new Exception("Unable to set a default system state on the feature because no state transition rules are set up yet for this feature type.");
             }
+
+            // If the logic falls through the loop below and doesn't match anything, default to the last state listed
+            int shouldBeSystemStateId = transitionRules.Last().CMSystemStateId;
 
             foreach (var transitionRule in transitionRules)
             {
-                var tasksInQuerySystemState = tasksByFeatureId.ContainsKey(cmFeature.Id) ?
-                    tasksByFeatureId[cmFeature.Id].Where(t => t.CMSystemStateId == transitionRule.ConditionQuerySystemStateId) :
+                var tasksInReferencedSystemState = tasksByFeatureId.ContainsKey(cmFeature.Id) ?
+                    tasksByFeatureId[cmFeature.Id].Where(t => t.CMSystemStateId == transitionRule.CMSystemStateId) :
                     new List<CMTaskDto>();
 
-                // Defaults for when there are no tasks
-                // - Any tasks that are closed: false
-                // - Any tasks that are not closed: false
-                // - All tasks are closed: false
-                // - All tasks are not closed: false
-                // Therefore a system state with no tasks will never meet the condition
-                bool meetsRuleCondition = false;
-                if (tasksInQuerySystemState.Any())
+                // A feature with no tasks is the same as a feature that has all of it's tasks closed. As far as this logic goes.
+                // Same idea for: A system state (within a feature) that has no tasks considers that system state to have all of it's tasks closed.
+                // Therefore when creating a new feature, before the tasks are added, the feature will default to the lowest priority state.
+                if (tasksInReferencedSystemState.Any(cmTask =>
                 {
-                    int meetsConditionCount = 0;
-
-                    foreach (var cmTask in tasksInQuerySystemState)
-                    {
-                        var closedTaskStateId = closedTaskStateByTaskTypeId[cmTask.CMTaskTypeId];
-
-                        if ((cmTask.CMTaskStateId == closedTaskStateId) == transitionRule.ConditionTaskClosed)
-                        {
-                            meetsConditionCount++;
-
-                            // If we're only checking for "Any" tasks that meet the condition we can break early as we found 1.
-                            if (!transitionRule.ConditionAllTasks)
-                            {
-                                break;
-                            }
-                        }
-                    }
-
-                    if (transitionRule.ConditionAllTasks && meetsConditionCount == tasksInQuerySystemState.Count())
-                    {
-                        meetsRuleCondition = true;
-                    }
-                    else if (!transitionRule.ConditionAllTasks && meetsConditionCount > 0)
-                    {
-                        meetsRuleCondition = true;
-                    }
-                }
-
-                // If this transition rule met the condition then move the feature to the target state if it is not already there
-                // Rule processing stops as soon as we find one that meets the conditions
-                if (meetsRuleCondition)
+                    var closedTaskStateId = closedTaskStateByTaskTypeId[cmTask.CMTaskTypeId];
+                    return cmTask.CMTaskStateId != closedTaskStateId;
+                }))
                 {
-                    if (cmFeature.CMSystemStateId != transitionRule.ToCMSystemStateId)
-                    {
-                        cmFeature.CMSystemStateId = transitionRule.ToCMSystemStateId;
-                        var opResult = CMDataProvider.DataStore.Value.CMFeatures.Value.Update(cmFeature);
-                        if (opResult.Errors.Any())
-                        {
-                            throw new Exception(opResult.ErrorsCombined);
-                        }
-
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    shouldBeSystemStateId = transitionRule.CMSystemStateId;
+                    break; // Stop looping through the rules as soon as we find a state that has unclosed tasks
                 }
             }
 
-            return false;
+            if (cmFeature.CMSystemStateId != shouldBeSystemStateId)
+            {
+                cmFeature.CMSystemStateId = shouldBeSystemStateId;
+                if (cmFeature.Id != 0)
+                {
+                    var opResult = CMDataProvider.DataStore.Value.CMFeatures.Value.Update(cmFeature);
+                    if (opResult.Errors.Any())
+                    {
+                        throw new Exception(opResult.ErrorsCombined);
+                    }
+                }
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private static void RefreshLookups()
@@ -172,7 +130,7 @@ namespace TaskBase.Extensions
 
             foreach (var cmFeatureTemplate in allFeatureTemplates)
             {
-                var featureRules = allStateTransitionRules.Where(s => s.CMFeatureId == cmFeatureTemplate.Id).OrderBy(s => s.Priority);
+                var featureRules = allStateTransitionRules.Where(s => s.CMFeatureId == cmFeatureTemplate.Id).OrderBy(s => s.Order);
                 transitionRulesByFeatureId[cmFeatureTemplate.Id] = featureRules.ToList();
 
                 var tasks = allTaskInstances.Where(s => s.CMFeatureId == cmFeatureTemplate.Id);

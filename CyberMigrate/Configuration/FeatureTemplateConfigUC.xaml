@@ -22,7 +22,7 @@
         <Label x:Name="lblFeatureTemplateName" Content="Feature Template Name" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0" />
         <TextBox x:Name="txtFeatureTemplateName" Grid.Row="0" Grid.Column="1" LostFocus="txtFeatureTemplateName_LostFocus" />
 
-        <Label x:Name="lblStateTransitionRules" Content="State Transition Rules" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" />
+        <Label x:Name="lblStateTransitionRules" Content="State Transition Order" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" />
         <DataGrid x:Name="dataGridStateTransitionRules" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" />
 
         <Label x:Name="lblTaskTemplates" Content="Task Templates" HorizontalAlignment="Left" Grid.Row="4" Grid.Column="0" />
