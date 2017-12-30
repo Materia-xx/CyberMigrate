@@ -11,5 +11,17 @@ namespace Tasks.BuiltIn.FeatureDependency
             // mcbtodo:
             throw new NotImplementedException();
         }
+
+        public static void OnFeatureDto_Update()
+        {
+
+        }
+
+        public static void OnFeatureDto_Delete()
+        {
+
+        }
+
+
     }
 }

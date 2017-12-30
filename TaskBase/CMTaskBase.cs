@@ -20,6 +20,6 @@
         /// Also a task can use this function to set the default state of a task. When a task is first instanced by the program
         /// it will be in the "Instance" state.
         /// </summary>
-        public abstract void AutoProgress();
+        public abstract void AutoProgress(); // mcbtodo: can this be removed and the task state controlled completely by the CUD callbacks ?
     }
 }

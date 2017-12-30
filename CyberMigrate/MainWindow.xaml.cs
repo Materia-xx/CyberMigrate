@@ -295,60 +295,74 @@ namespace CyberMigrate
             stateCalculationCallbacksRegistered = true;
 
             // All things that should result in refreshing the cached lookup tables used for state calculation 
-            CMDataProvider.DataStore.Value.CMTasks.Value.OnCUD += OnCUD_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMFeatures.Value.OnCUD += OnCUD_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnCUD += OnCUD_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnCUD += OnCUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordCreated += Record_Created_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += Record_Updated_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordDeleted += Record_Deleted_StateCalcLookupsRefreshNeeded;
+
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordCreated += Record_Created_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_Updated_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted += Record_Deleted_StateCalcLookupsRefreshNeeded;
+
+            CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnRecordCreated += Record_Created_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnRecordUpdated += Record_Updated_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnRecordDeleted += Record_Deleted_StateCalcLookupsRefreshNeeded;
+
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordCreated += Record_Created_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordUpdated += Record_Updated_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordDeleted += Record_Deleted_StateCalcLookupsRefreshNeeded;
 
             // All things that should result in the re-calculation of *all* current feature system states
-            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnCUD += OnCUD_CalculateAllFeatureStates;
-            CMDataProvider.DataStore.Value.CMTasks.Value.OnCUD += OnCUD_CalculateAllFeatureStates;
-            CMDataProvider.DataStore.Value.CMFeatures.Value.OnCUD += OnCUD_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordCreated += Record_Created_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordUpdated += Record_Updated_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordDeleted += Record_Deleted_CalculateAllFeatureStates;
+
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordCreated += Record_Created_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += Record_Updated_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordDeleted += Record_Deleted_CalculateAllFeatureStates;
+
+            // Feature Create: Updating the feature state for a new feature is handled during the creation of the feature
+            // Feature Delete: If a feature is deleted and there is a dependency task pointing at it, it may cause the dependency task to calculate its task state differently
+            //                 However the StateCalculations.CalculateAllFeatureStates() call to calc all feature states does not call in to calculate task states first so we ignore deletes here.
+            // Feature Update: If the code is right this shouldn't cause a stack overflow if the depth of features isn't too deep.
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_Updated_CalculateAllFeatureStates;
         }
 
         /// <summary>
         /// Call by the CRUD providers when the lookups used by the state calculation routines need to be refreshed
         /// </summary>
-        /// <param name="cmCUDEventArgs"></param>
-        private void OnCUD_StateCalcLookupsRefreshNeeded(CMCUDEventArgs cmCUDEventArgs)
+        private void Record_Created_StateCalcLookupsRefreshNeeded(CMDataProviderRecordCreatedEventArgs createdRecordEventArgs)
         {
             StateCalculations.LookupsRefreshNeeded = true;
         }
 
         /// <summary>
-        /// Called by the CRUD providers when the current system state of features need to be recalculated
+        /// Call by the CRUD providers when the lookups used by the state calculation routines need to be refreshed
         /// </summary>
-        /// <param name="cmCUDEventArgs"></param>
-        private void OnCUD_CalculateAllFeatureStates(CMCUDEventArgs cmCUDEventArgs)
+        private void Record_Updated_StateCalcLookupsRefreshNeeded(CMDataProviderRecordUpdatedEventArgs updatedRecordEventArgs)
         {
-            switch (cmCUDEventArgs.DtoType.Name)
-            {
-                case nameof(CMFeatureStateTransitionRuleDto):
-                    // Recalc on any CUD of the rule
-                    break;
-                case nameof(CMTaskDto):
-                    // Recalc on any CUD of a task
-                    break;
-                case nameof(CMFeatureDto):
-                    switch (cmCUDEventArgs.ActionType)
-                    {
-                        case CMCUDActionType.Create:
-                            // Updating the feature state for a new feature is handled during the creation of the feature
-                            return;
-                        case CMCUDActionType.Update:
-                            // If the code is right this shouldn't cause a stack overflow if the depth of features isn't too deep, so let this one go through.
-                            break;
-                        case CMCUDActionType.Delete:
-                            // If a feature is deleted and there is a dependency task pointing at it, it may cause the dependency task to calculate its task state differently
-                            // However the method below to calc all feature states does not call in to calculate task states first so we ignore deletes here.
-                            return;
-                    }
-                    break;
-                default:
-                    // I want to explicitly handle each Dto type, so if I miss one in the switch above ...
-                    throw new Exception($"Unknown Dto type {cmCUDEventArgs.DtoType.Name} is routing to {nameof(OnCUD_CalculateAllFeatureStates)}. A case handler needs to be added for this.");
-            }
+            StateCalculations.LookupsRefreshNeeded = true;
+        }
 
+        /// <summary>
+        /// Call by the CRUD providers when the lookups used by the state calculation routines need to be refreshed
+        /// </summary>
+        private void Record_Deleted_StateCalcLookupsRefreshNeeded(CMDataProviderRecordDeletedEventArgs deletedRecordEventArgs)
+        {
+            StateCalculations.LookupsRefreshNeeded = true;
+        }
+
+        private void Record_Created_CalculateAllFeatureStates(CMDataProviderRecordCreatedEventArgs createdRecordEventArgs)
+        {
+            StateCalculations.CalculateAllFeatureStates();
+        }
+
+        private void Record_Updated_CalculateAllFeatureStates(CMDataProviderRecordUpdatedEventArgs updatedRecordEventArgs)
+        {
+            StateCalculations.CalculateAllFeatureStates();
+        }
+
+        private void Record_Deleted_CalculateAllFeatureStates(CMDataProviderRecordDeletedEventArgs deletedRecordEventArgs)
+        {
             StateCalculations.CalculateAllFeatureStates();
         }
 

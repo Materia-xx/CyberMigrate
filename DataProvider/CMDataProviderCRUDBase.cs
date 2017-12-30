@@ -18,13 +18,27 @@ namespace DataProvider
         protected string CollectionName { get; set; }
         private LiteCollection<T> cmCollection;
 
-        public delegate void CUDEvent(CMCUDEventArgs cmCUDEventArgs);
+        public delegate void CMDataProviderRecordCreatedEvent(CMDataProviderRecordCreatedEventArgs createdRecordEventArgs);
+        public delegate void CMDataProviderRecordUpdatedEvent(CMDataProviderRecordUpdatedEventArgs updatedRecordEventArgs);
+        public delegate void CMDataProviderRecordDeletedEvent(CMDataProviderRecordDeletedEventArgs deletedRecordEventArgs);
 
         /// <summary>
-        /// For Create and Update operations the event is raised after the operation, and only if the operation was successful.
-        /// for Delete the event is raised immediately *before* the operation.
+        /// Raised after a record is created and inserted into the database.
+        /// The object passed in the event args will have the newly inserted Id.
         /// </summary>
-        public CUDEvent OnCUD;
+        public CMDataProviderRecordCreatedEvent OnRecordCreated;
+
+        /// <summary>
+        /// Raised after a record has been updated in the database.
+        /// The objects in the event args will represent both the before and after state of the affected Dto.
+        /// </summary>
+        public CMDataProviderRecordUpdatedEvent OnRecordUpdated;
+
+        /// <summary>
+        /// Raised just before the delete operation is performed.
+        /// The object passed in the event args will the the record that will be deleted.
+        /// </summary>
+        public CMDataProviderRecordDeletedEvent OnRecordDeleted;
 
         public CMDataProviderCRUDBase(LiteDatabase liteDatabase, string collectionName)
         {
@@ -86,13 +100,10 @@ namespace DataProvider
             }
 
             cmCollection.Insert(insertingObject);
-            OnCUD?.Invoke(
-                new CMCUDEventArgs()
+            OnRecordCreated?.Invoke(
+                new CMDataProviderRecordCreatedEventArgs()
                 {
-                    ActionType = CMCUDActionType.Create,
-                    DtoType = typeof(T),
-                    DtoAfter = insertingObject,
-                    Id = insertingObject.Id
+                    CreatedDto = insertingObject
                 });
 
             return opResult;
@@ -102,13 +113,10 @@ namespace DataProvider
         {
             var opResult = new CMCUDResult();
 
-            var cudEvent = new CMCUDEventArgs()
+            var updateEvent = new CMDataProviderRecordUpdatedEventArgs()
             {
-                ActionType = CMCUDActionType.Update,
-                DtoType = typeof(T),
                 DtoBefore = Get(updatingObject.Id),
                 DtoAfter = updatingObject,
-                Id = updatingObject.Id
             };
 
             if (cmCollection.Update(updatingObject) == false)
@@ -117,7 +125,7 @@ namespace DataProvider
                 return opResult;
             }
 
-            OnCUD?.Invoke(cudEvent);
+            OnRecordUpdated?.Invoke(updateEvent);
 
             return opResult;
         }
@@ -126,13 +134,10 @@ namespace DataProvider
         {
             var opResult = new CMCUDResult();
 
-            OnCUD?.Invoke(
-                new CMCUDEventArgs()
+            OnRecordDeleted?.Invoke(
+                new CMDataProviderRecordDeletedEventArgs()
                 {
-                    ActionType = CMCUDActionType.Delete,
-                    DtoType = typeof(T),
                     DtoBefore = Get(deletingId),
-                    Id = deletingId
                 });
             if (!cmCollection.Delete(deletingId))
             {

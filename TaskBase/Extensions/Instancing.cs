@@ -35,7 +35,7 @@ namespace TaskBase.Extensions
             }
 
             // Clone the feature template to a feature instance
-            var featureDto = new CMFeatureDto()
+            var featureInstanceDto = new CMFeatureDto()
             {
                 CMParentFeatureTemplateId = featureTemplate.Id,
                 CMSystemId = featureTemplate.CMSystemId,
@@ -44,12 +44,12 @@ namespace TaskBase.Extensions
 
             // Calculate a default feature state, which is needed to insert into the db
             // Due to the fact that the feature has no cloned tasks yet, this state is likely temporary and will be updated again below
-            featureDto.RecalculateSystemState();
+            featureInstanceDto.RecalculateSystemState();
 
-            var opResultFeature = CMDataProvider.DataStore.Value.CMFeatures.Value.Insert(featureDto);
-            if (opResultFeature.Errors.Any())
+            var opFeatureInsert = CMDataProvider.DataStore.Value.CMFeatures.Value.Insert(featureInstanceDto);
+            if (opFeatureInsert.Errors.Any())
             {
-                throw new Exception(opResultFeature.ErrorsCombined);
+                throw new Exception(opFeatureInsert.ErrorsCombined);
             }
 
             // Clone each task in the feature template
@@ -62,16 +62,16 @@ namespace TaskBase.Extensions
                 var cmTaskInstance = new CMTaskDto()
                 {
                     CMParentTaskTemplateId = cmTaskTemplate.Id,
-                    CMFeatureId = featureDto.Id,
+                    CMFeatureId = featureInstanceDto.Id,
                     CMSystemStateId = cmTaskTemplate.CMSystemStateId,
                     CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Instance, taskTemplateType.Id).Id,
                     CMTaskTypeId = cmTaskTemplate.CMTaskTypeId,
                     Title = cmTaskTemplate.Title // mcbtodo: apply template vars here when they are implemented
                 };
-                var opResultTask = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(cmTaskInstance);
-                if (opResultTask.Errors.Any())
+                var opTaskInsert = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(cmTaskInstance);
+                if (opTaskInsert.Errors.Any())
                 {
-                    throw new Exception(opResultTask.ErrorsCombined);
+                    throw new Exception(opTaskInsert.ErrorsCombined);
                 }
 
                 // For the task data we revert to the task factory to provide it
@@ -79,9 +79,9 @@ namespace TaskBase.Extensions
             }
 
             // Recalculate the current system state again after the feature has tasks assigned
-            featureDto.RecalculateSystemState();
+            featureInstanceDto.RecalculateSystemState();
 
-            return featureDto;
+            return featureInstanceDto;
         }
     }
 }

@@ -57,8 +57,9 @@
     <Compile Include="CMSystemStatesCRUD.cs" />
     <Compile Include="CMSystemsCRUD.cs" />
     <Compile Include="CMDataProvider.cs" />
-    <Compile Include="Events\CMCUDActionType.cs" />
-    <Compile Include="Events\CMCUDEventArgs.cs" />
+    <Compile Include="Events\CMDataProviderRecordDeletedEventArgs.cs" />
+    <Compile Include="Events\CMDataProviderRecordUpdatedEventArgs.cs" />
+    <Compile Include="Events\CMDataProviderRecordCreatedEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReservedTaskStates.cs" />
   </ItemGroup>

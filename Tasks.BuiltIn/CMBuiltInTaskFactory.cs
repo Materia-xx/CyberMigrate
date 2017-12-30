@@ -150,6 +150,8 @@ namespace Tasks.BuiltIn
             {
                 throw new Exception(opResult.ErrorsCombined);
             }
+
+            UpdateTaskStatesForFeatureDependendies(clonedFeatureInstance, clonedFeatureInstance);
         }
 
         private void Note_CreateTaskDataInstance(CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance, int featureDepth)
@@ -185,103 +187,99 @@ namespace Tasks.BuiltIn
             FeatureDependency_TaskState_WaitingOnDependency = FeatureDependency_TaskStates.First(s => s.InternalName.Equals("WaitingOnDependency")); // mcbtodo: const this or something
             FeatureDependency_TaskState_Closed = FeatureDependency_TaskStates.First(s => s.InternalName.Equals(ReservedTaskStates.Closed));
 
-            CMDataProvider.DataStore.Value.CMTasks.Value.OnCUD += OnTaskCUD;
-            CMDataProvider.DataStore.Value.CMFeatures.Value.OnCUD += OnFeatureCUD; // mcbtodo: split these OnCUD events out to be 1 event for each OnCreated, OnUpdated and OnDeleted that each has a distinct type of event args
+            // mcbtodo: figure out why typing += <tab><tab> here doesn't do anything, but yet the events are working fine.
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordDeleted += Task_Deleted;
+
+            // If a feature is somehow deleted then any feature dependency that was pointing at it can be resolved
+            // If a feature state is changed to the one being monitored for then it can be resolved
+            // If a feature is inserted and a dependency was already watching that feature id ... no, that doesn't make sense.
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted += Feature_Deleted;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Feature_Updated;
         }
 
-        private void OnTaskCUD(CMCUDEventArgs cmCUDEventArgs)
+        private void Task_Deleted(CMDataProviderRecordDeletedEventArgs deletedRecordEventArgs)
         {
-            switch (cmCUDEventArgs.ActionType)
+            var cmTaskDto = deletedRecordEventArgs.DtoBefore as CMTaskDto;
+            // Try to figure out what the task type is
+            var cmTaskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get_ForTaskId(cmTaskDto.Id);
+            if (cmTaskType == null)
             {
-                case CMCUDActionType.Delete:
-                    // Try to figure out what the task type is
-                    var cmTaskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get_ForTaskId(cmCUDEventArgs.Id);
-                    if (cmTaskType == null)
-                    {
-                        return;
-                    }
+                return;
+            }
 
-                    switch (cmTaskType.Name)
-                    {
-                        case nameof(FeatureDependencyTask):
-                            BuildInTasksDataProviders.FeatureDependencyDataProvider.Delete_ForTaskId(cmCUDEventArgs.Id);
-                            break;
-                        case nameof(NoteTask):
-                            BuildInTasksDataProviders.NoteDataProvider.Delete_ForTaskId(cmCUDEventArgs.Id);
-                            break;
-                    }
-
+            switch (cmTaskType.Name)
+            {
+                case nameof(FeatureDependencyTask):
+                    BuildInTasksDataProviders.FeatureDependencyDataProvider.Delete_ForTaskId(cmTaskDto.Id);
+                    break;
+                case nameof(NoteTask):
+                    BuildInTasksDataProviders.NoteDataProvider.Delete_ForTaskId(cmTaskDto.Id);
                     break;
             }
         }
 
-        private void OnFeatureCUD(CMCUDEventArgs cmCUDEventArgs)
+        private void Feature_Deleted(CMDataProviderRecordDeletedEventArgs deletedRecordEventArgs)
         {
-            // If a feature is somehow deleted then any feature dependency that was pointing at it can be resolved
-            // If a feature state is changed to the one being monitored for then it can be resolved
-            // If a feature is inserted and a dependency was already watching that feature id ... no, that doesn't make sense.
+            var beforeDto = deletedRecordEventArgs.DtoBefore as CMFeatureDto;
 
-            switch (cmCUDEventArgs.ActionType)
+            UpdateTaskStatesForFeatureDependendies(beforeDto, null);
+        }
+
+        private void Feature_Updated(CMDataProviderRecordUpdatedEventArgs updatedRecordEventArgs)
+        {
+            // Figure out if the feature state was updated, which is what we're really interested in here.
+            var beforeDto = updatedRecordEventArgs.DtoBefore as CMFeatureDto;
+            var afterDto = updatedRecordEventArgs.DtoAfter as CMFeatureDto;
+
+            // Currently updates to feature templates system status doesn't happen, but if it starts at some point, just go with it until it becomes and issue
+
+            // If the feature system state was updated
+            if (beforeDto.CMSystemStateId != afterDto.CMSystemStateId)
             {
-                case CMCUDActionType.Delete:
-                case CMCUDActionType.Update:
-                    // Figure out if the feature state was updated, which is what we're really interested in here.
-                    var beforeDto = cmCUDEventArgs.DtoBefore as CMFeatureDto;
-                    var afterDto = cmCUDEventArgs.DtoAfter as CMFeatureDto;
+                UpdateTaskStatesForFeatureDependendies(beforeDto, afterDto);
+            }
+        }
 
-                    // Something is wrong, abort
-                    if (beforeDto == null)
-                    {
-                        return;
-                    }
-                    
-                    // Currently updates to feature templates system status doesn't happen, but if it starts at some point, just go with it until it becomes and issue
+        private void UpdateTaskStatesForFeatureDependendies(CMFeatureDto featureBeforeDto, CMFeatureDto featureAfterDto)
+        {
+            // Look for dependency task data that reference this feature that is being changed
+            var linkedTaskDatas = BuildInTasksDataProviders.FeatureDependencyDataProvider.GetAll();
+            // mcbtodo: Is there a way to code in CRUD provider overrides for the FeatureDependencyDataProvider so this doesn't have to do a GetAll() ?
+            linkedTaskDatas = linkedTaskDatas.Where(t => t.CMFeatureId == featureBeforeDto.Id);
 
-                    if (afterDto == null // The feature was deleted
-                        || beforeDto.CMSystemStateId != afterDto.CMSystemStateId) // The feature system state was updated
-                    {
-                        // Look for dependency task data that reference this feature that is being changed
-                        var linkedTaskDatas = BuildInTasksDataProviders.FeatureDependencyDataProvider.GetAll();
-                        // mcbtodo: Is there a way to code in CRUD provider overrides for the FeatureDependencyDataProvider so this doesn't have to do a GetAll() ?
-                        linkedTaskDatas = linkedTaskDatas.Where(t => t.CMFeatureId == beforeDto.Id);
+            // If there are no dependencies on this feature, then there is nothing more to do.
+            if (!linkedTaskDatas.Any())
+            {
+                return;
+            }
 
-                        // If there are no dependencies on this feature, then there is nothing more to do.
-                        if (!linkedTaskDatas.Any())
-                        {
-                            return;
-                        }
+            // mcbtodo: still has some kinks to work out because when instancing from a template that has a dep task in it, the dep task ends in in the "instance" state after creation instead of the "WaitingForDependency" state
 
-                        // mcbtodo: still has some kinks to work out because when instancing from a template that has a dep task in it, the dep task ends in in the "instance" state after creation instead of the "WaitingForDependency" state
+            // For each dependency data that was watching this feature
+            foreach (var linkedTaskData in linkedTaskDatas)
+            {
+                var cmTask = CMDataProvider.DataStore.Value.CMTasks.Value.Get(linkedTaskData.TaskId);
+                if (cmTask == null)
+                {
+                    // If the task this data links to is null then somehow the task was deleted without deleting the data,
+                    // Do so now and return
+                    BuildInTasksDataProviders.FeatureDependencyDataProvider.Delete(linkedTaskData.Id);
+                    return;
+                }
 
-                        // For each dependency data that was watching this feature
-                        foreach (var linkedTaskData in linkedTaskDatas)
-                        {
-                            var cmTask = CMDataProvider.DataStore.Value.CMTasks.Value.Get(linkedTaskData.TaskId);
-                            if (cmTask == null)
-                            {
-                                // If the task this data links to is null then somehow the task was deleted without deleting the data,
-                                // Do so now and return
-                                BuildInTasksDataProviders.FeatureDependencyDataProvider.Delete(linkedTaskData.Id);
-                                return;
-                            }
+                // Figure out what the task (that is associated with the dependency data) state should be
+                var shouldBeState = featureAfterDto == null || linkedTaskData.CMTargetSystemStateId == featureAfterDto.CMSystemStateId ?
+                    FeatureDependency_TaskState_Closed :
+                    FeatureDependency_TaskState_WaitingOnDependency;
 
-                            // Figure out what the task (that is associated with the dependency data) state should be
-                            var shouldBeState = linkedTaskData.CMTargetSystemStateId == beforeDto.CMSystemStateId ?
-                                FeatureDependency_TaskState_Closed :
-                                FeatureDependency_TaskState_WaitingOnDependency;
-
-                            // Now check to see if the dependency task actually is in that state
-                            if (cmTask.CMTaskStateId != shouldBeState.Id)
-                            {
-                                // If it's not in the state it should be, then do the update so it is.
-                                // All of the checks to avoid doing an update are to avoid chain reactions with the CUD events
-                                cmTask.CMTaskStateId = shouldBeState.Id;
-                                CMDataProvider.DataStore.Value.CMTasks.Value.Update(cmTask);
-                            }
-                        }
-                    }
-
-                    break;
+                // Now check to see if the dependency task actually is in that state
+                if (cmTask.CMTaskStateId != shouldBeState.Id)
+                {
+                    // If it's not in the state it should be, then do the update so it is.
+                    // All of the checks to avoid doing an update are to avoid chain reactions with the CUD events
+                    cmTask.CMTaskStateId = shouldBeState.Id;
+                    CMDataProvider.DataStore.Value.CMTasks.Value.Update(cmTask);
+                }
             }
         }
     }
