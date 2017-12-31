@@ -55,6 +55,10 @@ namespace Tasks.BuiltIn.Note
                     Note = txtNote.Text
                 };
             }
+            else
+            {
+                TaskData.Note = txtNote.Text;
+            }
 
             CMCUDResult opResult;
             if (TaskData.Id == 0)

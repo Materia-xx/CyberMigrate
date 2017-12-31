@@ -1,8 +1,5 @@
 Upcoming:
 
-    - Consider taking the "All" rule condition out and only using Any rules. Plus add a new rule type that just blindly sets the state that can be used to 
-      set a feature to its final state if the rule processing makes it that far.
-
     - Refresh the main UI filtered items when the items change, maybe refresh a second or so after there have been no updates for a couple seconds
       to void trying to rapidly refresh every time a record is updated during large sweeping updates.
     - Add a way for task types to add details to the result grid in the details section
@@ -16,8 +13,4 @@ Upcoming:
         - Textbox to search through titles, names and possibly task data and perform a customized search
     - Shows the tasks sorted in the way the design plan indicates
     - Add the ability to add instanced tasks ad-hoc to already created features
-    - Add in feature vars
-    - Work on making the autoprogress methods of the tasks work and having the main program call this for the correct
-            tasks on a regular interval
-    - Put in the logic for the autoprogression of system state within a feature
-    - Verify that a Task.AutoProgress call works to update any open task dialog with the correct state.
+    - Update the program so that when a task state is updated that it also updates any open task dialog with the correct state.

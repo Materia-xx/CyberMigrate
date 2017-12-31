@@ -11,6 +11,39 @@ namespace TaskBase.Extensions
     public static class InstancingExtensions
     {
         /// <summary>
+        /// Creates an instance of the task, setting the instanced task to the <see cref="ReservedTaskStates.Instance"/> state.
+        /// The clone task Id is left at 0 and not inserted into the database.
+        /// System and feature ids are re-assigned to the passed in values.
+        /// All other values are an exact copy from the template with no feature vars resolved.
+        /// </summary>
+        /// <param name="taskTemplate"></param>
+        /// <param name="cmFeatureId">The feature id that the clone should be assigned to</param>
+        /// <returns></returns>
+        public static CMTaskDto ToInstance(this CMTaskDto taskTemplate, int cmFeatureId)
+        {
+            // Cloning something that is not a template is not an implemented feature
+            if (!taskTemplate.IsTemplate)
+            {
+                throw new NotImplementedException("Instancing a task that is not a template is not implemented.");
+            }
+
+            var taskTemplateType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(taskTemplate.CMTaskTypeId);
+
+            // Instance the task
+            var taskInstance = new CMTaskDto()
+            {
+                CMFeatureId = cmFeatureId,
+                CMParentTaskTemplateId = taskTemplate.Id,
+                CMSystemStateId = taskTemplate.CMSystemStateId,
+                CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Instance, taskTemplateType.Id).Id,
+                CMTaskTypeId = taskTemplate.CMTaskTypeId,
+                Title = taskTemplate.Title
+            };
+
+            return taskInstance;
+        }
+
+        /// <summary>
         /// Creates an instance of a feature template.
         /// </summary>
         /// <param name="featureTemplate"></param>
@@ -20,11 +53,11 @@ namespace TaskBase.Extensions
         /// prevent a never-ending loop.
         /// </param>
         /// <returns></returns>
-        public static CMFeatureDto CreateFeatureInstance(this CMFeatureDto featureTemplate, int featureDepth)
+        public static CMFeatureDto ToInstance(this CMFeatureDto featureTemplate, int featureDepth, List<CMFeatureVarStringDto> initialFeatureVars)
         {
             if (!featureTemplate.IsTemplate)
             {
-                throw new InvalidOperationException("Cannot create an instance of an already instanced feature.");
+                throw new NotImplementedException("Instancing a feature that is already an instance is not implemented.");
             }
 
             featureDepth++;
@@ -39,7 +72,7 @@ namespace TaskBase.Extensions
             {
                 CMParentFeatureTemplateId = featureTemplate.Id,
                 CMSystemId = featureTemplate.CMSystemId,
-                Name = featureTemplate.Name // mcbtodo: apply template vars here when they are implemented
+                Name = featureTemplate.Name
             };
 
             // Calculate a default feature state, which is needed to insert into the db
@@ -52,30 +85,43 @@ namespace TaskBase.Extensions
                 throw new Exception(opFeatureInsert.ErrorsCombined);
             }
 
-            // Clone each task in the feature template
+            // The new feature has an Id now, we can set up the feature vars specific to this feature
+            initialFeatureVars.Add(
+                new CMFeatureVarStringDto()
+                {
+                    Name = "Feature.Id",
+                    Value = featureInstanceDto.Id.ToString()
+                });
+
+            // Add all feature vars to the feature
+            // This will trigger other routines that resolve the feature vars within tasks and features to execute in response through the CUD events
+            foreach (var featureVar in initialFeatureVars)
+            {
+                // Attach the feature var to the new feature
+                featureVar.CMFeatureId = featureInstanceDto.Id;
+
+                var opFeatureVarStringInsert = CMDataProvider.DataStore.Value.CMFeatureVarStrings.Value.Insert(featureVar);
+                if (opFeatureVarStringInsert.Errors.Any())
+                {
+                    throw new Exception(opFeatureVarStringInsert.ErrorsCombined);
+                }
+            }
+
+            // Instances each task in the feature template
             var taskTemplates = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(featureTemplate.Id, true);
             foreach (var cmTaskTemplate in taskTemplates)
             {
-                var taskTemplateType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(cmTaskTemplate.CMTaskTypeId);
+                var taskInstance = cmTaskTemplate.ToInstance(featureInstanceDto.Id);
 
-                // We can clone the task template to instance here
-                var cmTaskInstance = new CMTaskDto()
-                {
-                    CMParentTaskTemplateId = cmTaskTemplate.Id,
-                    CMFeatureId = featureInstanceDto.Id,
-                    CMSystemStateId = cmTaskTemplate.CMSystemStateId,
-                    CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Instance, taskTemplateType.Id).Id,
-                    CMTaskTypeId = cmTaskTemplate.CMTaskTypeId,
-                    Title = cmTaskTemplate.Title // mcbtodo: apply template vars here when they are implemented
-                };
-                var opTaskInsert = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(cmTaskInstance);
+                var opTaskInsert = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(taskInstance);
                 if (opTaskInsert.Errors.Any())
                 {
                     throw new Exception(opTaskInsert.ErrorsCombined);
                 }
 
                 // For the task data we revert to the task factory to provide it
-                TaskFactoriesCatalog.Instance.CreateTaskDataInstance(taskTemplateType, cmTaskTemplate, cmTaskInstance, featureDepth);
+                var taskTemplateType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(cmTaskTemplate.CMTaskTypeId);
+                TaskFactoriesCatalog.Instance.CreateTaskDataInstance(taskTemplateType, cmTaskTemplate, taskInstance, featureDepth);
             }
 
             // Recalculate the current system state again after the feature has tasks assigned

@@ -114,7 +114,7 @@ namespace Tasks.BuiltIn
             // At this point each dependency found will create a new instance of the target feature
             // I had the idea of adding more functionality and allowing several dependency tasks to point at different states of the
             // same feature. But it's a v2 thing.
-            var clonedFeatureInstance = featureTemplate.CreateFeatureInstance(featureDepth);
+            var clonedFeatureInstance = featureTemplate.ToInstance(featureDepth, new List<CMFeatureVarStringDto>());
 
             // Now we can create new task data that points at the new feature instance
             var taskData = new FeatureDependencyDto()
@@ -173,6 +173,13 @@ namespace Tasks.BuiltIn
             // If a feature is inserted and a dependency was already watching that feature id ... no, that doesn't make sense.
             CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted += Feature_Deleted;
             CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Feature_Updated;
+
+            // Any time a feature var is updated we want to make sure the appropriate task data is taken care of
+            CMDataProvider.DataStore.Value.CMFeatureVarStrings.Value.OnRecordCreated += FeatureVar_Created;
+
+            // Any time a note data is created or updated we want to re-apply any feature vars in it
+            BuildInTasksDataProviders.NoteDataProvider.OnRecordCreated += NoteData_Created_ResolveFeatureVars;
+            BuildInTasksDataProviders.NoteDataProvider.OnRecordUpdated += NoteData_Updated_ResolveFeatureVars;
         }
 
         private void Task_Deleted(CMDataProviderRecordDeletedEventArgs deletedRecordEventArgs)
@@ -215,6 +222,100 @@ namespace Tasks.BuiltIn
             if (beforeDto.CMSystemStateId != afterDto.CMSystemStateId)
             {
                 UpdateTaskStatesForFeatureDependendies(beforeDto, afterDto);
+            }
+        }
+
+        private void FeatureVar_Created(CMDataProviderRecordCreatedEventArgs createdRecordEventArgs)
+        {
+            // The featureVar that was added
+            var featureVar = createdRecordEventArgs.CreatedDto as CMFeatureVarStringDto;
+
+            // The feature that the feature var is assigned to
+            var feature = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(featureVar.CMFeatureId);
+
+            // Don't process feature var replacements in a feature template
+            if (feature.IsTemplate)
+            {
+                return;
+            }
+
+            // All current feature vars for this feature
+            var featureVars = CMDataProvider.DataStore.Value.CMFeatureVarStrings.Value.GetAll_ForFeature(feature.Id).ToList();
+
+            // All tasks currently assigned to the feature
+            var tasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(feature.Id, feature.IsTemplate);
+
+            foreach (var cmTask in tasks)
+            {
+                // Figure out if this is a task type we are interested in
+                var cmTaskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(cmTask.CMTaskTypeId);
+
+                // mcbtodo: add Depth limitation here to prevent stack overflows and put the option in the config
+                // mcbtodo: this may be the same option as the depth of features that are allowed, maybe.
+
+                switch (cmTaskType.Name)
+                {
+                    case nameof(BuildInTaskTypes.FeatureDependency):
+                        // The feature dependency task data does not yet make use of feature vars
+                        break;
+                    case nameof(BuildInTaskTypes.Note):
+                        Note_ResolveFeatureVars(cmTask, featureVars);
+                        break;
+                }
+            }
+        }
+
+        private void NoteData_Created_ResolveFeatureVars(CMDataProviderRecordCreatedEventArgs createdRecordEventArgs)
+        {
+            // The note data that was created
+            var noteData = createdRecordEventArgs.CreatedDto as NoteDto;
+
+            // The task that this note data is associated with
+            var task = CMDataProvider.DataStore.Value.CMTasks.Value.Get(noteData.TaskId);
+
+            // Get all feature vars that currently exist for the feature that the task is in
+            var featureVars = CMDataProvider.DataStore.Value.CMFeatureVarStrings.Value.GetAll_ForFeature(task.CMFeatureId).ToList();
+
+            // Resolve any templates in the newly created note
+            Note_ResolveFeatureVars(task, featureVars);
+        }
+
+        private void NoteData_Updated_ResolveFeatureVars(CMDataProviderRecordUpdatedEventArgs updatedRecordEventArgs)
+        {
+            // The note data that was created
+            var noteData = updatedRecordEventArgs.DtoAfter as NoteDto;
+
+            // The task that this note data is associated with
+            var task = CMDataProvider.DataStore.Value.CMTasks.Value.Get(noteData.TaskId);
+
+            // Get all feature vars that currently exist for the feature that the task is in
+            var featureVars = CMDataProvider.DataStore.Value.CMFeatureVarStrings.Value.GetAll_ForFeature(task.CMFeatureId).ToList();
+
+            // Resolve any templates in the updated note
+            Note_ResolveFeatureVars(task, featureVars);
+        }
+
+        private void Note_ResolveFeatureVars(CMTaskDto cmTask, List<CMFeatureVarStringDto> featureVars)
+        {
+            // Do not resolve feature vars for a task template
+            if (cmTask.IsTemplate)
+            {
+                return;
+            }
+
+            // The task data for the task
+            var taskData = BuildInTasksDataProviders.NoteDataProvider.Get_ForTaskId(cmTask.Id);
+
+            var newNote = FeatureVars.ResolveFeatureVarsInString(taskData.Note, featureVars);
+            if (!newNote.Equals(taskData.Note, StringComparison.OrdinalIgnoreCase))
+            {
+                taskData.Note = newNote; // mcbtodo: if this line is removed it will cause a stack overflow, see if there is a way to keep track of what id is updating where in the CRUD providers to automatically catch this type of thing
+
+                var opUpdateTaskData = BuildInTasksDataProviders.NoteDataProvider.Update(taskData);
+                if (opUpdateTaskData.Errors.Any())
+                {
+                    throw new InvalidOperationException(opUpdateTaskData.ErrorsCombined);
+                }
             }
         }
 

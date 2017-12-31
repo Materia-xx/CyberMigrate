@@ -47,6 +47,7 @@
     <Compile Include="CMDataProviderDataStore.cs" />
     <Compile Include="CMDataProviderCRUDBase.cs" />
     <Compile Include="CMDataProviderMaster.cs" />
+    <Compile Include="CMFeatureVarStringsCRUD.cs" />
     <Compile Include="CMTaskDataCRUD.cs" />
     <Compile Include="CMTaskStatesCRUD.cs" />
     <Compile Include="CMTaskTypesCRUD.cs" />

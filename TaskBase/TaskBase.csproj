@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CMTaskFactoryBase.cs" />
+    <Compile Include="Extensions\FeatureVars.cs" />
     <Compile Include="Extensions\Instancing.cs" />
     <Compile Include="Extensions\StateCalculations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

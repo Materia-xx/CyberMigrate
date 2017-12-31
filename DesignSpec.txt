@@ -143,13 +143,13 @@ TODO: Add in the concept of choice based workflows. The ability to query the use
             * Self - The intention is that the var is set on the current feature.
             * Master - The var will be set on the master feature.
 
-        * GetInputVarNamesForFeature(int featureId) - Calls all tasks in the feature asking they for the variable
+        * GetInputVarNamesForFeature(int featureId) - Calls all tasks in the feature asking them for the variable
           names they will ultimately need, the task should even include names it think it might need. The function
           digs into all child features as well recursively until it has the full list.
           InputVars that are returned will have a mode on each one.
             * Automatic - There is another task/feature that provides this var as output
             * Manual - No other task indicated that it sets an output var with this name.
-                TODO: expand on the logic of how the function digs around and figures out this
+                TODO: expand on the logic of how the function digs around and figures this out
           This mode can be used to determine what variables to prompt for during a task that prompts for needed inputs.
 
     * TODO: how would these vars make it into task titles and feature titles ?

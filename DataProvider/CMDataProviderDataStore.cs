@@ -8,21 +8,23 @@ namespace DataProvider
     /// </summary>
     public class CMDataProviderDataStore
     {
-        public Lazy<CMSystemsCRUD> CMSystems { get; set; }
+        public Lazy<CMSystemsCRUD> CMSystems { get; private set; }
 
-        public Lazy<CMSystemStatesCRUD> CMSystemStates { get; set; }
+        public Lazy<CMSystemStatesCRUD> CMSystemStates { get; private set; }
 
-        public Lazy<CMFeaturesCRUD> CMFeatures { get; set; }
+        public Lazy<CMFeaturesCRUD> CMFeatures { get; private set; }
 
-        public Lazy<CMFeatureStateTransitionRulesCRUD> CMFeatureStateTransitionRules { get; set; }
+        public Lazy<CMFeatureStateTransitionRulesCRUD> CMFeatureStateTransitionRules { get; private set; }
 
-        public Lazy<CMTasksCRUD> CMTasks { get; set; }
+        public Lazy<CMTasksCRUD> CMTasks { get; private set; }
 
-        public Lazy<CMTaskFactoriesCRUD> CMTaskFactories { get; set; }
+        public Lazy<CMTaskFactoriesCRUD> CMTaskFactories { get; private set; }
 
-        public Lazy<CMTaskTypesCRUD> CMTaskTypes { get; set; }
+        public Lazy<CMTaskTypesCRUD> CMTaskTypes { get; private set; }
 
-        public Lazy<CMTaskStatesCRUD> CMTaskStates { get; set; }
+        public Lazy<CMTaskStatesCRUD> CMTaskStates { get; private set; }
+
+        public Lazy<CMFeatureVarStringsCRUD> CMFeatureVarStrings { get; private set; }
 
         public CMDataProviderDataStore(LiteDatabase dataStoreDatabase)
         {
@@ -64,6 +66,11 @@ namespace DataProvider
             CMTaskStates = new Lazy<CMTaskStatesCRUD>(() =>
             {
                 return new CMTaskStatesCRUD(dataStoreDatabase, "TaskStates");
+            });
+
+            CMFeatureVarStrings = new Lazy<CMFeatureVarStringsCRUD>(() =>
+            {
+                return new CMFeatureVarStringsCRUD(dataStoreDatabase, "FeatureVarStrings");
             });
         }
     }

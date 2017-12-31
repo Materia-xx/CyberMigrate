@@ -29,9 +29,9 @@ namespace CyberMigrate
         private Dictionary<string, bool> taskFactoryInitialized = new Dictionary<string, bool>();
 
         /// <summary>
-        /// Keeps track if the state calculation callback events have been registered yet.
+        /// Keeps track if the internal CUD callbacks have been registered yet.
         /// </summary>
-        private bool stateCalculationCallbacksRegistered = false;
+        private bool internalCUDCallbacksRegistered = false;
 
         public MainWindow()
         {
@@ -242,7 +242,7 @@ namespace CyberMigrate
                 addNewFeature.Items.Add(newFeatureSubMenu);
                 addNewFeature.Click += (sender, e) =>
                 {
-                    var newFeature = cmFeatureTemplate.CreateFeatureInstance(0);
+                    var newFeature = cmFeatureTemplate.ToInstance(0, new List<CMFeatureVarStringDto>());
                     ShowFilteredTasks();
                 };
             }
@@ -283,87 +283,81 @@ namespace CyberMigrate
                 return;
             }
             TaskFactories_Init();
-            RegisterStateCalculation_Callbacks();
+            RegisterInternalCUDCallbacks();
         }
 
-        private void RegisterStateCalculation_Callbacks()
+        private void RegisterInternalCUDCallbacks()
         {
-            if (stateCalculationCallbacksRegistered)
+            if (internalCUDCallbacksRegistered)
             {
                 return;
             }
-            stateCalculationCallbacksRegistered = true;
+            internalCUDCallbacksRegistered = true;
 
             // All things that should result in refreshing the cached lookup tables used for state calculation 
-            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordCreated += Record_Created_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += Record_Updated_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordDeleted += Record_Deleted_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordCreated += Record_CUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += Record_CUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordDeleted += Record_CUD_StateCalcLookupsRefreshNeeded;
 
-            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordCreated += Record_Created_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_Updated_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted += Record_Deleted_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordCreated += Record_CUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_CUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted += Record_CUD_StateCalcLookupsRefreshNeeded;
 
-            CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnRecordCreated += Record_Created_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnRecordUpdated += Record_Updated_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnRecordDeleted += Record_Deleted_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnRecordCreated += Record_CUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnRecordUpdated += Record_CUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnRecordDeleted += Record_CUD_StateCalcLookupsRefreshNeeded;
 
-            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordCreated += Record_Created_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordUpdated += Record_Updated_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordDeleted += Record_Deleted_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordCreated += Record_CUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordUpdated += Record_CUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordDeleted += Record_CUD_StateCalcLookupsRefreshNeeded;
 
             // All things that should result in the re-calculation of *all* current feature system states
-            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordCreated += Record_Created_CalculateAllFeatureStates;
-            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordUpdated += Record_Updated_CalculateAllFeatureStates;
-            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordDeleted += Record_Deleted_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordCreated += Record_CUD_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordUpdated += Record_CUD_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordDeleted += Record_CUD_CalculateAllFeatureStates;
 
-            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordCreated += Record_Created_CalculateAllFeatureStates;
-            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += Record_Updated_CalculateAllFeatureStates;
-            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordDeleted += Record_Deleted_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordCreated += Record_CUD_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += Record_CUD_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordDeleted += Record_CUD_CalculateAllFeatureStates;
 
             // Feature Create: Updating the feature state for a new feature is handled during the creation of the feature
             // Feature Delete: If a feature is deleted and there is a dependency task pointing at it, it may cause the dependency task to calculate its task state differently
             //                 However the StateCalculations.CalculateAllFeatureStates() call to calc all feature states does not call in to calculate task states first so we ignore deletes here.
             // Feature Update: If the code is right this shouldn't cause a stack overflow if the depth of features isn't too deep.
-            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_Updated_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_CUD_CalculateAllFeatureStates;
+
+            // React to when new feature vars are added. A title of a feature may be waiting for this or a task may be waiting to make
+            // a decision based on a feature var.
+            CMDataProvider.DataStore.Value.CMFeatureVarStrings.Value.OnRecordCreated += FeatureVar_Created;
+
         }
 
         /// <summary>
-        /// Call by the CRUD providers when the lookups used by the state calculation routines need to be refreshed
+        /// Called by the CRUD providers when the lookups used by the state calculation routines need to be refreshed
         /// </summary>
-        private void Record_Created_StateCalcLookupsRefreshNeeded(CMDataProviderRecordCreatedEventArgs createdRecordEventArgs)
+        private void Record_CUD_StateCalcLookupsRefreshNeeded(object createdRecordEventArgs)
         {
             StateCalculations.LookupsRefreshNeeded = true;
         }
 
         /// <summary>
-        /// Call by the CRUD providers when the lookups used by the state calculation routines need to be refreshed
+        /// Called by the CRUD providers when the feature states need to be re-calculated
         /// </summary>
-        private void Record_Updated_StateCalcLookupsRefreshNeeded(CMDataProviderRecordUpdatedEventArgs updatedRecordEventArgs)
+        /// <param name="createdRecordEventArgs"></param>
+        private void Record_CUD_CalculateAllFeatureStates(object createdRecordEventArgs)
         {
-            StateCalculations.LookupsRefreshNeeded = true;
+            StateCalculations.CalculateAllFeatureStates();
         }
 
         /// <summary>
-        /// Call by the CRUD providers when the lookups used by the state calculation routines need to be refreshed
+        /// Called by the CRUD providers when a new feature var is inserted and things that reference that var need to be resolved
         /// </summary>
-        private void Record_Deleted_StateCalcLookupsRefreshNeeded(CMDataProviderRecordDeletedEventArgs deletedRecordEventArgs)
+        /// <param name="createdRecordEventArgs"></param>
+        private void FeatureVar_Created(CMDataProviderRecordCreatedEventArgs createdRecordEventArgs)
         {
-            StateCalculations.LookupsRefreshNeeded = true;
-        }
-
-        private void Record_Created_CalculateAllFeatureStates(CMDataProviderRecordCreatedEventArgs createdRecordEventArgs)
-        {
-            StateCalculations.CalculateAllFeatureStates();
-        }
-
-        private void Record_Updated_CalculateAllFeatureStates(CMDataProviderRecordUpdatedEventArgs updatedRecordEventArgs)
-        {
-            StateCalculations.CalculateAllFeatureStates();
-        }
-
-        private void Record_Deleted_CalculateAllFeatureStates(CMDataProviderRecordDeletedEventArgs deletedRecordEventArgs)
-        {
-            StateCalculations.CalculateAllFeatureStates();
+            var featureVar = createdRecordEventArgs.CreatedDto as CMFeatureVarStringDto;
+            var feature = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(featureVar.CMFeatureId);
+            feature.ResolveFeatureVarsForFeatureAndTasks();
         }
 
         private void TaskFactories_Init()
