@@ -9,7 +9,7 @@ namespace DataProvider
     /// </summary>
     public class CMTaskDataCRUD<T> : CMDataProviderCRUDBase<T> where T : CMTaskDataDtoBase
     {
-        public CMTaskDataCRUD(LiteDatabase liteDatabase, string collectionName) : base(liteDatabase, collectionName)
+        public CMTaskDataCRUD(string collectionName) : base(CMDataProvider.DataStoreDatabase, $"TaskData_{collectionName}")
         {
         }
 

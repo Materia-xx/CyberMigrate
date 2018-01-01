@@ -16,9 +16,7 @@ namespace DataProvider
             }
         }
 
-        private static Dictionary<Type, object> TaskTypeDataProviders = new Dictionary<Type, object>();
-
-        private static LiteDatabase DataStoreDatabase
+        internal static LiteDatabase DataStoreDatabase
         {
             get
             {
@@ -48,26 +46,5 @@ namespace DataProvider
             var options = Master.Value.GetOptions();
             return new CMDataProviderDataStore(DataStoreDatabase);
         });
-
-        /// <summary>
-        /// Gets a data provider linked to the DTO type specified by type T.
-        /// Meant for creating up generic providers within the context of a task, and for storing task specific data.
-        /// </summary>
-        /// <typeparam name="T">A Dto type that inherits from <see cref="CMTaskDataDtoBase"/></typeparam>
-        /// <returns></returns>
-        public static CMTaskDataCRUD<T> GetTaskTypeDataProvider<T>() where T : CMTaskDataDtoBase
-        {
-            if (!TaskTypeDataProviders.ContainsKey(typeof(T)))
-            {
-                var typeName = typeof(T).Name;
-                var collectionName = $"TaskData_{typeName}";
-                var newDataProvider = new CMTaskDataCRUD<T>(DataStoreDatabase, collectionName);
-                TaskTypeDataProviders.Add(typeof(T), newDataProvider);
-            }
-
-            var dataProviderObj = TaskTypeDataProviders[typeof(T)];
-            var dataProvider = dataProviderObj as CMTaskDataCRUD<T>;
-            return dataProvider;
-        }
     }
 }

@@ -39,7 +39,7 @@ namespace Tasks.BuiltIn.FeatureDependency
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            TaskData = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(cmTask.Id);
+            TaskData = FeatureDependencyExtensions.FeatureDependencyDataProvider.Get_ForTaskId(cmTask.Id);
 
             if (TaskData == null)
             {
@@ -87,40 +87,15 @@ namespace Tasks.BuiltIn.FeatureDependency
 
         private void btnUpdate_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var taskDataRow in TaskData.PathOptions)
-            {
-                if (taskDataRow.CMFeatureTemplateId == 0)
-                {
-                    MessageBox.Show("Each row must be assigned to a valid feature.");
-                    return;
-                }
-
-                if (taskDataRow.CMTargetSystemStateId == 0)
-                {
-                    MessageBox.Show("Each row must be assigned to a valid sytem state.");
-                    return;
-                }
-
-                if (string.IsNullOrWhiteSpace(taskDataRow.FeatureVarName) && !string.IsNullOrWhiteSpace(taskDataRow.FeatureVarSetTo))
-                {
-                    MessageBox.Show("Cannot set a feature var value to check for without specifying the feature var itself.");
-                    return;
-                }
-            }
-
-            // Make sure the options are listed in order
-            // mcbtodo: this would be better in the data provider when that is possible
-            TaskData.PathOptions = TaskData.PathOptions.OrderBy(po => po.Order).ToList();
-
             if (TaskData.Id == 0)
             {
-                BuildInTasksDataProviders.FeatureDependencyDataProvider.Insert(TaskData);
+                FeatureDependencyExtensions.FeatureDependencyDataProvider.Insert(TaskData);
                 // Re-get so the db id is assigned
-                TaskData = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(cmTask.Id);
+                TaskData = FeatureDependencyExtensions.FeatureDependencyDataProvider.Get_ForTaskId(cmTask.Id);
             }
             else
             {
-                BuildInTasksDataProviders.FeatureDependencyDataProvider.Update(TaskData);
+                FeatureDependencyExtensions.FeatureDependencyDataProvider.Update(TaskData);
             }
 
             MessageBox.Show("Updated");

@@ -4,14 +4,25 @@ using Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TaskBase.Extensions;
 
 namespace Tasks.BuiltIn.FeatureDependency
 {
     public static class FeatureDependencyExtensions
     {
+        internal static FeatureDependencyTaskDataCRUD FeatureDependencyDataProvider
+        {
+            get
+            {
+                if (featureDependencyDataProvider == null)
+                {
+                    featureDependencyDataProvider = new FeatureDependencyTaskDataCRUD(nameof(FeatureDependencyDto));
+                }
+                return featureDependencyDataProvider;
+            }
+        }
+        private static FeatureDependencyTaskDataCRUD featureDependencyDataProvider;
+
         internal static List<CMTaskStateDto> FeatureDependency_TaskStates { get; set; }
         internal static CMTaskStateDto FeatureDependency_TaskState_WaitingOnDependency { get; set; }
         internal static CMTaskStateDto FeatureDependency_TaskState_Closed { get; set; }
@@ -83,14 +94,14 @@ namespace Tasks.BuiltIn.FeatureDependency
         internal static void FeatureDependency_CreateTaskDataInstance(CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance)
         {
             // Double check to make sure there isn't task data for this task already
-            var existingTaskData = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(cmTaskInstance.Id);
+            var existingTaskData = FeatureDependencyDataProvider.Get_ForTaskId(cmTaskInstance.Id);
             if (existingTaskData != null)
             {
                 throw new Exception("Task data already exists for the feature dependency task.");
             }
 
             // The task data (template) to clone
-            var taskDataTemplate = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(cmTaskTemplate.Id);
+            var taskDataTemplate = FeatureDependencyDataProvider.Get_ForTaskId(cmTaskTemplate.Id);
 
             // If there was no task data template defined then just return without creating data for the instance
             if (taskDataTemplate == null)
@@ -102,7 +113,7 @@ namespace Tasks.BuiltIn.FeatureDependency
             var taskDataInstance = taskDataTemplate.ToInstance(cmTaskInstance.Id);
 
             // And insert it
-            var opInsertResult = BuildInTasksDataProviders.FeatureDependencyDataProvider.Insert(taskDataInstance);
+            var opInsertResult = FeatureDependencyExtensions.FeatureDependencyDataProvider.Insert(taskDataInstance);
             if (opInsertResult.Errors.Any())
             {
                 throw new Exception(opInsertResult.ErrorsCombined);
@@ -134,10 +145,7 @@ namespace Tasks.BuiltIn.FeatureDependency
             }
 
             // Look for dependency task data that reference this feature that is being changed
-            var linkedTaskDatas = BuildInTasksDataProviders.FeatureDependencyDataProvider.GetAll();
-
-            // mcbtodo: Is there a way to code in CRUD provider overrides for the FeatureDependencyDataProvider so this doesn't have to do a GetAll() ?
-            linkedTaskDatas = linkedTaskDatas.Where(t => t.InstancedCMFeatureId == featureBeforeDto.Id);
+            var linkedTaskDatas = FeatureDependencyDataProvider.GetAll_ForInstancedFeatureId(featureBeforeDto.Id);
 
             // If there are no dependencies on the feature that was updated, then there is nothing more to do.
             if (!linkedTaskDatas.Any())
@@ -153,7 +161,7 @@ namespace Tasks.BuiltIn.FeatureDependency
                 {
                     // If the task this data links to is null then somehow the task was deleted without deleting the data,
                     // Do so now
-                    BuildInTasksDataProviders.FeatureDependencyDataProvider.Delete(linkedTaskData.Id);
+                    FeatureDependencyDataProvider.Delete(linkedTaskData.Id);
                     continue;
                 }
 
@@ -180,7 +188,7 @@ namespace Tasks.BuiltIn.FeatureDependency
         /// </summary>
         internal static void FeatureDependency_ResolveFeatureVars(CMTaskDto taskInstance, List<CMFeatureVarStringDto> featureVars)
         {
-            FeatureDependencyDto instanceTaskData = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(taskInstance.Id);
+            FeatureDependencyDto instanceTaskData = FeatureDependencyDataProvider.Get_ForTaskId(taskInstance.Id);
 
             if (instanceTaskData.InstancedCMFeatureId > 0)
             {
@@ -228,7 +236,7 @@ namespace Tasks.BuiltIn.FeatureDependency
                     // Set the task data to represent the feature instance that was created
                     instanceTaskData.InstancedCMFeatureId = clonedFeatureInstance.Id;
                     instanceTaskData.InstancedTargetCMSystemStateId = pathOption.CMTargetSystemStateId;
-                    var opUpdateTaskData = BuildInTasksDataProviders.FeatureDependencyDataProvider.Update(instanceTaskData);
+                    var opUpdateTaskData = FeatureDependencyDataProvider.Update(instanceTaskData);
                     if (opUpdateTaskData.Errors.Any())
                     {
                         throw new Exception(opUpdateTaskData.ErrorsCombined);

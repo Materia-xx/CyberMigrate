@@ -90,7 +90,7 @@ namespace TaskBase.Extensions
                 }
             }
 
-            // mcbtodo: see if there is an easy way that works to wrap this checking and update logic into extension methods. It would handle just updating the system state id and keeping whatever title is currently in the db.
+            // mcbtodo: see if there is an easy way that works to wrap this checking and update logic into extension methods. It would handle updating *just* the system state id and keeping whatever title is currently in the db.
             if (cmFeature.CMSystemStateId != shouldBeSystemStateId)
             {
                 cmFeature.CMSystemStateId = shouldBeSystemStateId;

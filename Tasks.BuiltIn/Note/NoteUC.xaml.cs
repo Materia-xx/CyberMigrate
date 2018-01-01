@@ -30,7 +30,7 @@ namespace Tasks.BuiltIn.Note
 
         private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            TaskData = BuildInTasksDataProviders.NoteDataProvider.Get_ForTaskId(cmTask.Id);
+            TaskData = NoteExtensions.NoteDataProvider.Get_ForTaskId(cmTask.Id);
 
             if (TaskData != null)
             {
@@ -63,11 +63,11 @@ namespace Tasks.BuiltIn.Note
             CMCUDResult opResult;
             if (TaskData.Id == 0)
             {
-                opResult = BuildInTasksDataProviders.NoteDataProvider.Insert(TaskData);
+                opResult = NoteExtensions.NoteDataProvider.Insert(TaskData);
             }
             else
             {
-                opResult = BuildInTasksDataProviders.NoteDataProvider.Update(TaskData);
+                opResult = NoteExtensions.NoteDataProvider.Update(TaskData);
             }
 
             if (opResult.Errors.Any())

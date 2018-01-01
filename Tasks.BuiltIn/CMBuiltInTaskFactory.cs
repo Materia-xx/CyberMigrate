@@ -112,15 +112,15 @@ namespace Tasks.BuiltIn
             CMDataProvider.DataStore.Value.CMFeatureVarStrings.Value.OnRecordCreated += FeatureVar_Created;
 
             // Any time a note data is created or updated we want to re-apply any feature vars in it
-            BuildInTasksDataProviders.NoteDataProvider.OnRecordCreated += NoteExtensions.NoteData_Created_ResolveFeatureVars;
-            BuildInTasksDataProviders.NoteDataProvider.OnRecordUpdated += NoteExtensions.NoteData_Updated_ResolveFeatureVars;
+            NoteExtensions.NoteDataProvider.OnRecordCreated += NoteExtensions.NoteData_Created_ResolveFeatureVars;
+            NoteExtensions.NoteDataProvider.OnRecordUpdated += NoteExtensions.NoteData_Updated_ResolveFeatureVars;
 
             // Handle anything we need to anytime a feature dependency task data is created or updated
             // Feature dependency data deleted:
             //      * If the associated task was deleted too then let that event handler handle it.
             //      * If just the data was deleted then don't delete the child feature if there is one.
-            BuildInTasksDataProviders.FeatureDependencyDataProvider.OnRecordCreated += FeatureDependencyExtensions.FeatureDependencyData_Created;
-            BuildInTasksDataProviders.FeatureDependencyDataProvider.OnRecordUpdated += FeatureDependencyExtensions.FeatureDependencyData_Updated;
+            FeatureDependencyExtensions.FeatureDependencyDataProvider.OnRecordCreated += FeatureDependencyExtensions.FeatureDependencyData_Created;
+            FeatureDependencyExtensions.FeatureDependencyDataProvider.OnRecordUpdated += FeatureDependencyExtensions.FeatureDependencyData_Updated;
         }
 
         private void Task_Deleted(CMDataProviderRecordDeletedEventArgs deletedRecordEventArgs)
@@ -136,10 +136,10 @@ namespace Tasks.BuiltIn
             switch (cmTaskType.Name)
             {
                 case nameof(BuildInTaskTypes.FeatureDependency):
-                    BuildInTasksDataProviders.FeatureDependencyDataProvider.Delete_ForTaskId(cmTaskDto.Id);
+                    FeatureDependencyExtensions.FeatureDependencyDataProvider.Delete_ForTaskId(cmTaskDto.Id);
                     break;
                 case nameof(BuildInTaskTypes.Note):
-                    BuildInTasksDataProviders.NoteDataProvider.Delete_ForTaskId(cmTaskDto.Id);
+                    NoteExtensions.NoteDataProvider.Delete_ForTaskId(cmTaskDto.Id);
                     break;
             }
         }

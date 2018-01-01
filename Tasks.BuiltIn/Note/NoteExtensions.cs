@@ -4,18 +4,29 @@ using Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TaskBase.Extensions;
 
 namespace Tasks.BuiltIn.Note
 {
     public static class NoteExtensions
     {
+        internal static NoteTaskDataCRUD NoteDataProvider
+        {
+            get
+            {
+                if (noteDataProvider == null)
+                {
+                    noteDataProvider = new NoteTaskDataCRUD(nameof(NoteDto));
+                }
+                return noteDataProvider;
+            }
+        }
+        private static NoteTaskDataCRUD noteDataProvider;
+
         internal static void Note_CreateTaskDataInstance(CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance)
         {
             // The task data (template) to clone
-            var taskDataTemplate = BuildInTasksDataProviders.NoteDataProvider.Get_ForTaskId(cmTaskTemplate.Id);
+            var taskDataTemplate = NoteDataProvider.Get_ForTaskId(cmTaskTemplate.Id);
 
             // If there was no task data template defined then just return without creating data for the instance
             if (taskDataTemplate == null)
@@ -30,7 +41,7 @@ namespace Tasks.BuiltIn.Note
                 Note = taskDataTemplate.Note
             };
 
-            var opResult = BuildInTasksDataProviders.NoteDataProvider.Insert(taskData);
+            var opResult = NoteDataProvider.Insert(taskData);
             if (opResult.Errors.Any())
             {
                 throw new Exception(opResult.ErrorsCombined);
@@ -46,14 +57,14 @@ namespace Tasks.BuiltIn.Note
             }
 
             // The task data for the task
-            var taskData = BuildInTasksDataProviders.NoteDataProvider.Get_ForTaskId(cmTask.Id);
+            var taskData = NoteDataProvider.Get_ForTaskId(cmTask.Id);
 
             var newNote = FeatureVars.ResolveFeatureVarsInString(taskData.Note, featureVars);
             if (!newNote.Equals(taskData.Note, StringComparison.OrdinalIgnoreCase))
             {
                 taskData.Note = newNote;
 
-                var opUpdateTaskData = BuildInTasksDataProviders.NoteDataProvider.Update(taskData);
+                var opUpdateTaskData = NoteDataProvider.Update(taskData);
                 if (opUpdateTaskData.Errors.Any())
                 {
                     throw new InvalidOperationException(opUpdateTaskData.ErrorsCombined);
