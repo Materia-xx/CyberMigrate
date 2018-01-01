@@ -58,6 +58,7 @@
     <Compile Include="CMSystemStatesCRUD.cs" />
     <Compile Include="CMSystemsCRUD.cs" />
     <Compile Include="CMDataProvider.cs" />
+    <Compile Include="CUDDepthTracking.cs" />
     <Compile Include="Events\CMDataProviderRecordDeletedEventArgs.cs" />
     <Compile Include="Events\CMDataProviderRecordUpdatedEventArgs.cs" />
     <Compile Include="Events\CMDataProviderRecordCreatedEventArgs.cs" />

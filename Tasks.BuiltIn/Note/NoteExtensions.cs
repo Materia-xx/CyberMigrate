@@ -12,7 +12,7 @@ namespace Tasks.BuiltIn.Note
 {
     public static class NoteExtensions
     {
-        internal static void Note_CreateTaskDataInstance(CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance, int featureDepth)
+        internal static void Note_CreateTaskDataInstance(CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance)
         {
             // The task data (template) to clone
             var taskDataTemplate = BuildInTasksDataProviders.NoteDataProvider.Get_ForTaskId(cmTaskTemplate.Id);
@@ -51,7 +51,7 @@ namespace Tasks.BuiltIn.Note
             var newNote = FeatureVars.ResolveFeatureVarsInString(taskData.Note, featureVars);
             if (!newNote.Equals(taskData.Note, StringComparison.OrdinalIgnoreCase))
             {
-                taskData.Note = newNote; // mcbtodo: if this line is removed it will cause a stack overflow, see if there is a way to keep track of what id is updating where in the CRUD providers to automatically catch this type of thing
+                taskData.Note = newNote;
 
                 var opUpdateTaskData = BuildInTasksDataProviders.NoteDataProvider.Update(taskData);
                 if (opUpdateTaskData.Errors.Any())

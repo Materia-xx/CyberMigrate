@@ -47,24 +47,12 @@ namespace TaskBase.Extensions
         /// Creates an instance of a feature template.
         /// </summary>
         /// <param name="featureTemplate"></param>
-        /// <param name="featureDepth">
-        /// For situations where we clone entire branches of feature templates, this indicates how many features from the starting 
-        /// point we are currently at. If the depth goes over a threshhold the program will halt the cloning operation to 
-        /// prevent a never-ending loop.
-        /// </param>
         /// <returns></returns>
-        public static CMFeatureDto ToInstance(this CMFeatureDto featureTemplate, int featureDepth, List<CMFeatureVarStringDto> initialFeatureVars)
+        public static CMFeatureDto ToInstance(this CMFeatureDto featureTemplate, List<CMFeatureVarStringDto> initialFeatureVars)
         {
             if (!featureTemplate.IsTemplate)
             {
                 throw new NotImplementedException("Instancing a feature that is already an instance is not implemented.");
-            }
-
-            featureDepth++;
-            if (featureDepth > 10) // mcbtodo: make this configurable in the master options
-            {
-                // mcbtodo: this will leave a mess of features and records that needs to be cleaned up, make that easier to deal with.
-                throw new StackOverflowException("Unable to clone a feature template that is more than 10 levels deep. Check the feature for errors and try again.");
             }
 
             // Clone the feature template to a feature instance
@@ -121,7 +109,7 @@ namespace TaskBase.Extensions
 
                 // For the task data we revert to the task factory to provide it
                 var taskTemplateType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(cmTaskTemplate.CMTaskTypeId);
-                TaskFactoriesCatalog.Instance.CreateTaskDataInstance(taskTemplateType, cmTaskTemplate, taskInstance, featureDepth);
+                TaskFactoriesCatalog.Instance.CreateTaskDataInstance(taskTemplateType, cmTaskTemplate, taskInstance);
             }
 
             // Recalculate the current system state again after the feature has tasks assigned

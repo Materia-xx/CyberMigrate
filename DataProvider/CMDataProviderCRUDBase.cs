@@ -93,6 +93,11 @@ namespace DataProvider
         public virtual CMCUDResult Insert(T insertingObject)
         {
             var opResult = new CMCUDResult();
+            if (CUDDepthTracking.ExceedsMaxOperationDepth(opResult))
+            {
+                return opResult;
+            }
+
             if (insertingObject.Id != 0)
             {
                 opResult.Errors.Add($"Cannot insert a new item into {CollectionName}. New items must have their id set to 0 before insert.");
@@ -100,18 +105,34 @@ namespace DataProvider
             }
 
             cmCollection.Insert(insertingObject);
-            OnRecordCreated?.Invoke(
-                new CMDataProviderRecordCreatedEventArgs()
-                {
-                    CreatedDto = insertingObject
-                });
 
+            try
+            {
+                CUDDepthTracking.OperationDepth++;
+                OnRecordCreated?.Invoke(
+                    new CMDataProviderRecordCreatedEventArgs()
+                    {
+                        CreatedDto = insertingObject
+                    });
+            }
+            catch (Exception ex)
+            {
+                opResult.Errors.Add(ex.ToString());
+            }
+            finally
+            {
+                CUDDepthTracking.OperationDepth--;
+            }
             return opResult;
         }
 
         public virtual CMCUDResult Update(T updatingObject)
         {
             var opResult = new CMCUDResult();
+            if (CUDDepthTracking.ExceedsMaxOperationDepth(opResult))
+            {
+                return opResult;
+            }
 
             var updateEvent = new CMDataProviderRecordUpdatedEventArgs()
             {
@@ -125,7 +146,19 @@ namespace DataProvider
                 return opResult;
             }
 
-            OnRecordUpdated?.Invoke(updateEvent);
+            try
+            {
+                CUDDepthTracking.OperationDepth++;
+                OnRecordUpdated?.Invoke(updateEvent);
+            }
+            catch (Exception ex)
+            {
+                opResult.Errors.Add(ex.ToString());
+            }
+            finally
+            {
+                CUDDepthTracking.OperationDepth--;
+            }
 
             return opResult;
         }
@@ -133,12 +166,29 @@ namespace DataProvider
         public virtual CMCUDResult Delete(int deletingId)
         {
             var opResult = new CMCUDResult();
+            if (CUDDepthTracking.ExceedsMaxOperationDepth(opResult))
+            {
+                return opResult;
+            }
 
-            OnRecordDeleted?.Invoke(
-                new CMDataProviderRecordDeletedEventArgs()
-                {
-                    DtoBefore = Get(deletingId),
-                });
+            try
+            {
+                CUDDepthTracking.OperationDepth++;
+                OnRecordDeleted?.Invoke(
+                    new CMDataProviderRecordDeletedEventArgs()
+                    {
+                        DtoBefore = Get(deletingId),
+                    });
+            }
+            catch (Exception ex)
+            {
+                opResult.Errors.Add(ex.ToString());
+            }
+            finally
+            {
+                CUDDepthTracking.OperationDepth--;
+            }
+
             if (!cmCollection.Delete(deletingId))
             {
                 opResult.Errors.Add($"{CollectionName} with id {deletingId} was not found to delete.");

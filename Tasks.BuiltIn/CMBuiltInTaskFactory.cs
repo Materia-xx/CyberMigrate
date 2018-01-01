@@ -79,15 +79,15 @@ namespace Tasks.BuiltIn
             return null;
         }
 
-        public override void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance, int featureDepth)
+        public override void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance)
         {
             switch (cmTaskType.Name)
             {
                 case nameof(BuildInTaskTypes.FeatureDependency):
-                    FeatureDependencyExtensions.FeatureDependency_CreateTaskDataInstance(cmTaskTemplate, cmTaskInstance, featureDepth);
+                    FeatureDependencyExtensions.FeatureDependency_CreateTaskDataInstance(cmTaskTemplate, cmTaskInstance);
                     break;
                 case nameof(BuildInTaskTypes.Note):
-                    NoteExtensions.Note_CreateTaskDataInstance(cmTaskTemplate, cmTaskInstance, featureDepth);
+                    NoteExtensions.Note_CreateTaskDataInstance(cmTaskTemplate, cmTaskInstance);
                     break;
             }
         }
@@ -190,9 +190,6 @@ namespace Tasks.BuiltIn
             {
                 // Figure out if this is a task type we are interested in
                 var cmTaskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(cmTask.CMTaskTypeId);
-
-                // mcbtodo: add Depth limitation here to prevent stack overflows and put the option in the config
-                // mcbtodo: this may be the same option as the depth of features that are allowed, maybe.
 
                 switch (cmTaskType.Name)
                 {

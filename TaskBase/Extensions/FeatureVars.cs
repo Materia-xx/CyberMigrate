@@ -47,7 +47,7 @@ namespace TaskBase.Extensions
             // Only update the feature if an update was made
             if (!newFeatureName.Equals(feature.Name, StringComparison.OrdinalIgnoreCase))
             {
-                feature.Name = newFeatureName; // mcbtodo: probably causes a stack overflow if removed, make sure it's taken care of in a more elegant way
+                feature.Name = newFeatureName;
 
                 var opFeatureUpdate = CMDataProvider.DataStore.Value.CMFeatures.Value.Update(feature);
                 if (opFeatureUpdate.Errors.Any())
@@ -77,7 +77,7 @@ namespace TaskBase.Extensions
             // Only update the task if a change was made
             if (!newTaskTitle.Equals(task.Title, StringComparison.OrdinalIgnoreCase))
             {
-                task.Title = newTaskTitle; // mcbtodo: more stack overflow checking
+                task.Title = newTaskTitle;
 
                 var opTaskUpdate = CMDataProvider.DataStore.Value.CMTasks.Value.Update(task);
                 if (opTaskUpdate.Errors.Any())

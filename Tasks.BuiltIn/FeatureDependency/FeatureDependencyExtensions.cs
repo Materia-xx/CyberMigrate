@@ -80,7 +80,7 @@ namespace Tasks.BuiltIn.FeatureDependency
             FeatureDependency_ResolveFeatureVars(task, featureVars);
         }
 
-        internal static void FeatureDependency_CreateTaskDataInstance(CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance, int featureDepth)
+        internal static void FeatureDependency_CreateTaskDataInstance(CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance)
         {
             // Double check to make sure there isn't task data for this task already
             var existingTaskData = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(cmTaskInstance.Id);
@@ -223,7 +223,7 @@ namespace Tasks.BuiltIn.FeatureDependency
                     var featureTemplate = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(pathOption.CMFeatureTemplateId);
 
                     var childFeatureVars = new List<CMFeatureVarStringDto>();
-                    var clonedFeatureInstance = featureTemplate.ToInstance(0, childFeatureVars); // mcbtodo: should not be hardcoded to 0
+                    var clonedFeatureInstance = featureTemplate.ToInstance(childFeatureVars);
 
                     // Set the task data to represent the feature instance that was created
                     instanceTaskData.InstancedCMFeatureId = clonedFeatureInstance.Id;

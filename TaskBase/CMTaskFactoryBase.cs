@@ -55,8 +55,7 @@ namespace TaskBase
         /// <param name="cmTaskType"></param>
         /// <param name="cmTaskTemplate">The task template that the task was created from</param>
         /// <param name="cmTaskInstance">The new task that was created</param>
-        /// <param name="featureDepth">The current depth of feature if the creating routing is recursing through linked features</param>
-        public abstract void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance, int featureDepth);
+        public abstract void CreateTaskDataInstance(CMTaskTypeDto cmTaskType, CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance);
 
         /// <summary>
         /// Called after registering the task types and states in the database.
