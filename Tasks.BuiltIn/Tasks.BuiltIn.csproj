@@ -50,7 +50,7 @@
     <Compile Include="BuildInTasksDataProvider.cs" />
     <Compile Include="BuildInTaskTypes.cs" />
     <Compile Include="FeatureDependency\FeatureDependencyExtensions.cs" />
-    <Compile Include="FeatureDependency\FeatureDependencyRowDto.cs" />
+    <Compile Include="FeatureDependency\FeatureDependencyPathOptionDto.cs" />
     <Compile Include="CMBuiltInTaskFactory.cs" />
     <Compile Include="FeatureDependency\FeatureDependencyConfigUC.xaml.cs">
       <DependentUpon>FeatureDependencyConfigUC.xaml</DependentUpon>

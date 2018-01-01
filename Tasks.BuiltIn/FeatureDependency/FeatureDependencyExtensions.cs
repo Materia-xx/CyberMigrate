@@ -37,7 +37,7 @@ namespace Tasks.BuiltIn.FeatureDependency
             // Copy the path options over
             foreach (var pathOption in taskDataTemplate.PathOptions)
             {
-                var clonedPathOption = new FeatureDependencyRowDto()
+                var clonedPathOption = new FeatureDependencyPathOptionDto()
                 {
                     CMFeatureTemplateId = pathOption.CMFeatureTemplateId,
                     CMTargetSystemStateId = pathOption.CMTargetSystemStateId,
@@ -198,7 +198,7 @@ namespace Tasks.BuiltIn.FeatureDependency
             }
 
             // Examine all path options
-            foreach (var pathOption in instanceTaskData.PathOptions) // mcbtodo: add a priority property on these and make sure the options are listed in this order in the UI and here
+            foreach (var pathOption in instanceTaskData.PathOptions.OrderBy(po => po.Order))
             {
                 bool useThisOption = false;
 

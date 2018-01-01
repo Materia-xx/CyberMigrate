@@ -18,6 +18,7 @@
         </Grid.RowDefinitions>
         <DataGrid x:Name="dataGridFeatureDependencySettings" AutoGenerateColumns="False" CanUserAddRows="True" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
             <DataGrid.Columns>
+                <DataGridTextColumn Header="Order" Binding="{Binding Order}" Width="40"></DataGridTextColumn>
                 <DataGridTextColumn Header="If Feature Var" Binding="{Binding FeatureVarName}" Width="150"></DataGridTextColumn>
                 <DataGridTextColumn Header="Is Set To" Binding="{Binding FeatureVarSetTo}" Width="150"></DataGridTextColumn>
                 <DataGridTemplateColumn Header="Then Begin Feature">

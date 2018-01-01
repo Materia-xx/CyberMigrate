@@ -50,7 +50,6 @@ namespace Tasks.BuiltIn.FeatureDependency
             }
 
             // mcbtodo: Add a way to see the feature that was instanced, after it is.
-
             dataGridFeatureDependencySettings.ItemsSource = TaskData.PathOptions;
         }
 
@@ -58,7 +57,7 @@ namespace Tasks.BuiltIn.FeatureDependency
         {
             var selectedRowIndex = dataGridFeatureDependencySettings.SelectedIndex;
 
-            var rowData = dataGridFeatureDependencySettings.SelectedItem as FeatureDependencyRowDto;
+            var rowData = dataGridFeatureDependencySettings.SelectedItem as FeatureDependencyPathOptionDto;
             if (rowData == null)
             {
                 MessageBox.Show("The row must first be fully inserted before the associated feature can be set.");
@@ -108,6 +107,10 @@ namespace Tasks.BuiltIn.FeatureDependency
                     return;
                 }
             }
+
+            // Make sure the options are listed in order
+            // mcbtodo: this would be better in the data provider when that is possible
+            TaskData.PathOptions = TaskData.PathOptions.OrderBy(po => po.Order).ToList();
 
             if (TaskData.Id == 0)
             {

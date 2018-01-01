@@ -23,6 +23,6 @@ namespace Tasks.BuiltIn.FeatureDependency
         /// <summary>
         /// The list of potential feature dependencies with associated rules to determine if they will be instanced as the dependency
         /// </summary>
-        public List<FeatureDependencyRowDto> PathOptions { get; set; } = new List<FeatureDependencyRowDto>();
+        public List<FeatureDependencyPathOptionDto> PathOptions { get; set; } = new List<FeatureDependencyPathOptionDto>();
     }
 }

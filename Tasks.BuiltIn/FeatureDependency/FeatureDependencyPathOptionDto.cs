@@ -3,8 +3,13 @@ using Dto;
 
 namespace Tasks.BuiltIn.FeatureDependency
 {
-    public class FeatureDependencyRowDto
+    public class FeatureDependencyPathOptionDto
     {
+        /// <summary>
+        /// The order that the options should be processed in
+        /// </summary>
+        public int Order { get; set; }
+
         /// <summary>
         /// The feature var name to look at to test if this will be a dependency or not.
         /// Leave blank to unconditionally use the dependency
