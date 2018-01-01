@@ -1,17 +1,28 @@
 ﻿using Dto;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Tasks.BuiltIn.FeatureDependency
 {
     public class FeatureDependencyDto : CMTaskDataDtoBase
     {
         /// <summary>
-        /// The feature that is being tracked
+        /// Represents the feature dependency instance that was chosen from PathOptions.
+        /// Will be set to 0 if a choice has not yet been made.
         /// </summary>
-        public int CMFeatureId { get; set; }
+        public int InstancedCMFeatureId { get; set; }
 
         /// <summary>
-        /// The target state that will trigger the dependency
+        /// Represents the target system state that the instanced feature must be in for the associated dependency task to be closed
         /// </summary>
-        public int CMTargetSystemStateId { get; set; }
+        public int InstancedTargetCMSystemStateId { get; set; }
+
+        /// <summary>
+        /// The list of potential feature dependencies with associated rules to determine if they will be instanced as the dependency
+        /// </summary>
+        public List<FeatureDependencyRowDto> PathOptions { get; set; } = new List<FeatureDependencyRowDto>();
     }
 }

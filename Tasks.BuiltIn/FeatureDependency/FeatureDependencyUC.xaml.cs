@@ -1,10 +1,19 @@
-﻿using DataProvider;
-using Dto;
+﻿using Dto;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
 
 namespace Tasks.BuiltIn.FeatureDependency
 {
@@ -19,12 +28,6 @@ namespace Tasks.BuiltIn.FeatureDependency
 
         private FeatureDependencyDto TaskData;
 
-        private ObservableCollection<CMSystemDto> ComboBox_Systems = new ObservableCollection<CMSystemDto>();
-
-        private ObservableCollection<CMFeatureDto> ComboBox_Features = new ObservableCollection<CMFeatureDto>();
-
-        private ObservableCollection<CMSystemStateDto> ComboBox_States = new ObservableCollection<CMSystemStateDto>();
-
         public FeatureDependencyUC(CMSystemDto cmSystem, CMFeatureDto cmFeature, CMTaskDto cmTask)
         {
             InitializeComponent();
@@ -32,133 +35,92 @@ namespace Tasks.BuiltIn.FeatureDependency
             this.cmSystem = cmSystem;
             this.cmFeature = cmFeature;
             this.cmTask = cmTask;
-
-            ComboBox_Systems.Clear();
-            var cmSystems = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll();
-            foreach (var combobox_cmSystem in cmSystems)
-            {
-                ComboBox_Systems.Add(combobox_cmSystem);
-            }
-
-            cboSystem.ItemsSource = ComboBox_Systems;
-            cboSystem.DisplayMemberPath = nameof(CMSystemDto.Name);
-            cboSystem.SelectedValuePath = nameof(CMSystemDto.Id);
-
-            cboFeature.ItemsSource = ComboBox_Features;
-            cboFeature.DisplayMemberPath = nameof(CMFeatureDto.Name);
-            cboFeature.SelectedValuePath = nameof(CMFeatureDto.Id);
-
-            cboState.ItemsSource = ComboBox_States;
-            cboState.DisplayMemberPath = nameof(CMSystemStateDto.Name);
-            cboState.SelectedValuePath = nameof(CMSystemStateDto.Id);
         }
 
-        private void ReloadComboBox_Features()
-        {
-            ComboBox_Features.Clear();
-            var selectedSystemObj = cboSystem.SelectedItem;
-            if (selectedSystemObj == null)
-            {
-                return;
-            }
-            var selectedSystem = selectedSystemObj as CMSystemDto;
-            var cmFeatures = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll_ForSystem(selectedSystem.Id, cmTask.IsTemplate);
-            foreach (var cmFeature in cmFeatures)
-            {
-                ComboBox_Features.Add(cmFeature);
-            }
-        }
-
-        private void ReloadComboBox_States()
-        {
-            ComboBox_States.Clear();
-            var selectedFeatureObj = cboFeature.SelectedItem;
-            if (selectedFeatureObj == null)
-            {
-                return;
-            }
-            var selectedFeature = selectedFeatureObj as CMFeatureDto;
-
-            // If this is a feature template then get the system states directly for it, otherwise get them for the parent feature template
-            var featureTemplateId = selectedFeature.CMParentFeatureTemplateId == 0 ? selectedFeature.Id : selectedFeature.CMParentFeatureTemplateId;
-            var cmStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForFeatureTemplate(featureTemplateId);
-            foreach (var cmState in cmStates)
-            {
-                ComboBox_States.Add(cmState);
-            }
-        }
-
-        private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             TaskData = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(cmTask.Id);
 
-            if (TaskData != null)
-            {
-                try
-                {
-                    var selectedFeature = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(TaskData.CMFeatureId);
-
-                    cboSystem.SelectedItem = ComboBox_Systems.First(s => s.Id == selectedFeature.CMSystemId);
-                    ReloadComboBox_Features();
-                    cboFeature.SelectedItem = ComboBox_Features.First(f => f.Id == TaskData.CMFeatureId);
-                    ReloadComboBox_States();
-                    cboState.SelectedItem = ComboBox_States.First(s => s.Id == TaskData.CMTargetSystemStateId);
-                }
-                catch
-                {
-                    MessageBox.Show("The values that were set on this dependency previously cannot be represented within the current configuration. Please re-set the values.");
-                }
-            }
-
-            cboSystem.SelectionChanged += CboSystem_SelectionChanged;
-            cboFeature.SelectionChanged += CboFeature_SelectionChanged;
-            cboState.SelectionChanged += CboState_SelectionChanged;
-        }
-
-        private void CboSystem_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ReloadComboBox_Features();
-        }
-
-        private void CboFeature_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ReloadComboBox_States();
-        }
-
-        private void CboState_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // Updating the state is the only thing that will insert or update the task data
-            var selectedFeatureObj = cboFeature.SelectedItem;
-            if (selectedFeatureObj == null)
-            {
-                return;
-            }
-            var selectedFeature = selectedFeatureObj as CMFeatureDto;
-
-            var selectedStateObj = cboState.SelectedItem;
-            if (selectedStateObj == null)
-            {
-                return;
-            }
-            var selectedState = selectedStateObj as CMSystemStateDto;
-
             if (TaskData == null)
             {
-                var taskDataDto = new FeatureDependencyDto()
+                TaskData = new FeatureDependencyDto()
                 {
-                    TaskId = cmTask.Id,
-                    CMFeatureId = selectedFeature.Id,
-                    CMTargetSystemStateId = selectedState.Id
+                    TaskId = cmTask.Id
                 };
-                BuildInTasksDataProviders.FeatureDependencyDataProvider.Insert(taskDataDto);
+            }
+
+            // mcbtodo: Add a way to see the feature that was instanced, after it is.
+
+            dataGridFeatureDependencySettings.ItemsSource = TaskData.PathOptions;
+        }
+
+        private void btnSetFeature_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedRowIndex = dataGridFeatureDependencySettings.SelectedIndex;
+
+            var rowData = dataGridFeatureDependencySettings.SelectedItem as FeatureDependencyRowDto;
+            if (rowData == null)
+            {
+                MessageBox.Show("The row must first be fully inserted before the associated feature can be set.");
+                return;
+            }
+
+            Window featureSelector = new Window()
+            {
+                Title = "Select Feature",
+                Width = 800,
+                Height = 600
+            };
+
+            var featureSelectorUC = new FeatureDependencyChooseFeatureUC(rowData.CMFeatureTemplateId, rowData.CMTargetSystemStateId, cmTask.IsTemplate, featureSelector);
+            featureSelectorUC.Margin = new Thickness(5);
+            featureSelector.Content = featureSelectorUC;
+            featureSelector.ShowDialog();
+
+            if (featureSelectorUC.SelectionConfirmed)
+            {
+                rowData.CMFeatureTemplateId = featureSelectorUC.SelectedFeatureId;
+                rowData.CMTargetSystemStateId = featureSelectorUC.SelectedSystemStateId;
+                dataGridFeatureDependencySettings.ItemsSource = null;
+                dataGridFeatureDependencySettings.ItemsSource = TaskData.PathOptions;
+            }
+        }
+
+        private void btnUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var taskDataRow in TaskData.PathOptions)
+            {
+                if (taskDataRow.CMFeatureTemplateId == 0)
+                {
+                    MessageBox.Show("Each row must be assigned to a valid feature.");
+                    return;
+                }
+
+                if (taskDataRow.CMTargetSystemStateId == 0)
+                {
+                    MessageBox.Show("Each row must be assigned to a valid sytem state.");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(taskDataRow.FeatureVarName) && !string.IsNullOrWhiteSpace(taskDataRow.FeatureVarSetTo))
+                {
+                    MessageBox.Show("Cannot set a feature var value to check for without specifying the feature var itself.");
+                    return;
+                }
+            }
+
+            if (TaskData.Id == 0)
+            {
+                BuildInTasksDataProviders.FeatureDependencyDataProvider.Insert(TaskData);
+                // Re-get so the db id is assigned
                 TaskData = BuildInTasksDataProviders.FeatureDependencyDataProvider.Get_ForTaskId(cmTask.Id);
             }
             else
             {
-                TaskData.CMFeatureId = selectedFeature.Id;
-                TaskData.CMTargetSystemStateId = selectedState.Id;
                 BuildInTasksDataProviders.FeatureDependencyDataProvider.Update(TaskData);
             }
+
+            MessageBox.Show("Updated");
         }
     }
 }

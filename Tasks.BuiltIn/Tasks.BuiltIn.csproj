@@ -49,15 +49,21 @@
   <ItemGroup>
     <Compile Include="BuildInTasksDataProvider.cs" />
     <Compile Include="BuildInTaskTypes.cs" />
-    <Compile Include="FeatureDependency\FeatureDependencyDto.cs" />
+    <Compile Include="FeatureDependency\FeatureDependencyExtensions.cs" />
+    <Compile Include="FeatureDependency\FeatureDependencyRowDto.cs" />
     <Compile Include="CMBuiltInTaskFactory.cs" />
     <Compile Include="FeatureDependency\FeatureDependencyConfigUC.xaml.cs">
       <DependentUpon>FeatureDependencyConfigUC.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FeatureDependency\FeatureDependencyDto.cs" />
     <Compile Include="FeatureDependency\FeatureDependencyTaskStates.cs" />
+    <Compile Include="FeatureDependency\FeatureDependencyxChooseFeatureUC.xaml.cs">
+      <DependentUpon>FeatureDependencyxChooseFeatureUC.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FeatureDependency\FeatureDependencyUC.xaml.cs">
       <DependentUpon>FeatureDependencyUC.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Note\NoteExtensions.cs" />
     <Compile Include="Note\NoteUC.xaml.cs">
       <DependentUpon>NoteUC.xaml</DependentUpon>
     </Compile>
@@ -80,6 +86,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="FeatureDependency\FeatureDependencyConfigUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FeatureDependency\FeatureDependencyxChooseFeatureUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

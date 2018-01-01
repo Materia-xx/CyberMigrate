@@ -1,5 +1,6 @@
 Upcoming:
 
+    - Add in a way to manually set and view the feature vars currently present on a feature, may be useful until better ways are introduced.
     - Refresh the main UI filtered items when the items change, maybe refresh a second or so after there have been no updates for a couple seconds
       to void trying to rapidly refresh every time a record is updated during large sweeping updates.
     - Add a way for task types to add details to the result grid in the details section
