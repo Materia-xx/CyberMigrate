@@ -1,17 +1,42 @@
 Upcoming:
 
+    - Hook to CRUD events and refresh the filter tree view when appropriate
+
+    - Hook to CRUD events and refresh the filtered tasks when appropriate (probably a different set of subscriptions than the filter tree refresh)
+
+    - Add a right click menu to the filter feature node to add a new task
+
+            Add <Task type 1> in
+                <System State x>
+                <System State y>
+            Add <Task type 2> in
+                <System State x>
+                <System State y>
+
+      The listed system states should be only those allowed in the feature.
+      Selecting a system state will create a "New Task" of the specified type in the specified system state
+      The above update to hook to CRUD events should trigger and re-list the currently filtered items to show the new one.
+
     - Add in a way to manually set and view the feature vars currently present on a feature, may be useful until better ways are introduced.
+
     - Refresh the main UI filtered items when the items change, maybe refresh a second or so after there have been no updates for a couple seconds
       to void trying to rapidly refresh every time a record is updated during large sweeping updates.
+
     - Add a way for task types to add details to the result grid in the details section
+
     - Add a way to quickly mark a task as complete via the filter results grid
+
     - Update the main UI to show for different system states when those are selected in the filter tree.
+
     - Add more filter tools in the main UI
         - Checkbox to Show closed items
         - Checkbox to show hidden tasks 
             a new concept for feature dependency tasks, which don't need work done by themselves, it's auto-calculated to can be hidden in the UI.
             But the user may want to view it to reset the dependency details to another feature or just manually close it.
         - Textbox to search through titles, names and possibly task data and perform a customized search
+
     - Shows the tasks sorted in the way the design plan indicates
+
     - Add the ability to add instanced tasks ad-hoc to already created features
+
     - Update the program so that when a task state is updated that it also updates any open task dialog with the correct state.
