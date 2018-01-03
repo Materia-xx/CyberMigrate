@@ -84,6 +84,15 @@ namespace CyberMigrate
                 {
                     var cmSystemStateTVI = GetTVI_SystemState(cmSystemState);
                     cmSystemTVI.Items.Add(cmSystemStateTVI);
+
+                    // Get all features that are currently in this state and show them
+                    var cmFeatures = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll_Instances_ForSystemState(cmSystemState.Id);
+
+                    foreach (var cmFeature in cmFeatures)
+                    {
+                        var cmFeatureTVI = GetTVI_Feature(cmFeature);
+                        cmSystemStateTVI.Items.Add(cmFeatureTVI);
+                    }
                 }
 
                 cmSystemTVI.ExpandSubtree();
@@ -91,25 +100,6 @@ namespace CyberMigrate
 
             // Show all tasks by default in the filter grid by selecting the 'All Systems' node.
             allSystemsTVI.IsSelected = true;
-        }
-
-        private TreeViewItem GetTVI_AllSystems()
-        {
-            var allSystemsTVI = new TreeViewItem()
-            {
-                Header = "All Systems",
-                Tag = null, // There is no tag here because there is no need to show any UI at this level.
-            };
-
-            // Add the context menu
-            // There is no context menu actions currently for task factories
-            var contextMenu = new ContextMenu();
-            contextMenu.Visibility = Visibility.Hidden;
-            allSystemsTVI.ContextMenu = contextMenu;
-
-            allSystemsTVI.Selected += TreeFilter_NodeSelected; // Still keep the onSelected event so the UI can clear what may be there when selected
-
-            return allSystemsTVI;
         }
 
         private void TreeFilter_NodeSelected(object sender, RoutedEventArgs e)
@@ -139,7 +129,8 @@ namespace CyberMigrate
 
             if (attachedTag?.Dto == null)
             {
-                // list everything
+                // Unknown filter node, list nothing
+                return;
             }
             else
             {
@@ -153,6 +144,9 @@ namespace CyberMigrate
                         var filterSystemState = attachedTag.Dto as CMSystemStateDto;
                         filterSystemStateId = filterSystemState.Id;
                         break;
+                    default:
+                        // Also unknown filter node, list nothing
+                        return;
                 }
             }
 
@@ -216,6 +210,25 @@ namespace CyberMigrate
             }
         }
 
+        private TreeViewItem GetTVI_AllSystems()
+        {
+            var allSystemsTVI = new TreeViewItem()
+            {
+                Header = "All Systems",
+                Tag = null, // There is no tag here because there is no need to show any UI at this level.
+            };
+
+            // Add the context menu
+            // There is no context menu actions currently for task factories
+            var contextMenu = new ContextMenu();
+            contextMenu.Visibility = Visibility.Hidden;
+            allSystemsTVI.ContextMenu = contextMenu;
+
+            allSystemsTVI.Selected += TreeFilter_NodeSelected; // Still keep the onSelected event so the UI can clear what may be there when selected
+
+            return allSystemsTVI;
+        }
+
         private TreeViewItem GetTVI_System(CMSystemDto cmSystem)
         {
             var cmSystemTreeViewItem = new TreeViewItem()
@@ -265,6 +278,21 @@ namespace CyberMigrate
             cmSystemStateTVI.ContextMenu = contextMenu;
 
             return cmSystemStateTVI;
+        }
+
+        private TreeViewItem GetTVI_Feature(CMFeatureDto cmFeature)
+        {
+            var cmFeatureTVI = new TreeViewItem()
+            {
+                Header = cmFeature.Name,
+                Tag = new TreeViewTag(cmFeature)
+            };
+
+            var contextMenu = new ContextMenu();
+            contextMenu.Visibility = Visibility.Hidden;
+            cmFeatureTVI.ContextMenu = contextMenu;
+
+            return cmFeatureTVI;
         }
 
         /// <summary>

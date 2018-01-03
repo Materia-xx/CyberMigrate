@@ -53,11 +53,31 @@ namespace DataProvider
             return lookup;
         }
 
+        /// <summary>
+        /// Gets all features within the specified system
+        /// </summary>
+        /// <param name="cmSystemId"></param>
+        /// <param name="isTemplate"></param>
+        /// <returns></returns>
         public IEnumerable<CMFeatureDto> GetAll_ForSystem(int cmSystemId, bool isTemplate)
         {
             var results = Find(f =>
                 (isTemplate ? f.CMParentFeatureTemplateId == 0 : f.CMParentFeatureTemplateId != 0) // Don't use IsTemplate Dto property here b/c this queries BSON data directly
              && f.CMSystemId == cmSystemId);
+
+            return results.OrderBy(f => f.Name);
+        }
+
+        /// <summary>
+        /// Gets all feature instances that are in the specified system state.
+        /// </summary>
+        /// <param name="cmSystemStateId"></param>
+        /// <returns></returns>
+        public IEnumerable<CMFeatureDto> GetAll_Instances_ForSystemState(int cmSystemStateId)
+        {
+            var results = Find(f =>
+                f.CMParentFeatureTemplateId != 0
+             && f.CMSystemStateId == cmSystemStateId);
 
             return results.OrderBy(f => f.Name);
         }
