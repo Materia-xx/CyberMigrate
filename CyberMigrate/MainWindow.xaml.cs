@@ -28,6 +28,8 @@ namespace CyberMigrate
         /// </summary>
         private Dictionary<string, bool> taskFactoryInitialized = new Dictionary<string, bool>();
 
+        private class AllSystemsDto : IdBasedObject { }
+
         /// <summary>
         /// Keeps track if the internal CUD callbacks have been registered yet.
         /// </summary>
@@ -125,6 +127,7 @@ namespace CyberMigrate
 
             int filterSystemId = 0;
             int filterSystemStateId = 0;
+            int filterFeatureId = 0;
             bool filterOnlyShowTasksInCurrentFeatureState = true;
 
             if (attachedTag?.Dto == null)
@@ -136,6 +139,9 @@ namespace CyberMigrate
             {
                 switch (attachedTag.DtoTypeName)
                 {
+                    case nameof(AllSystemsDto):
+                        // No filters, list everything
+                        break;
                     case nameof(CMSystemDto):
                         var filterSystem = attachedTag.Dto as CMSystemDto;
                         filterSystemId = filterSystem.Id;
@@ -143,6 +149,11 @@ namespace CyberMigrate
                     case nameof(CMSystemStateDto):
                         var filterSystemState = attachedTag.Dto as CMSystemStateDto;
                         filterSystemStateId = filterSystemState.Id;
+                        break;
+                    case nameof(CMFeatureDto):
+                        var filterFeature = attachedTag.Dto as CMFeatureDto;
+                        filterFeatureId = filterFeature.Id;
+                        filterOnlyShowTasksInCurrentFeatureState = false;
                         break;
                     default:
                         // Also unknown filter node, list nothing
@@ -154,16 +165,23 @@ namespace CyberMigrate
             var unsortedResults = new List<FilterResultItem>();
             foreach (var cmTask in filteredTasks)
             {
-                // Filter out tasks in system state if filter is set
+                // Filter to just tasks in the specified system state (if filter is set)
                 if (filterSystemStateId != 0 && cmTask.CMSystemStateId != filterSystemStateId)
                 {
                     continue;
                 }
 
                 var featureRef = featureInstancesLookup[cmTask.CMFeatureId];
+
+                // Filter to just tasks in the specified feature (if filter is set)
+                if (filterFeatureId !=0 && featureRef.Id != filterFeatureId)
+                {
+                    continue;
+                }
+
                 var systemRef = systemsLookup[featureRef.CMSystemId];
 
-                // Filter out tasks in system if filter is set
+                // Filter to just tasks in the specified system (if filter is set)
                 if (filterSystemId != 0 && systemRef.Id != filterSystemId)
                 {
                     continue;
@@ -215,7 +233,7 @@ namespace CyberMigrate
             var allSystemsTVI = new TreeViewItem()
             {
                 Header = "All Systems",
-                Tag = null, // There is no tag here because there is no need to show any UI at this level.
+                Tag = new TreeViewTag(new AllSystemsDto())
             };
 
             // Add the context menu
