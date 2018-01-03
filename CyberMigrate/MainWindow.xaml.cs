@@ -253,7 +253,7 @@ namespace CyberMigrate
                     Header = cmFeatureTemplate.Name
                 };
                 addNewFeature.Items.Add(newFeatureSubMenu);
-                addNewFeature.Click += (sender, e) =>
+                newFeatureSubMenu.Click += (sender, e) =>
                 {
                     var newFeature = cmFeatureTemplate.ToInstance(new List<CMFeatureVarStringDto>());
                     ShowFilteredTasks();
