@@ -1,9 +1,5 @@
 Upcoming:
 
-    - Hook to CRUD events and refresh the filter tree view when appropriate
-
-    - Hook to CRUD events and refresh the filtered tasks when appropriate (probably a different set of subscriptions than the filter tree refresh)
-
     - Add a right click menu to the filter feature node to add a new task
 
             Add <Task type 1> in

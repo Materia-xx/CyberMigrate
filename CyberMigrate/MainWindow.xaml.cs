@@ -66,6 +66,9 @@ namespace CyberMigrate
 
         private void RedrawFilterTreeView()
         {
+            var attachedTag = treeFilter.GetSelectedTreeViewTag();
+            TreeViewItem plannedSelectionTVI = null;
+
             treeFilter.Items.Clear();
 
             var allSystemsTVI = GetTVI_AllSystems();
@@ -78,6 +81,7 @@ namespace CyberMigrate
             {
                 var cmSystemTVI = GetTVI_System(cmSystem);
                 allSystemsTVI.Items.Add(cmSystemTVI);
+                SetPlannedTVIToSelect_IfMatch(ref plannedSelectionTVI, attachedTag?.Dto, cmSystemTVI, cmSystem);
 
                 // Show all system states available in this system
                 var cmSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id);
@@ -86,6 +90,7 @@ namespace CyberMigrate
                 {
                     var cmSystemStateTVI = GetTVI_SystemState(cmSystemState);
                     cmSystemTVI.Items.Add(cmSystemStateTVI);
+                    SetPlannedTVIToSelect_IfMatch(ref plannedSelectionTVI, attachedTag?.Dto, cmSystemStateTVI, cmSystemState);
 
                     // Get all features that are currently in this state and show them
                     var cmFeatures = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll_Instances_ForSystemState(cmSystemState.Id);
@@ -94,14 +99,52 @@ namespace CyberMigrate
                     {
                         var cmFeatureTVI = GetTVI_Feature(cmFeature);
                         cmSystemStateTVI.Items.Add(cmFeatureTVI);
+                        SetPlannedTVIToSelect_IfMatch(ref plannedSelectionTVI, attachedTag?.Dto, cmFeatureTVI, cmFeature);
                     }
                 }
 
                 cmSystemTVI.ExpandSubtree();
             }
 
-            // Show all tasks by default in the filter grid by selecting the 'All Systems' node.
-            allSystemsTVI.IsSelected = true;
+            // If no node was found to set as the selected one, then default to the "All Systems" node
+            if (plannedSelectionTVI == null)
+            {
+                plannedSelectionTVI = allSystemsTVI;
+            }
+
+            // Select the node that is supposed to be selected so that it lists the tasks
+            plannedSelectionTVI.IsSelected = true;
+        }
+
+        private void SetPlannedTVIToSelect_IfMatch(ref TreeViewItem plannedSelectionTVI, IdBasedObject previouslySelectedDto, TreeViewItem prospectTVI, IdBasedObject prospectDto)
+        {
+            // If there is already a TVI planned to be selected
+            if (plannedSelectionTVI != null)
+            {
+                return;
+            }
+
+            // If either of the Dtos are null then don't choose this node, the code will manually
+            // select the "All Systems" node above if this ends up being the case for everything
+            if (previouslySelectedDto == null || prospectDto == null)
+            {
+                return;
+            }
+
+            var previousType = previouslySelectedDto.GetType().Name;
+            var prospectType = prospectDto.GetType().Name;
+
+            // If the previous Dto is the not same type as the prospect, then it is not a match
+            if (previousType.Equals(prospectType) == false)
+            {
+                return;
+            }
+
+            // We know the Dto types match, now just compare the ids to see if it is the same record
+            if (previouslySelectedDto.Id == prospectDto.Id)
+            {
+                plannedSelectionTVI = prospectTVI;
+            }
         }
 
         private void TreeFilter_NodeSelected(object sender, RoutedEventArgs e)
@@ -112,16 +155,6 @@ namespace CyberMigrate
         private void ShowFilteredTasks()
         {
             filterResults.Clear();
-
-            // Default is to list tasks in all systems/features/states
-            var systemsLookup = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll_AsLookup();
-            var featureInstancesLookup = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll_Instances_AsLookup();
-            var systemStatesLookup = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_AsLookup();
-            var taskStatesLookup = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll_AsLookup();
-            var taskTypesLookup = CMDataProvider.DataStore.Value.CMTaskTypes.Value.GetAll_AsLookup();
-
-            // mcbtodo: add a way to query for just task instances that are open
-            var filteredTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_Instances();
 
             var attachedTag = treeFilter.GetSelectedTreeViewTag();
 
@@ -160,6 +193,16 @@ namespace CyberMigrate
                         return;
                 }
             }
+
+            // Default is to list tasks in all systems/features/states
+            var systemsLookup = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll_AsLookup();
+            var featureInstancesLookup = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll_Instances_AsLookup();
+            var systemStatesLookup = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_AsLookup();
+            var taskStatesLookup = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll_AsLookup();
+            var taskTypesLookup = CMDataProvider.DataStore.Value.CMTaskTypes.Value.GetAll_AsLookup();
+
+            // mcbtodo: add a way to query for just task instances that are open
+            var filteredTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_Instances();
 
             // Show the results
             var unsortedResults = new List<FilterResultItem>();
@@ -376,12 +419,45 @@ namespace CyberMigrate
             // a decision based on a feature var.
             CMDataProvider.DataStore.Value.CMFeatureVarStrings.Value.OnRecordCreated += FeatureVar_Created;
 
+            // Refresh the filter tree view when needed
+            CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordCreated += Record_CUD_FilterTreeViewRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordUpdated += Record_CUD_FilterTreeViewRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordDeleted += Record_CUD_FilterTreeViewRefreshNeeded;
+
+            CMDataProvider.DataStore.Value.CMSystemStates.Value.OnRecordCreated += Record_CUD_FilterTreeViewRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMSystemStates.Value.OnRecordUpdated += Record_CUD_FilterTreeViewRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMSystemStates.Value.OnRecordDeleted += Record_CUD_FilterTreeViewRefreshNeeded;
+
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordCreated += Record_CUD_FilterTreeViewRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_CUD_FilterTreeViewRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted += Record_CUD_FilterTreeViewRefreshNeeded;
+
+            // Refresh the list of tasks when needed
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_CUD_FilterTreeViewRefreshNeeded;
+
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordCreated += Record_CUD_RefreshFilteredTasks;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += Record_CUD_RefreshFilteredTasks;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordDeleted += Record_CUD_RefreshFilteredTasks;
+        }
+
+        private void Record_CUD_RefreshFilteredTasks(object recordEventArgs)
+        {
+            ShowFilteredTasks();
+        }
+
+        /// <summary>
+        /// Redraws the filter tree view when associated records are created, updated or deleted
+        /// </summary>
+        /// <param name="recordEventArgs"></param>
+        private void Record_CUD_FilterTreeViewRefreshNeeded(object recordEventArgs)
+        {
+            RedrawFilterTreeView();
         }
 
         /// <summary>
         /// Called by the CRUD providers when the lookups used by the state calculation routines need to be refreshed
         /// </summary>
-        private void Record_CUD_StateCalcLookupsRefreshNeeded(object createdRecordEventArgs)
+        private void Record_CUD_StateCalcLookupsRefreshNeeded(object recordEventArgs)
         {
             StateCalculations.LookupsRefreshNeeded = true;
         }
@@ -390,7 +466,7 @@ namespace CyberMigrate
         /// Called by the CRUD providers when the feature states need to be re-calculated
         /// </summary>
         /// <param name="createdRecordEventArgs"></param>
-        private void Record_CUD_CalculateAllFeatureStates(object createdRecordEventArgs)
+        private void Record_CUD_CalculateAllFeatureStates(object recordEventArgs)
         {
             StateCalculations.CalculateAllFeatureStates();
         }
