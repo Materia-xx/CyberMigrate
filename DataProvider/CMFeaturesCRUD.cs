@@ -1,5 +1,6 @@
 ﻿using Dto;
 using LiteDB;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,6 +10,36 @@ namespace DataProvider
     {
         public CMFeaturesCRUD(LiteDatabase liteDatabase, string collectionName) : base(liteDatabase, collectionName)
         {
+        }
+
+        /// <summary>
+        /// Gets the internal feature. If it doesn't exist then it will be created
+        /// </summary>
+        /// <returns></returns>
+        public CMFeatureDto GetInternalFeature()
+        {
+            var internalSystem = CMDataProvider.DataStore.Value.CMSystems.Value.Get_InternalSystem();
+
+            var results = GetAll_ForSystem(internalSystem.Id, true);
+
+            if (!results.Any())
+            {
+                var internalFeature = new CMFeatureDto()
+                {
+                    CMSystemId = internalSystem.Id,
+                    Name = Guid.NewGuid().ToString(),
+                    CMSystemStateId = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(internalSystem.Id).First().Id
+                };
+                var opResult = Insert(internalFeature);
+                if (opResult.Errors.Any())
+                {
+                    // Not expecting any errors here, but set an alarm just in case
+                    throw new Exception(opResult.ErrorsCombined);
+                }
+
+                results = GetAll_ForSystem(internalSystem.Id, true);
+            }
+            return results.First();
         }
 
         /// <summary>
@@ -202,7 +233,7 @@ namespace DataProvider
             var deletingItem = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(deletingId);
 
             // Do not allow deleting of features if there are still tasks assigned to it.
-            var featureTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(deletingId, deletingItem.IsTemplate);
+            var featureTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(deletingId);
             if (featureTasks.Any())
             {
                 opResult.Errors.Add($"Cannot delete item in {CollectionName} because tasks are still assigned.");

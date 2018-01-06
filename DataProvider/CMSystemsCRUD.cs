@@ -1,5 +1,6 @@
 ﻿using Dto;
 using LiteDB;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,6 +23,46 @@ namespace DataProvider
         {
             var results = base.GetAll();
             return results.OrderBy(s => s.Name);
+        }
+
+        /// <summary>
+        /// Gets the internal system. If not yet present it will create it.
+        /// </summary>
+        /// <returns></returns>
+        public CMSystemDto Get_InternalSystem()
+        {
+            var internalSystem = Find(s => s.IsInternal).FirstOrDefault();
+
+            if (internalSystem == null)
+            {
+                var newInternalSystem = new CMSystemDto()
+                {
+                    IsInternal = true,
+                    Name = Guid.NewGuid().ToString()
+                };
+                var opResult = Insert(newInternalSystem);
+                if (opResult.Errors.Any())
+                {
+                    // Not expecting any errors here, but set an alarm just in case
+                    throw new Exception(opResult.ErrorsCombined);
+                }
+
+                internalSystem = Find(s => s.IsInternal).First();
+            }
+
+            // Make sure the internal system has 1 system state that features and tasks can be grouped in
+            var internalSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(internalSystem.Id);
+            if (!internalSystemStates.Any())
+            {
+                var newInternalSystemState = new CMSystemStateDto()
+                {
+                     CMSystemId = internalSystem.Id,
+                     Name = Guid.NewGuid().ToString()
+                };
+                CMDataProvider.DataStore.Value.CMSystemStates.Value.Insert(newInternalSystemState);
+            }
+
+            return internalSystem;
         }
 
         /// <summary>

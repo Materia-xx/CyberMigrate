@@ -184,7 +184,7 @@ namespace Tasks.BuiltIn
             var featureVars = CMDataProvider.DataStore.Value.CMFeatureVarStrings.Value.GetAll_ForFeature(feature.Id).ToList();
 
             // All tasks currently assigned to the feature
-            var tasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(feature.Id, feature.IsTemplate);
+            var tasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(feature.Id);
 
             foreach (var cmTask in tasks)
             {

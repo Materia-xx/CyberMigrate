@@ -86,8 +86,6 @@ namespace DataProvider
             return opResult;
         }
 
-
-
         public override CMCUDResult Insert(CMSystemStateDto insertingObject)
         {
             var opResult = new CMCUDResult();

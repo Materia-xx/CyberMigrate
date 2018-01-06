@@ -56,7 +56,7 @@ namespace DataProvider
             // If the one being deleted is the last one then check to see if any task templates are under this state
             if (!matchingRules.Any())
             {
-                var taskTemplates = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(cmRule.CMFeatureId, true);
+                var taskTemplates = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(cmRule.CMFeatureId);
                 if (taskTemplates.Any(t => t.CMSystemStateId == cmRule.CMSystemStateId))
                 {
                     var targetSystemState = CMDataProvider.DataStore.Value.CMSystemStates.Value.Get(cmRule.CMSystemStateId);
@@ -88,7 +88,7 @@ namespace DataProvider
                 // If the one being updated was the last rule that referred to the state then check to see if any task templates are under this state
                 if (!matchingRules.Any())
                 {
-                    var taskTemplates = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(cmRule.CMFeatureId, true);
+                    var taskTemplates = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(cmRule.CMFeatureId);
                     if (taskTemplates.Any(t => t.CMSystemStateId == cmRule.CMSystemStateId))
                     {
                         opResult.Errors.Add($"Cannot update item in {CollectionName} with id {updatingObject.Id} because there are currently task templates in the state it referrs to.");

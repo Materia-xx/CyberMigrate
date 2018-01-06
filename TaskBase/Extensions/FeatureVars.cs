@@ -57,7 +57,7 @@ namespace TaskBase.Extensions
             }
 
             // Update the title on all tasks (task data updates are handled fully by the task factory catalog CUD callbacks)
-            var tasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(feature.Id, feature.IsTemplate);
+            var tasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(feature.Id);
             foreach (var cmTask in tasks)
             {
                 cmTask.ResolveFeatureVars(featureVars);

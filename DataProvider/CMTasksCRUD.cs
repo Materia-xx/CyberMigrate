@@ -1,6 +1,7 @@
 ﻿using DataProvider.Events;
 using Dto;
 using LiteDB;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,6 +11,47 @@ namespace DataProvider
     {
         public CMTasksCRUD(LiteDatabase liteDatabase, string collectionName) : base(liteDatabase, collectionName)
         {
+        }
+
+        /// <summary>
+        /// Gets the ad-hoc task template for the specified task type. If one doesn't exist in the database it will be created.
+        /// </summary>
+        /// <param name="cmTaskTypeId"></param>
+        /// <returns></returns>
+        public CMTaskDto Get_AdHocTemplate(int cmTaskTypeId)
+        {
+            var systemFeature = CMDataProvider.DataStore.Value.CMFeatures.Value.GetInternalFeature();
+
+            var adHocTemplate = Find(t =>
+                t.CMFeatureId == systemFeature.Id
+                && t.CMTaskTypeId == cmTaskTypeId
+                ).FirstOrDefault();
+
+            if (adHocTemplate == null)
+            {
+                var newAdhocTemplate = new CMTaskDto()
+                {
+                    CMFeatureId = systemFeature.Id,
+                    CMTaskTypeId = cmTaskTypeId,
+
+                    // These values should not be cloned when creating an instance, but we need valid values
+                    CMSystemStateId = systemFeature.CMSystemStateId,
+                    CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Template, cmTaskTypeId).Id,
+                    Title = Guid.NewGuid().ToString()
+                };
+                var opResult = Insert(newAdhocTemplate);
+                if (opResult.Errors.Any())
+                {
+                    // Not expecting any errors here, but set an alarm just in case
+                    throw new Exception(opResult.ErrorsCombined);
+                }
+                adHocTemplate = Find(t =>
+                    t.CMFeatureId == systemFeature.Id
+                    && t.CMTaskTypeId == cmTaskTypeId
+                    ).First();
+            }
+
+            return adHocTemplate;
         }
 
         public IEnumerable<CMTaskDto> GetAll_Templates()
@@ -26,13 +68,16 @@ namespace DataProvider
             return results;
         }
 
-        public IEnumerable<CMTaskDto> GetAll_ForFeature(int cmFeatureId, bool isTemplate)
+        public IEnumerable<CMTaskDto> GetAll_ForFeature(int cmFeatureId)
         {
-            var results = Find(t =>
-                (isTemplate ? t.CMParentTaskTemplateId == 0 : t.CMParentTaskTemplateId != 0) // Don't use IsTemplate Dto property here b/c this queries BSON data directly
-             && t.CMFeatureId == cmFeatureId);
+            var results = Find(t => t.CMFeatureId == cmFeatureId);
 
-            return results.OrderBy(t => t.Title);
+            var cmFeature = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(cmFeatureId);
+            int cmFeatureTemplateId = cmFeature.IsTemplate ? cmFeature.Id : cmFeature.CMParentFeatureTemplateId;
+            var systemStatesLookup = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForFeatureTemplate(cmFeatureTemplateId)
+                .ToDictionary(s => s.Id, s => s);
+
+            return results.OrderBy(t => systemStatesLookup[t.CMSystemStateId].Priority);
         }
 
         /// <summary>

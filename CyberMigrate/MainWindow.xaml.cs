@@ -724,7 +724,7 @@ namespace CyberMigrate
 
             var featureEditor = new FeatureEditor(cmFeature);
 
-            featureEditor.ShowDialog();
+            featureEditor.Show();
         }
     }
 }

@@ -6,28 +6,7 @@
         xmlns:local="clr-namespace:CyberMigrate"
         mc:Ignorable="d"
         Title="FeatureEditor" Width="1024" Height="768" Loaded="Window_Loaded">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="25"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <Label x:Name="lblFeatureVars" Content="Feature Variables" Grid.Column="0" />
-
-        <Label x:Name="lblFeature" Content="Name" Grid.Column="1" HorizontalAlignment="Right" />
-        <TextBox x:Name="txtFeatureName" Grid.Column="2" LostFocus="txtFeatureName_LostFocus" />
-
-        <DataGrid x:Name="dataGridFeatureVars" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" AutoGenerateColumns="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="150"></DataGridTextColumn>
-                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="200"></DataGridTextColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-
-    </Grid>
+    <DockPanel x:Name="editorUIPanel">
+        
+    </DockPanel>
 </Window>

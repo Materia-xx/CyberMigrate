@@ -24,10 +24,8 @@ namespace TaskBase.Extensions
             // Cloning something that is not a template is not an implemented feature
             if (!taskTemplate.IsTemplate)
             {
-                throw new NotImplementedException("Instancing a task that is not a template is not implemented.");
+                throw new NotImplementedException("A task instance can only be created from a task template.");
             }
-
-            var taskTemplateType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(taskTemplate.CMTaskTypeId);
 
             // Instance the task
             var taskInstance = new CMTaskDto()
@@ -35,7 +33,7 @@ namespace TaskBase.Extensions
                 CMFeatureId = cmFeatureId,
                 CMParentTaskTemplateId = taskTemplate.Id,
                 CMSystemStateId = taskTemplate.CMSystemStateId,
-                CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Instance, taskTemplateType.Id).Id,
+                CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Instance, taskTemplate.CMTaskTypeId).Id,
                 CMTaskTypeId = taskTemplate.CMTaskTypeId,
                 Title = taskTemplate.Title
             };
@@ -96,7 +94,7 @@ namespace TaskBase.Extensions
             }
 
             // Instances each task in the feature template
-            var taskTemplates = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(featureTemplate.Id, true);
+            var taskTemplates = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(featureTemplate.Id);
             foreach (var cmTaskTemplate in taskTemplates)
             {
                 var taskInstance = cmTaskTemplate.ToInstance(featureInstanceDto.Id);
