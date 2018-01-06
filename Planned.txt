@@ -1,7 +1,5 @@
 Upcoming:
 
-    - The ability to describe each system state
-
     - Add a way for task types to add details to the result grid in the details section
 
     - Add a way to quickly mark a task as complete via the filter results grid

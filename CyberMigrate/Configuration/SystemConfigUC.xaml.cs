@@ -54,6 +54,13 @@ namespace CyberMigrate.Configuration
                     Binding = new Binding(nameof(CMSystemStateDto.Name)),
                     Width = 200
                 });
+            dataGridStates.Columns.Add(
+                new DataGridTextColumn()
+                {
+                    Header = nameof(CMSystemStateDto.Description),
+                    Binding = new Binding(nameof(CMSystemStateDto.Description)),
+                    Width = 400
+                });
 
             // Load all states in this system
             dataGridStates.ItemsSource = systemStates;
