@@ -21,7 +21,7 @@ namespace DataProvider
         /// <returns></returns>
         public override IEnumerable<CMSystemDto> GetAll()
         {
-            var results = base.GetAll();
+            var results = Find(s => s.IsInternal == false);
             return results.OrderBy(s => s.Name);
         }
 

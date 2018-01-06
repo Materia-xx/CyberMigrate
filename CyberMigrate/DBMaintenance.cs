@@ -11,6 +11,7 @@ namespace CyberMigrate
             //Upgrade_TaskDto();
             //Upgrade_FeatureDto();
             //Upgrade_TransitionRuleDto();
+            //Upgrade_SystemDto();
 
             // mcbtodo: These are only cleanup routines I'm using to clean up the db during dev and won't be needed in the released version
             //Debug_DeleteTasksNotInAFeature();
@@ -109,6 +110,21 @@ namespace CyberMigrate
             }
         }
 
+        private static void Upgrade_SystemDto()
+        {
+            MessageBox.Show("Press OK upgrade system Dto records in the database.");
+
+            var allSystems = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll();
+            foreach (var cmSystem in allSystems)
+            {
+                var opResult = CMDataProvider.DataStore.Value.CMSystems.Value.Update(cmSystem);
+                if (opResult.Errors.Any())
+                {
+                    MessageBox.Show(opResult.ErrorsCombined);
+                }
+            }
+        }
+
         private static void Debug_DeleteTasksNotInAFeature()
         {
             MessageBox.Show("Press OK to delete all task that are not in a feature.");
@@ -162,7 +178,5 @@ namespace CyberMigrate
                 CMDataProvider.DataStore.Value.CMFeatures.Value.Delete(featureInstance.Id);
             }
         }
-
-
     }
 }

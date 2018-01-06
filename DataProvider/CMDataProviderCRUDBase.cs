@@ -63,14 +63,8 @@ namespace DataProvider
         /// <returns></returns>
         public virtual Dictionary<int, T> GetAll_AsLookup()
         {
-            var lookup = new Dictionary<int, T>();
-
-            var results = GetAll();
-            foreach (var item in results)
-            {
-                lookup[item.Id] = item;
-            }
-            return lookup;
+            return GetAll()
+                .ToDictionary(v => v.Id, v => v);
         }
 
         protected virtual IEnumerable<T> Find(Expression<Func<T,bool>> expression)
