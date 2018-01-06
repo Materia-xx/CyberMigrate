@@ -29,9 +29,23 @@ namespace CyberMigrate
             // Select the node that is hovered over when right clicking and before showing the context menu
             treeConfig.PreviewMouseRightButtonDown += TreeViewExtensions.TreeView_PreviewMouseRightButtonDown_SelectNode;
             ReLoadTreeConfiguration();
+
+            // Record updates that should refresh the configuration tree
+            CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordCreated += Record_CUD_TreeConfgRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordUpdated += Record_CUD_TreeConfgRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordDeleted += Record_CUD_TreeConfgRefreshNeeded;
+
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordCreated += Record_CUD_TreeConfgRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_CUD_TreeConfgRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted += Record_CUD_TreeConfgRefreshNeeded;
         }
 
-        public void ReLoadTreeConfiguration()
+        private void Record_CUD_TreeConfgRefreshNeeded(object recordEventArgs)
+        {
+            ReLoadTreeConfiguration();
+        }
+
+        private void ReLoadTreeConfiguration()
         {
             treeConfig.Items.Clear();
 

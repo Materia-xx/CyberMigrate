@@ -428,7 +428,6 @@ namespace CyberMigrate.Configuration
 
             // Reload main treeview, this is how we handle renames
             cmFeatureTemplate = cmFeatureTemplateDb;
-            ConfigWindow.ReLoadTreeConfiguration();
         }
     }
 }

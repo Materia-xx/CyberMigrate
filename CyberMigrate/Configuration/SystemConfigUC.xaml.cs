@@ -160,9 +160,6 @@ namespace CyberMigrate.Configuration
             }
 
             cmSystem = CMDataProvider.DataStore.Value.CMSystems.Value.Get(cmSystem.Id);
-
-            // Reload main treeview, this is how we handle renames
-            ConfigWindow.ReLoadTreeConfiguration();
         }
     }
 }
