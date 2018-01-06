@@ -104,15 +104,9 @@ namespace DataProvider
                 return opResult;
             }
 
-            // Update the Dto and validate it
+            // Update just the name
             dbEntry.Name = name;
-            opResult = UpsertChecks(opResult, dbEntry);
-            if (opResult.Errors.Any())
-            {
-                return opResult;
-            }
-
-            return base.Update(dbEntry);
+            return Update(dbEntry);
         }
 
         public override CMCUDResult Delete(int deletingId)
