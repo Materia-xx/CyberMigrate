@@ -59,6 +59,12 @@ namespace Tasks.BuiltIn.Note
             // The task data for the task
             var taskData = NoteDataProvider.Get_ForTaskId(cmTask.Id);
 
+            // If there is no note data then there is nothing more to do here
+            if (taskData == null)
+            {
+                return;
+            }
+
             var newNote = FeatureVars.ResolveFeatureVarsInString(taskData.Note, featureVars);
             if (!newNote.Equals(taskData.Note, StringComparison.OrdinalIgnoreCase))
             {

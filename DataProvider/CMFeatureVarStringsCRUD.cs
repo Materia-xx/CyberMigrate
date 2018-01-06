@@ -28,12 +28,16 @@ namespace DataProvider
 
         public override CMCUDResult Delete(int deletingId)
         {
-            throw new Exception("Feature vars are immutable and cannot be deleted after they are created.");
+            var opResult = new CMCUDResult();
+            opResult.Errors.Add("Feature vars are immutable and cannot be deleted after they are created.");
+            return opResult;
         }
 
         public override CMCUDResult Update(CMFeatureVarStringDto updatingObject)
         {
-            throw new Exception("Feature vars are immutable and cannot be updated after they are created.");
+            var opResult = new CMCUDResult();
+            opResult.Errors.Add("Feature vars are immutable and cannot be updated after they are created.");
+            return opResult;
         }
 
         public override CMCUDResult Insert(CMFeatureVarStringDto insertingObject)
