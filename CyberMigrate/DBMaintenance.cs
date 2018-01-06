@@ -17,6 +17,12 @@ namespace CyberMigrate
             //Debug_DeleteInvalidFeatureTransitionRules();
             //Debug_DeleteAllTaskAndFeatureInstances();
             //Debug_DeleteAllTaskTypesAndStates();
+            //Debug_DeleteOptions();
+        }
+
+        public static void Debug_DeleteOptions()
+        {
+            CMDataProvider.Master.Value.DeleteOptions();
         }
 
         // Remove all task types and states, the program should load new ones from the tasks and defaults. 

@@ -1,6 +1,7 @@
 ﻿using DataProvider;
 using Dto;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -12,16 +13,13 @@ namespace CyberMigrate.Configuration
     public partial class DataStoreConfigUC : UserControl
     {
         private Config ConfigWindow { get; set; }
-        private MainWindow MainForm { get; set; }
-
 
         public CMDataStoreDto cmDataStore;
 
-        public DataStoreConfigUC(Config configWindow, MainWindow mainForm, CMDataStoreDto cmDataStore)
+        public DataStoreConfigUC(Config configWindow, CMDataStoreDto cmDataStore)
         {
             this.cmDataStore = cmDataStore;
             this.ConfigWindow = configWindow;
-            this.MainForm = mainForm;
 
             InitializeComponent();
         }
@@ -43,11 +41,12 @@ namespace CyberMigrate.Configuration
             var options = CMDataProvider.Master.Value.GetOptions();
             options.DataStorePath = txtStorePath.Text;
 
-            CMDataProvider.Master.Value.UpdateOptions(options);
-
-            MessageBox.Show("Updated.");
-
-            MainForm.DataStorePathSet();
+            var opResult = CMDataProvider.Master.Value.UpdateOptions(options);
+            if (opResult.Errors.Any())
+            {
+                MessageBox.Show(opResult.ErrorsCombined);
+                return;
+            }
         }
     }
 }

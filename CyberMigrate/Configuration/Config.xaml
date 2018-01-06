@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CyberMigrate"
         mc:Ignorable="d"
-        Title="Config" Width="1280" Height="1024" Loaded="Window_Loaded">
+        Title="Config" Width="1280" Height="1024" Loaded="Window_Loaded" Unloaded="Window_Unloaded">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>

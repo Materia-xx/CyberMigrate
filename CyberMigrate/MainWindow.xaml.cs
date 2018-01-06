@@ -360,7 +360,7 @@ namespace CyberMigrate
         /// Call this after the data store path has been set, or verified that it is set after startup.
         /// It takes care of registering everything for the new or pre-existing data store
         /// </summary>
-        public void DataStorePathSet()
+        private void DataStorePathSet()
         {
             var registerError = RegisterTaskFactories_InDatabase();
             if (!string.IsNullOrWhiteSpace(registerError))
@@ -438,6 +438,22 @@ namespace CyberMigrate
             CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordCreated += Record_CUD_RefreshFilteredTasks;
             CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += Record_CUD_RefreshFilteredTasks;
             CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordDeleted += Record_CUD_RefreshFilteredTasks;
+
+            // Reload the datastore when the options are updated
+            CMDataProvider.Master.Value.OnRecordCreated += Record_CUD_OptionsUpdated;
+            CMDataProvider.Master.Value.OnRecordUpdated += Record_CUD_OptionsUpdated;
+        }
+
+        /// <summary>
+        /// Triggered when the options are updated
+        /// </summary>
+        /// <param name="recordEventArgs"></param>
+        private void Record_CUD_OptionsUpdated(object recordEventArgs)
+        {
+            if (DataStoreOptionConfigured())
+            {
+                DataStorePathSet();
+            }
         }
 
         private void Record_CUD_RefreshFilteredTasks(object recordEventArgs)

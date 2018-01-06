@@ -16,11 +16,10 @@ namespace CyberMigrate
     /// </summary>
     public partial class Config : Window
     {
-        private MainWindow MainForm { get; set; }
+        private bool DataStoreCUDEventsSubscribedTo { get; set; }
 
         public Config(MainWindow mainForm)
         {
-            this.MainForm = mainForm;
             InitializeComponent();
         }
 
@@ -30,14 +29,58 @@ namespace CyberMigrate
             treeConfig.PreviewMouseRightButtonDown += TreeViewExtensions.TreeView_PreviewMouseRightButtonDown_SelectNode;
             ReLoadTreeConfiguration();
 
-            // Record updates that should refresh the configuration tree
-            CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordCreated += Record_CUD_TreeConfgRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordUpdated += Record_CUD_TreeConfgRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordDeleted += Record_CUD_TreeConfgRefreshNeeded;
+            CMDataProvider.Master.Value.OnRecordCreated += Options_CUD;
+            CMDataProvider.Master.Value.OnRecordUpdated += Options_CUD;
 
-            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordCreated += Record_CUD_TreeConfgRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_CUD_TreeConfgRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted += Record_CUD_TreeConfgRefreshNeeded;
+            SubscribeToDataStoreCUDEvents();
+        }
+
+        private void Window_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Unsubscribe any events
+            CMDataProvider.Master.Value.OnRecordCreated -= Options_CUD;
+            CMDataProvider.Master.Value.OnRecordUpdated -= Options_CUD;
+
+            if (DataStoreCUDEventsSubscribedTo)
+            {
+                DataStoreCUDEventsSubscribedTo = false;
+                CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordCreated -= Record_CUD_TreeConfgRefreshNeeded;
+                CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordUpdated -= Record_CUD_TreeConfgRefreshNeeded;
+                CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordDeleted -= Record_CUD_TreeConfgRefreshNeeded;
+
+                CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordCreated -= Record_CUD_TreeConfgRefreshNeeded;
+                CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated -= Record_CUD_TreeConfgRefreshNeeded;
+                CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted -= Record_CUD_TreeConfgRefreshNeeded;
+            }
+        }
+
+        private void SubscribeToDataStoreCUDEvents()
+        {
+            if (DataStoreCUDEventsSubscribedTo)
+            {
+                return;
+            }
+
+            // Record updates that should refresh the configuration tree if the data store has been set up
+            // If the data store path hasn't been set yet, then this is as far as we can go
+            if (!string.IsNullOrWhiteSpace(CMDataProvider.Master.Value.GetOptions().DataStorePath))
+            {
+                DataStoreCUDEventsSubscribedTo = true;
+                CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordCreated += Record_CUD_TreeConfgRefreshNeeded;
+                CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordUpdated += Record_CUD_TreeConfgRefreshNeeded;
+                CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordDeleted += Record_CUD_TreeConfgRefreshNeeded;
+
+                CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordCreated += Record_CUD_TreeConfgRefreshNeeded;
+                CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_CUD_TreeConfgRefreshNeeded;
+                CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted += Record_CUD_TreeConfgRefreshNeeded;
+            }
+        }
+
+
+        private void Options_CUD(object recordEventArgs)
+        {
+            SubscribeToDataStoreCUDEvents();
+            ReLoadTreeConfiguration();
         }
 
         private void Record_CUD_TreeConfgRefreshNeeded(object recordEventArgs)
@@ -55,6 +98,7 @@ namespace CyberMigrate
             // If the data store path hasn't been set yet, then this is as far as we can go
             if (string.IsNullOrWhiteSpace(CMDataProvider.Master.Value.GetOptions().DataStorePath))
             {
+                dataStoreTVI.IsSelected = true;
                 return;
             }
 
@@ -342,7 +386,7 @@ namespace CyberMigrate
             switch (attachedTag.DtoTypeName)
             {
                 case nameof(CMDataStoreDto):
-                    var dataStoreConfigUc = new DataStoreConfigUC(this, MainForm, attachedTag.Dto as CMDataStoreDto);
+                    var dataStoreConfigUc = new DataStoreConfigUC(this, attachedTag.Dto as CMDataStoreDto);
                     configUIPanel.Children.Add(dataStoreConfigUc);
                     break;
                 case nameof(CMSystemDto):

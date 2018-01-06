@@ -1,4 +1,5 @@
-﻿using Dto;
+﻿using DataProvider.Events;
+using Dto;
 using LiteDB;
 using System;
 using System.Linq;
@@ -15,10 +16,56 @@ namespace DataProvider
         private LiteDatabase db;
         private LiteCollection<CMOptionsDto> optionsCollection;
 
+        public delegate void CMDataProviderRecordCreatedEvent(CMDataProviderRecordCreatedEventArgs createdRecordEventArgs);
+        public delegate void CMDataProviderRecordUpdatedEvent(CMDataProviderRecordUpdatedEventArgs updatedRecordEventArgs);
+        public delegate void CMDataProviderRecordDeletedEvent(CMDataProviderRecordDeletedEventArgs deletedRecordEventArgs);
+
+        /// <summary>
+        /// Raised after a record is created and inserted into the database.
+        /// The object passed in the event args will have the newly inserted Id.
+        /// </summary>
+        public CMDataProviderRecordCreatedEvent OnRecordCreated;
+
+        /// <summary>
+        /// Raised after a record has been updated in the database.
+        /// The objects in the event args will represent both the before and after state of the affected Dto.
+        /// </summary>
+        public CMDataProviderRecordUpdatedEvent OnRecordUpdated;
+
+        /// <summary>
+        /// Raised just before the delete operation is performed.
+        /// The object passed in the event args will the the record that will be deleted.
+        /// </summary>
+        public CMDataProviderRecordDeletedEvent OnRecordDeleted;
+
         public CMDataProviderMaster(LiteDatabase masterDatabase)
         {
             this.db = masterDatabase;
             this.optionsCollection = db.GetCollection<CMOptionsDto>("CyberMigrateOptions");
+        }
+
+        /// <summary>
+        /// Deletes the options from the database
+        /// </summary>
+        /// <returns></returns>
+        public CMCUDResult DeleteOptions()
+        {
+            var opResult = new CMCUDResult();
+
+            var options = GetOptions();
+
+            OnRecordDeleted?.Invoke(
+                new CMDataProviderRecordDeletedEventArgs()
+                {
+                    DtoBefore = options,
+                });
+
+            if (!optionsCollection.Delete(options.Id))
+            {
+                opResult.Errors.Add($"Option with id {options.Id} was not found to delete.");
+            }
+
+            return opResult;
         }
 
         /// <summary>
@@ -34,17 +81,36 @@ namespace DataProvider
             {
                 options = new CMOptionsDto();
                 optionsCollection.Insert(options);
+
+                OnRecordCreated?.Invoke(
+                    new CMDataProviderRecordCreatedEventArgs()
+                    {
+                        CreatedDto = options
+                    });
             }
 
             return options;
         }
 
-        public void UpdateOptions(CMOptionsDto options)
+        public CMCUDResult UpdateOptions(CMOptionsDto options)
         {
+            var opResult = new CMCUDResult();
+
+            var updateEvent = new CMDataProviderRecordUpdatedEventArgs()
+            {
+                DtoBefore = GetOptions(),
+                DtoAfter = options,
+            };
+
             if (!optionsCollection.Update(options))
             {
-                throw new InvalidOperationException("Options were not found in master db.");
+                opResult.Errors.Add("Options were not found in master db.");
+                return opResult;
             }
+
+            OnRecordUpdated?.Invoke(updateEvent);
+
+            return opResult;
         }
     }
 }
