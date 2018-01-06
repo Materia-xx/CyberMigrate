@@ -31,7 +31,14 @@
                     <DataGridTemplateColumn Header="View Task">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Click="btnViewTask_Click">View</Button>
+                                <Button Click="btnViewTask_Click" Margin="1" >View Task</Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="View Feature">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Click="btnViewFeature_Click" Margin="1" >View Feature</Button>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

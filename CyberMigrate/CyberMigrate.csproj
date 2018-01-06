@@ -59,6 +59,9 @@
     </ApplicationDefinition>
     <Compile Include="DBMaintenance.cs" />
     <Compile Include="Extensions\TreeViewExtensions.cs" />
+    <Compile Include="FeatureEditor.xaml.cs">
+      <DependentUpon>FeatureEditor.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FilterResultItem.cs" />
     <Compile Include="TaskEditor.xaml.cs">
       <DependentUpon>TaskEditor.xaml</DependentUpon>
@@ -81,6 +84,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Configuration\TaskTypeConfigUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FeatureEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

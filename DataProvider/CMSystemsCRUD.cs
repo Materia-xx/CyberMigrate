@@ -37,13 +37,40 @@ namespace DataProvider
             return results.FirstOrDefault();
         }
 
+        private CMCUDResult UpsertChecks(CMCUDResult opResult, CMSystemDto dto)
+        {
+            // If we are checking an insert operation
+            if (dto.Id == 0)
+            {
+                if (Get_ForSystemName(dto.Name) != null)
+                {
+                    opResult.Errors.Add($"A system with the name '{dto.Name}' already exists. Rename that one first.");
+                }
+            }
+            // If we are checking an update operation
+            {
+                // Look for systems with this name that are not this record
+                var dupeResults = Find(s =>
+                    s.Id != dto.Id
+                    && s.Name.Equals(dto.Name, System.StringComparison.Ordinal) // Note: case 'sensitive' compare so we allow renames to upper/lower case
+                );
+
+                if (dupeResults.Any())
+                {
+                    opResult.Errors.Add($"A system with the name '{dto.Name}' already exists.");
+                    return opResult;
+                }
+            }
+
+            return opResult;
+        }
+
         public override CMCUDResult Insert(CMSystemDto insertingObject)
         {
             var opResult = new CMCUDResult();
-
-            if (Get_ForSystemName(insertingObject.Name) != null)
+            opResult = UpsertChecks(opResult, insertingObject);
+            if (opResult.Errors.Any())
             {
-                opResult.Errors.Add($"A system with the name '{insertingObject.Name}' already exists. Rename that one first.");
                 return opResult;
             }
 
@@ -53,20 +80,39 @@ namespace DataProvider
         public override CMCUDResult Update(CMSystemDto updatingObject)
         {
             var opResult = new CMCUDResult();
-
-            // Look for systems with this name that are not this record
-            var dupeResults = Find(s =>
-                s.Id != updatingObject.Id
-                && s.Name.Equals(updatingObject.Name, System.StringComparison.Ordinal) // Note: case 'sensitive' compare so we allow renames to upper/lower case
-            );
-
-            if (dupeResults.Any())
+            opResult = UpsertChecks(opResult, updatingObject);
+            if (opResult.Errors.Any())
             {
-                opResult.Errors.Add($"A system with the name '{updatingObject.Name}' already exists.");
                 return opResult;
             }
 
             return base.Update(updatingObject);
+        }
+
+        /// <summary>
+        /// Updates only the name if it has changed from the database.
+        /// </summary>
+        /// <param name="updatingObject"></param>
+        /// <returns></returns>
+        public CMCUDResult UpdateIfNeeded_Name(int cmSystemId, string name)
+        {
+            var opResult = new CMCUDResult();
+            var dbEntry = Get(cmSystemId);
+            if (dbEntry.Name.Equals(name, System.StringComparison.Ordinal))
+            {
+                // Nothing changed, no update to the name is needed
+                return opResult;
+            }
+
+            // Update the Dto and validate it
+            dbEntry.Name = name;
+            opResult = UpsertChecks(opResult, dbEntry);
+            if (opResult.Errors.Any())
+            {
+                return opResult;
+            }
+
+            return base.Update(dbEntry);
         }
 
         public override CMCUDResult Delete(int deletingId)

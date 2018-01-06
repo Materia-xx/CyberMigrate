@@ -1,0 +1,30 @@
+﻿<Window x:Class="CyberMigrate.FeatureEditor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CyberMigrate"
+        mc:Ignorable="d"
+        Title="FeatureEditor" Width="1024" Height="768" Loaded="Window_Loaded">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Label x:Name="lblFeatureVars" Content="Feature Variables" Grid.Column="0" />
+
+        <Label x:Name="lblFeature" Content="Name" Grid.Column="1" HorizontalAlignment="Right" />
+        <TextBox x:Name="txtFeatureName" Grid.Column="2" LostFocus="txtFeatureName_LostFocus" />
+
+        <DataGrid x:Name="dataGridFeatureVars" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" AutoGenerateColumns="False" CanUserAddRows="True">
+
+        </DataGrid>
+
+    </Grid>
+</Window>

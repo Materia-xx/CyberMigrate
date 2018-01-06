@@ -691,5 +691,24 @@ namespace CyberMigrate
             // mcbtodo: keep track of open windows and just switch the already open one if it is, otherwise we open it here.
             taskEditor.Show();
         }
+
+        private void btnViewFeature_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedRowIndex = dataGridTasks.SelectedIndex;
+
+            if (filterResults.Count() <= selectedRowIndex)
+            {
+                // This means clicking on the button of a new row, but this shouldn't be possible so just ignore it.
+                return;
+            }
+
+            var cmFilterData = filterResults[selectedRowIndex];
+            var cmTask = CMDataProvider.DataStore.Value.CMTasks.Value.Get(cmFilterData.TaskId);
+            var cmFeature = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(cmTask.CMFeatureId);
+
+            var featureEditor = new FeatureEditor(cmFeature);
+
+            featureEditor.ShowDialog();
+        }
     }
 }

@@ -151,27 +151,17 @@ namespace CyberMigrate.Configuration
 
         private void txtSystemName_LostFocus(object sender, RoutedEventArgs e)
         {
-            // Update. Load it first from the db first just in case it has been updated elsewhere.
-            var cmSystemDb = CMDataProvider.DataStore.Value.CMSystems.Value.Get(cmSystem.Id);
-            var originalName = cmSystemDb.Name;
-            cmSystemDb.Name = txtSystemName.Text;
-
-            // If the name wasn't actually changed, then there is no need to try and update
-            if (originalName.Equals(cmSystemDb.Name, StringComparison.Ordinal)) // Note: case 'sensitive' compare so we allow renames to upper/lower case
-            {
-                return;
-            }
-
-            var opResult = CMDataProvider.DataStore.Value.CMSystems.Value.Update(cmSystemDb);
+            var opResult = CMDataProvider.DataStore.Value.CMSystems.Value.UpdateIfNeeded_Name(cmSystem.Id, txtSystemName.Text);
             if (opResult.Errors.Any())
             {
                 MessageBox.Show(opResult.ErrorsCombined);
-                txtSystemName.Text = originalName;
+                txtSystemName.Text = cmSystem.Name;
                 return;
             }
 
+            cmSystem = CMDataProvider.DataStore.Value.CMSystems.Value.Get(cmSystem.Id);
+
             // Reload main treeview, this is how we handle renames
-            cmSystem = cmSystemDb;
             ConfigWindow.ReLoadTreeConfiguration();
         }
     }

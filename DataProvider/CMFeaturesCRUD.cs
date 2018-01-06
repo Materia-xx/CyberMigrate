@@ -116,6 +116,38 @@ namespace DataProvider
                 }
             }
 
+            // If we are checking an insert operation
+            if (dto.Id == 0)
+            {
+                // Require that template names are distinct. Instances can have duplicate names.
+                if (dto.IsTemplate)
+                {
+                    if (Get_ForName(dto.Name, dto.CMSystemId, dto.IsTemplate) != null)
+                    {
+                        opResult.Errors.Add($"A feature with the name '{dto.Name}' already exists within the system. Rename that one first.");
+                    }
+                }
+            }
+            // If we are checking an update operation
+            else
+            {
+                // Require that template names are distinct. Instances can have duplicate names.
+                if (dto.IsTemplate)
+                {
+                    // Find a record with the same name that is not this one
+                    var dupeResults = Find(f =>
+                        f.Id != dto.Id
+                        && (dto.IsTemplate ? f.CMParentFeatureTemplateId == 0 : f.CMParentFeatureTemplateId != 0) // Don't use IsTemplate Dto property here b/c this queries BSON data directly
+                        && f.CMSystemId == dto.CMSystemId
+                        && f.Name.Equals(dto.Name, System.StringComparison.Ordinal)); // Note: case 'sensitive' compare so we allow renames to upper/lower case
+
+                    if (dupeResults.Any())
+                    {
+                        opResult.Errors.Add($"A feature with the name '{dto.Name}' already exists within the system.");
+                    }
+                }
+            }
+
             return opResult;
         }
 
@@ -126,16 +158,6 @@ namespace DataProvider
             if (opResult.Errors.Any())
             {
                 return opResult;
-            }
-
-            // Require that template names are distinct. Instances can have duplicate names.
-            if (insertingObject.IsTemplate)
-            {
-                if (Get_ForName(insertingObject.Name, insertingObject.CMSystemId, insertingObject.IsTemplate) != null)
-                {
-                    opResult.Errors.Add($"A feature with the name '{insertingObject.Name}' already exists within the system. Rename that one first.");
-                    return opResult;
-                }
             }
 
             return base.Insert(insertingObject);
@@ -150,24 +172,33 @@ namespace DataProvider
                 return opResult;
             }
 
-            // Require that template names are distinct. Instances can have duplicate names.
-            if (updatingObject.IsTemplate)
-            {
-                // Find a record with the same name that is not this one
-                var dupeResults = Find(f =>
-                    f.Id != updatingObject.Id
-                    && (updatingObject.IsTemplate ? f.CMParentFeatureTemplateId == 0 : f.CMParentFeatureTemplateId != 0) // Don't use IsTemplate Dto property here b/c this queries BSON data directly
-                    && f.CMSystemId == updatingObject.CMSystemId
-                    && f.Name.Equals(updatingObject.Name, System.StringComparison.Ordinal)); // Note: case 'sensitive' compare so we allow renames to upper/lower case
+            return base.Update(updatingObject);
+        }
 
-                if (dupeResults.Any())
-                {
-                    opResult.Errors.Add($"A feature with the name '{updatingObject.Name}' already exists within the system.");
-                    return opResult;
-                }
+        /// <summary>
+        /// Updates only the name if it has changed from the database.
+        /// </summary>
+        /// <param name="updatingObject"></param>
+        /// <returns></returns>
+        public CMCUDResult UpdateIfNeeded_Name(int cmFeatureId, string name)
+        {
+            var opResult = new CMCUDResult();
+            var dbEntry = Get(cmFeatureId);
+            if (dbEntry.Name.Equals(name, System.StringComparison.Ordinal))
+            {
+                // Nothing changed, no update to the name is needed
+                return opResult;
             }
 
-            return base.Update(updatingObject);
+            // Update the Dto and validate it
+            dbEntry.Name = name;
+            opResult = UpsertChecks(opResult, dbEntry);
+            if (opResult.Errors.Any())
+            {
+                return opResult;
+            }
+
+            return base.Update(dbEntry);
         }
 
         public override CMCUDResult Delete(int deletingId)
