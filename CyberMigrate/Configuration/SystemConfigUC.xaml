@@ -19,7 +19,7 @@
         <Label x:Name="lblSystemName" Content="System Name" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0" />
         <TextBox x:Name="txtSystemName" Grid.Row="0" Grid.Column="1" LostFocus="txtSystemName_LostFocus"/>
 
-        <Label x:Name="lblStates" Content="States" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" />
+        <Label x:Name="lblStates" Content="States" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" ToolTip="The lowest priority should represent the beginning state and the highest should represent the end state." />
         <DataGrid x:Name="dataGridStates" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" />
     </Grid>
 </UserControl>

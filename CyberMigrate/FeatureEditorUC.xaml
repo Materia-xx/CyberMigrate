@@ -22,7 +22,7 @@
         <Label x:Name="lblFeatureName" Content="Feature Name" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0" />
         <TextBox x:Name="txtFeatureName" Grid.Row="0" Grid.Column="1" LostFocus="txtFeatureName_LostFocus" />
 
-        <Label x:Name="lblStateTransitionRules" Content="State Transition Order" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" />
+        <Label x:Name="lblStateTransitionRules" Content="State Transition Order" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" ToolTip="The lowest priority should represent the beginning state and the highest should represent the end state." />
         <DataGrid x:Name="dataGridStateTransitionRules" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" />
 
         <Label x:Name="lblFeatureVars" Content="Feature Variables" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" />
