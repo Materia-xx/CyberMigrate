@@ -1,19 +1,8 @@
-﻿using Dto;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using DataProvider;
+using Dto;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Tasks.BuiltIn.FeatureDependency
 {
@@ -25,6 +14,8 @@ namespace Tasks.BuiltIn.FeatureDependency
         private CMSystemDto cmSystem;
         private CMFeatureDto cmFeature;
         private CMTaskDto cmTask;
+
+        private CMFeatureDto cmTargetFeature;
 
         private FeatureDependencyDto TaskData;
 
@@ -39,6 +30,11 @@ namespace Tasks.BuiltIn.FeatureDependency
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            ReloadUI();
+        }
+
+        private void ReloadUI()
+        {
             TaskData = FeatureDependencyExtensions.FeatureDependencyDataProvider.Get_ForTaskId(cmTask.Id);
 
             if (TaskData == null)
@@ -49,15 +45,47 @@ namespace Tasks.BuiltIn.FeatureDependency
                 };
             }
 
-            // mcbtodo: Add a way to see the feature that was instanced, after it is.
-            dataGridFeatureDependencySettings.ItemsSource = TaskData.PathOptions;
+            dataGridEditFeatureDependencySettings.Visibility = Visibility.Hidden;
+            dataGridChooseFeatureDependency.Visibility = Visibility.Hidden;
+            btnUpdate.Visibility = Visibility.Hidden;
+            lblChosenFeature.Visibility = Visibility.Hidden;
+            lblChosenFeatureName.Visibility = Visibility.Hidden;
+
+            dataGridEditFeatureDependencySettings.ItemsSource = null;
+            dataGridChooseFeatureDependency.ItemsSource = null;
+
+            // Display as a task template
+            if (cmTask.IsTemplate)
+            {
+                dataGridEditFeatureDependencySettings.Visibility = Visibility.Visible;
+                btnUpdate.Visibility = Visibility.Visible;
+
+                dataGridEditFeatureDependencySettings.ItemsSource = TaskData.PathOptions;
+            }
+            // Display as a task instance
+            else
+            {
+                // Display for an instance that does not yet have the choice made
+                if (TaskData.InstancedCMFeatureId == 0)
+                {
+                    dataGridChooseFeatureDependency.Visibility = Visibility.Visible;
+                    dataGridChooseFeatureDependency.ItemsSource = TaskData.PathOptions;
+                }
+                // Display for an instance that already has the choice made
+                else
+                {
+                    lblChosenFeature.Visibility = Visibility.Visible;
+                    lblChosenFeatureName.Visibility = Visibility.Visible;
+
+                    cmTargetFeature = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(TaskData.InstancedCMFeatureId);
+                    lblChosenFeatureName.Content = cmTargetFeature.Name;
+                }
+            }
         }
 
         private void btnSetFeature_Click(object sender, RoutedEventArgs e)
         {
-            var selectedRowIndex = dataGridFeatureDependencySettings.SelectedIndex;
-
-            var rowData = dataGridFeatureDependencySettings.SelectedItem as FeatureDependencyPathOptionDto;
+            var rowData = ((FrameworkElement)sender).DataContext as FeatureDependencyPathOptionDto;
             if (rowData == null)
             {
                 MessageBox.Show("The row must first be fully inserted before the associated feature can be set.");
@@ -80,9 +108,36 @@ namespace Tasks.BuiltIn.FeatureDependency
             {
                 rowData.CMFeatureTemplateId = featureSelectorUC.SelectedFeatureId;
                 rowData.CMTargetSystemStateId = featureSelectorUC.SelectedSystemStateId;
-                dataGridFeatureDependencySettings.ItemsSource = null;
-                dataGridFeatureDependencySettings.ItemsSource = TaskData.PathOptions;
+                dataGridEditFeatureDependencySettings.ItemsSource = null;
+                dataGridEditFeatureDependencySettings.ItemsSource = TaskData.PathOptions;
             }
+        }
+
+        private void btnChooseFeature_Click(object sender, RoutedEventArgs e)
+        {
+            var rowData = ((FrameworkElement)sender).DataContext as FeatureDependencyPathOptionDto;
+            if (rowData == null)
+            {
+                // Shouldn't happen, but if it does, just ignore it.
+                return;
+            }
+
+            // Set the chosen feature var. CUD events should take care of the rest of the instancing aspects.
+            var newFeatureVar = new CMFeatureVarStringDto()
+            {
+                CMFeatureId = cmFeature.Id,
+                Name = rowData.FeatureVarName,
+                Value = rowData.FeatureVarSetTo
+            };
+            var opResult = CMDataProvider.DataStore.Value.CMFeatureVarStrings.Value.Insert(newFeatureVar);
+            if (opResult.Errors.Any())
+            {
+                MessageBox.Show(opResult.ErrorsCombined);
+                return;
+            }
+
+            // Reload the UI so it shows in the chosen mode
+            ReloadUI();
         }
 
         private void btnUpdate_Click(object sender, RoutedEventArgs e)

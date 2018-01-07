@@ -723,7 +723,6 @@ namespace CyberMigrate
             var cmFeature = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(cmTask.CMFeatureId);
 
             var featureEditor = new FeatureEditor(cmFeature);
-
             featureEditor.Show();
         }
     }
