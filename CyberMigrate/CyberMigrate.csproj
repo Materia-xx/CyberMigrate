@@ -66,6 +66,7 @@
     <Compile Include="TaskEditor.xaml.cs">
       <DependentUpon>TaskEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="TaskFactories.cs" />
     <Compile Include="TreeViewTag.cs" />
     <Page Include="Configuration\Config.xaml">
       <SubType>Designer</SubType>

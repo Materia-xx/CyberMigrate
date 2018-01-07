@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Windows.Controls;
 
@@ -13,6 +12,7 @@ namespace TaskBase
     public class TaskFactoriesCatalog
     {
         private CompositionContainer container;
+
 
         [ImportMany(typeof(CMTaskFactoryBase))]
         public IEnumerable<CMTaskFactoryBase> TaskFactories { get; set; }

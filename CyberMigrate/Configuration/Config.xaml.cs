@@ -76,10 +76,18 @@ namespace CyberMigrate
             }
         }
 
-
         private void Options_CUD(object recordEventArgs)
         {
             SubscribeToDataStoreCUDEvents();
+            var registerError = TaskFactories.Init();
+            if (!string.IsNullOrWhiteSpace(registerError))
+            {
+                // If there is any errors with registering the task types then close the main window
+                // Assuming that this means the program will not be able to run successfully without the property tasks registered
+                MessageBox.Show(registerError);
+                this.Close();
+                return;
+            }
             ReLoadTreeConfiguration();
         }
 
@@ -127,6 +135,12 @@ namespace CyberMigrate
             foreach (var taskFactory in TaskFactoriesCatalog.Instance.TaskFactories)
             {
                 var cmTaskFactoryDto = CMDataProvider.DataStore.Value.CMTaskFactories.Value.Get_ForName(taskFactory.Name);
+                if (cmTaskFactoryDto == null)
+                {
+                    // During initial setup the task factories may not be registered yet
+                    // The user will need to close and re-open the config screen
+                    continue;
+                }
 
                 var taskFactoryTVI = GetTVI_TaskFactory(cmTaskFactoryDto);
                 taskFactoriesTVI.Items.Add(taskFactoryTVI);
