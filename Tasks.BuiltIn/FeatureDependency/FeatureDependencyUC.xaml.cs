@@ -47,7 +47,6 @@ namespace Tasks.BuiltIn.FeatureDependency
 
             dataGridEditFeatureDependencySettings.Visibility = Visibility.Hidden;
             dataGridChooseFeatureDependency.Visibility = Visibility.Hidden;
-            btnUpdate.Visibility = Visibility.Hidden;
             lblChosenFeature.Visibility = Visibility.Hidden;
             lblChosenFeatureName.Visibility = Visibility.Hidden;
 
@@ -58,7 +57,6 @@ namespace Tasks.BuiltIn.FeatureDependency
             if (cmTask.IsTemplate)
             {
                 dataGridEditFeatureDependencySettings.Visibility = Visibility.Visible;
-                btnUpdate.Visibility = Visibility.Visible;
 
                 dataGridEditFeatureDependencySettings.ItemsSource = TaskData.PathOptions;
             }
@@ -108,6 +106,10 @@ namespace Tasks.BuiltIn.FeatureDependency
             {
                 rowData.CMFeatureTemplateId = featureSelectorUC.SelectedFeatureId;
                 rowData.CMTargetSystemStateId = featureSelectorUC.SelectedSystemStateId;
+                UpdateTaskData();
+
+                // This is here to make the button show the correct text on each button after chosing the feature
+                // Otherwise it just retains the previous value, even after associating a new feature.
                 dataGridEditFeatureDependencySettings.ItemsSource = null;
                 dataGridEditFeatureDependencySettings.ItemsSource = TaskData.PathOptions;
             }
@@ -140,7 +142,10 @@ namespace Tasks.BuiltIn.FeatureDependency
             ReloadUI();
         }
 
-        private void btnUpdate_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Updates the task data with whatever is currently set in the TaskData
+        /// </summary>
+        private void UpdateTaskData()
         {
             if (TaskData.Id == 0)
             {
@@ -152,8 +157,11 @@ namespace Tasks.BuiltIn.FeatureDependency
             {
                 FeatureDependencyExtensions.FeatureDependencyDataProvider.Update(TaskData);
             }
+        }
 
-            MessageBox.Show("Updated");
+        private void UserControl_Unloaded(object sender, RoutedEventArgs e)
+        {
+            UpdateTaskData();
         }
     }
 }
