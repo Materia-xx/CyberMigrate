@@ -38,7 +38,13 @@ namespace DataProvider
         /// Raised just before the delete operation is performed.
         /// The object passed in the event args will the the record that will be deleted.
         /// </summary>
-        public CMDataProviderRecordDeletedEvent OnRecordDeleted;
+        public CMDataProviderRecordDeletedEvent OnBeforeRecordDeleted;
+
+        /// <summary>
+        /// Raised after the delete operation is performed.
+        /// The object passed in the event args will the the record that was deleted.
+        /// </summary>
+        public CMDataProviderRecordDeletedEvent OnAfterRecordDeleted;
 
         public CMDataProviderCRUDBase(LiteDatabase liteDatabase, string collectionName)
         {
@@ -165,13 +171,15 @@ namespace DataProvider
                 return opResult;
             }
 
+            var dtoBefore = Get(deletingId);
+
             try
             {
                 CUDDepthTracking.OperationDepth++;
-                OnRecordDeleted?.Invoke(
+                OnBeforeRecordDeleted?.Invoke(
                     new CMDataProviderRecordDeletedEventArgs()
                     {
-                        DtoBefore = Get(deletingId),
+                        DtoBefore = dtoBefore,
                     });
             }
             catch (Exception ex)
@@ -186,6 +194,24 @@ namespace DataProvider
             if (!cmCollection.Delete(deletingId))
             {
                 opResult.Errors.Add($"{CollectionName} with id {deletingId} was not found to delete.");
+            }
+
+            try
+            {
+                CUDDepthTracking.OperationDepth++;
+                OnAfterRecordDeleted?.Invoke(
+                    new CMDataProviderRecordDeletedEventArgs()
+                    {
+                        DtoBefore = dtoBefore,
+                    });
+            }
+            catch (Exception ex)
+            {
+                opResult.Errors.Add(ex.ToString());
+            }
+            finally
+            {
+                CUDDepthTracking.OperationDepth--;
             }
 
             return opResult;

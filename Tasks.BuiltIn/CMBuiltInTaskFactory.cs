@@ -100,12 +100,12 @@ namespace Tasks.BuiltIn
             FeatureDependencyExtensions.FeatureDependency_TaskState_Closed = FeatureDependencyExtensions.FeatureDependency_TaskStates.First(s => s.InternalName.Equals(ReservedTaskStates.Closed));
 
             // mcbtodo: figure out why typing += <tab><tab> here doesn't do anything, but yet the events are working fine.
-            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordDeleted += Task_Deleted;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnBeforeRecordDeleted += Task_Deleted;
 
             // If a feature is somehow deleted then any feature dependency that was pointing at it can be resolved
             // If a feature state is changed to the one being monitored for then it can be resolved
             // If a feature is inserted and a dependency was already watching that feature id ... no, that doesn't make sense.
-            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted += Feature_Deleted;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnBeforeRecordDeleted += Feature_Deleted;
             CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Feature_Updated;
 
             // Any time a feature var is updated we want to make sure the appropriate task data is taken care of

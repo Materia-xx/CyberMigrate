@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -40,6 +36,12 @@ namespace CyberMigrate.Extensions
         public static void RemoveSelectedNode(this TreeView treeView)
         {
             var selectedItem = treeView.SelectedItem as TreeViewItem;
+
+            if (selectedItem == null)
+            {
+                // Nothing appears to be selected
+                return;
+            }
 
             // if the parent is null, try to remove it straight from the treeview
             if (selectedItem.Parent == null || !(selectedItem.Parent is TreeViewItem))

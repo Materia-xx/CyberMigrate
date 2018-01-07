@@ -379,28 +379,28 @@ namespace CyberMigrate
             // All things that should result in refreshing the cached lookup tables used for state calculation 
             CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordCreated += Record_CUD_StateCalcLookupsRefreshNeeded;
             CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += Record_CUD_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordDeleted += Record_CUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnBeforeRecordDeleted += Record_CUD_StateCalcLookupsRefreshNeeded;
 
             CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordCreated += Record_CUD_StateCalcLookupsRefreshNeeded;
             CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_CUD_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted += Record_CUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnBeforeRecordDeleted += Record_CUD_StateCalcLookupsRefreshNeeded;
 
             CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnRecordCreated += Record_CUD_StateCalcLookupsRefreshNeeded;
             CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnRecordUpdated += Record_CUD_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnRecordDeleted += Record_CUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMTaskTypes.Value.OnBeforeRecordDeleted += Record_CUD_StateCalcLookupsRefreshNeeded;
 
             CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordCreated += Record_CUD_StateCalcLookupsRefreshNeeded;
             CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordUpdated += Record_CUD_StateCalcLookupsRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordDeleted += Record_CUD_StateCalcLookupsRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnBeforeRecordDeleted += Record_CUD_StateCalcLookupsRefreshNeeded;
 
             // All things that should result in the re-calculation of *all* current feature system states
             CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordCreated += Record_CUD_CalculateAllFeatureStates;
             CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordUpdated += Record_CUD_CalculateAllFeatureStates;
-            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnRecordDeleted += Record_CUD_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.OnBeforeRecordDeleted += Record_CUD_CalculateAllFeatureStates;
 
             CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordCreated += Record_CUD_CalculateAllFeatureStates;
             CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += Record_CUD_CalculateAllFeatureStates;
-            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordDeleted += Record_CUD_CalculateAllFeatureStates;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnBeforeRecordDeleted += Record_CUD_CalculateAllFeatureStates;
 
             // Feature Create: Updating the feature state for a new feature is handled during the creation of the feature
             // Feature Delete: If a feature is deleted and there is a dependency task pointing at it, it may cause the dependency task to calculate its task state differently
@@ -415,22 +415,22 @@ namespace CyberMigrate
             // Refresh the filter tree view when needed
             CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordCreated += Record_CUD_FilterTreeViewRefreshNeeded;
             CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordUpdated += Record_CUD_FilterTreeViewRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordDeleted += Record_CUD_FilterTreeViewRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMSystems.Value.OnBeforeRecordDeleted += Record_CUD_FilterTreeViewRefreshNeeded;
 
             CMDataProvider.DataStore.Value.CMSystemStates.Value.OnRecordCreated += Record_CUD_FilterTreeViewRefreshNeeded;
             CMDataProvider.DataStore.Value.CMSystemStates.Value.OnRecordUpdated += Record_CUD_FilterTreeViewRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMSystemStates.Value.OnRecordDeleted += Record_CUD_FilterTreeViewRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMSystemStates.Value.OnBeforeRecordDeleted += Record_CUD_FilterTreeViewRefreshNeeded;
 
             CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordCreated += Record_CUD_FilterTreeViewRefreshNeeded;
             CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_CUD_FilterTreeViewRefreshNeeded;
-            CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted += Record_CUD_FilterTreeViewRefreshNeeded;
+            CMDataProvider.DataStore.Value.CMFeatures.Value.OnBeforeRecordDeleted += Record_CUD_FilterTreeViewRefreshNeeded;
 
             // Refresh the list of tasks when needed
             CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_CUD_FilterTreeViewRefreshNeeded;
 
             CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordCreated += Record_CUD_RefreshFilteredTasks;
             CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += Record_CUD_RefreshFilteredTasks;
-            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordDeleted += Record_CUD_RefreshFilteredTasks;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnBeforeRecordDeleted += Record_CUD_RefreshFilteredTasks;
 
             // Reload the datastore when the options are updated
             CMDataProvider.Master.Value.OnRecordCreated += Record_CUD_OptionsUpdated;

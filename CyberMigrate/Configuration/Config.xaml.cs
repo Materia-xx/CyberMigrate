@@ -46,11 +46,11 @@ namespace CyberMigrate
                 DataStoreCUDEventsSubscribedTo = false;
                 CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordCreated -= Record_CUD_TreeConfgRefreshNeeded;
                 CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordUpdated -= Record_CUD_TreeConfgRefreshNeeded;
-                CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordDeleted -= Record_CUD_TreeConfgRefreshNeeded;
+                CMDataProvider.DataStore.Value.CMSystems.Value.OnAfterRecordDeleted -= Record_CUD_TreeConfgRefreshNeeded;
 
                 CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordCreated -= Record_CUD_TreeConfgRefreshNeeded;
                 CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated -= Record_CUD_TreeConfgRefreshNeeded;
-                CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted -= Record_CUD_TreeConfgRefreshNeeded;
+                CMDataProvider.DataStore.Value.CMFeatures.Value.OnAfterRecordDeleted -= Record_CUD_TreeConfgRefreshNeeded;
             }
         }
 
@@ -68,11 +68,11 @@ namespace CyberMigrate
                 DataStoreCUDEventsSubscribedTo = true;
                 CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordCreated += Record_CUD_TreeConfgRefreshNeeded;
                 CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordUpdated += Record_CUD_TreeConfgRefreshNeeded;
-                CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordDeleted += Record_CUD_TreeConfgRefreshNeeded;
+                CMDataProvider.DataStore.Value.CMSystems.Value.OnAfterRecordDeleted += Record_CUD_TreeConfgRefreshNeeded;
 
                 CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordCreated += Record_CUD_TreeConfgRefreshNeeded;
                 CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordUpdated += Record_CUD_TreeConfgRefreshNeeded;
-                CMDataProvider.DataStore.Value.CMFeatures.Value.OnRecordDeleted += Record_CUD_TreeConfgRefreshNeeded;
+                CMDataProvider.DataStore.Value.CMFeatures.Value.OnAfterRecordDeleted += Record_CUD_TreeConfgRefreshNeeded;
             }
         }
 
@@ -98,6 +98,7 @@ namespace CyberMigrate
 
         private void ReLoadTreeConfiguration()
         {
+            configUIPanel.Children.Clear(); // mcbtodo: check to see if there are any unsaved changes before doing this.
             treeConfig.Items.Clear();
 
             var dataStoreTVI = GetTVI_DataStore();
@@ -338,7 +339,6 @@ namespace CyberMigrate
                     MessageBox.Show(opResult.ErrorsCombined);
                     return;
                 }
-                treeConfig.RemoveSelectedNode();
             };
 
             cmSystemTreeViewItem.ContextMenu = contextMenu;
@@ -378,7 +378,6 @@ namespace CyberMigrate
                     MessageBox.Show(opResult.ErrorsCombined);
                     return;
                 }
-                treeConfig.RemoveSelectedNode();
             };
             cmFeatureTemplateTreeViewItem.ContextMenu = contextMenu;
 
