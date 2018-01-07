@@ -112,6 +112,12 @@ namespace DataProvider
                 opResult.Errors.Add($"A task must have a task type set in {CollectionName}");
             }
 
+            // Must pass the previous checks before going on to this next phase of checks
+            if (opResult.Errors.Any())
+            {
+                return opResult;
+            }
+
             var taskStateTemplate = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Template, dto.CMTaskTypeId);
 
             // The only state option for a template is "Template"
