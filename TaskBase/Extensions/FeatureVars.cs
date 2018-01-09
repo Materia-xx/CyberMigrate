@@ -18,6 +18,11 @@ namespace TaskBase.Extensions
         /// <returns></returns>
         public static string ResolveFeatureVarsInString(string stringToResolve, List<CMFeatureVarStringDto> featureVars)
         {
+            if (stringToResolve == null)
+            {
+                return null;
+            }
+
             foreach (var featureVar in featureVars)
             {
                 var seeking = $"${{{featureVar.Name}}}";
