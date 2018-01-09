@@ -312,6 +312,7 @@ namespace CyberMigrate
                 {
                     var newFeature = cmFeatureTemplate.ToInstance(new List<CMFeatureVarStringDto>());
                     ShowFilteredTasks();
+                    new FeatureEditor(newFeature).Show();
                 };
             }
 
