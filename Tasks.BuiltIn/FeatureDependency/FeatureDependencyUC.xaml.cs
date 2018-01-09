@@ -63,6 +63,19 @@ namespace Tasks.BuiltIn.FeatureDependency
             // Display as a task instance
             else
             {
+                // If nothing is selected and there are no options to choose from then jump straight to the 
+                // dialog to select a dependency.
+                if (TaskData.InstancedCMFeatureId == 0 && !TaskData.PathOptions.Any())
+                {
+                    var featureSelectorUC = ShowFeatureSelectorWindow(0, 0, cmTask.IsTemplate);
+                    if (featureSelectorUC.SelectionConfirmed)
+                    {
+                        TaskData.InstancedCMFeatureId = featureSelectorUC.SelectedFeatureId;
+                        TaskData.InstancedTargetCMSystemStateId = featureSelectorUC.SelectedSystemStateId;
+                        UpdateTaskData();
+                    }
+                }
+
                 // Display for an instance that does not yet have the choice made
                 if (TaskData.InstancedCMFeatureId == 0)
                 {
@@ -81,6 +94,23 @@ namespace Tasks.BuiltIn.FeatureDependency
             }
         }
 
+        private FeatureDependencyChooseFeatureUC ShowFeatureSelectorWindow(int initialFeatureId, int initalTargetSystemStateId, bool isTemplate)
+        {
+            Window featureSelector = new Window()
+            {
+                Title = "Select Feature",
+                Width = 800,
+                Height = 600
+            };
+
+            var featureSelectorUC = new FeatureDependencyChooseFeatureUC(initialFeatureId, initalTargetSystemStateId, isTemplate, featureSelector);
+            featureSelectorUC.Margin = new Thickness(5);
+            featureSelector.Content = featureSelectorUC;
+            featureSelector.ShowDialog();
+
+            return featureSelectorUC;
+        }
+
         private void btnSetFeature_Click(object sender, RoutedEventArgs e)
         {
             var rowData = ((FrameworkElement)sender).DataContext as FeatureDependencyPathOptionDto;
@@ -90,18 +120,7 @@ namespace Tasks.BuiltIn.FeatureDependency
                 return;
             }
 
-            Window featureSelector = new Window()
-            {
-                Title = "Select Feature",
-                Width = 800,
-                Height = 600
-            };
-
-            var featureSelectorUC = new FeatureDependencyChooseFeatureUC(rowData.CMFeatureTemplateId, rowData.CMTargetSystemStateId, cmTask.IsTemplate, featureSelector);
-            featureSelectorUC.Margin = new Thickness(5);
-            featureSelector.Content = featureSelectorUC;
-            featureSelector.ShowDialog();
-
+            var featureSelectorUC = ShowFeatureSelectorWindow(rowData.CMFeatureTemplateId, rowData.CMTargetSystemStateId, cmTask.IsTemplate);
             if (featureSelectorUC.SelectionConfirmed)
             {
                 rowData.CMFeatureTemplateId = featureSelectorUC.SelectedFeatureId;
