@@ -344,8 +344,17 @@ namespace CyberMigrate
             };
 
             var contextMenu = new ContextMenu();
-            contextMenu.Visibility = Visibility.Hidden;
             cmFeatureTVI.ContextMenu = contextMenu;
+
+            var openFeatureMenu = new MenuItem()
+            {
+                Header = "Open Feature"
+            };
+            contextMenu.Items.Add(openFeatureMenu);
+            openFeatureMenu.Click += (sender, e) =>
+            {
+                new FeatureEditor(cmFeature).Show();
+            };
 
             return cmFeatureTVI;
         }
