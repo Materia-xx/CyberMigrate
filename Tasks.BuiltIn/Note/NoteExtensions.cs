@@ -66,7 +66,7 @@ namespace Tasks.BuiltIn.Note
             }
 
             var newNote = FeatureVars.ResolveFeatureVarsInString(taskData.Note, featureVars);
-            if (!newNote.Equals(taskData.Note, StringComparison.OrdinalIgnoreCase))
+            if (newNote != taskData.Note)
             {
                 taskData.Note = newNote;
 
