@@ -11,12 +11,22 @@ namespace CyberMigrate
         /// database be at this same version. If it is not, then it will need to go through an
         /// upgrade phase.
         /// </summary>
-        private static int CodeSchemaVersion = 1;
+        private static int CodeSchemaVersion = 2;
 
-        public static void RunMaintenanceRoutines()
+        private static int DatabaseSchemaVersion { get; set; }
+
+        public static bool RunMaintenanceRoutines()
         {
             // Gets the schema version that the database is currently at. If unknown defaults to the first supported version.
-            var databaseSchemaVersion = CMDataProvider.DataStore.Value.GetDatabaseSchemaVersion();
+            DatabaseSchemaVersion = CMDataProvider.DataStore.Value.GetDatabaseSchemaVersion();
+
+            if (CodeSchemaVersion > DatabaseSchemaVersion)
+            {
+                if (!UpgradeSchemaTo_Version2())
+                {
+                    return false;
+                }
+            }
 
             //Upgrade_TaskDto();
             //Upgrade_FeatureDto();
@@ -29,6 +39,35 @@ namespace CyberMigrate
             //Debug_DeleteAllTaskAndFeatureInstances();
             //Debug_DeleteAllTaskTypesAndStates();
             //Debug_DeleteOptions();
+
+            return true;
+        }
+
+        private static bool UpgradeSchemaTo_Version2()
+        {
+            var userResponse = MessageBox.Show("Upgrading database schema to version 2. Press OK to continue or cancel to quit.", "Upgrade to schema version 2", MessageBoxButton.OKCancel);
+            if (userResponse != MessageBoxResult.OK)
+            {
+                return false;
+            }
+
+            // Rewrite all system states to the db so they get the default MigrationOrder property set in the BSON data
+            var allSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll();
+            foreach (var systemState in allSystemStates)
+            {
+                systemState.MigrationOrder = systemState.Priority;
+
+                var opResult = CMDataProvider.DataStore.Value.CMSystemStates.Value.Update(systemState);
+                if (opResult.Errors.Any())
+                {
+                    MessageBox.Show($"An unrecoverable database upgrade error has occurred:\r\n{opResult.ErrorsCombined}");
+                    return false;
+                }
+            }
+
+            // Set the db to now be version 2
+            CMDataProvider.DataStore.Value.SetDatabaseSchemaVersion(2);
+            return true;
         }
 
         public static void Debug_DeleteOptions()

@@ -36,9 +36,7 @@ namespace DataProvider
             var results = Find(s =>
                 s.CMSystemId == cmSystemId
             );
-
-            // Return with the lowest priority first. Same pattern as other places that use priority.
-            return results.OrderBy(s => s.Priority);
+            return results;
         }
 
         /// <summary>

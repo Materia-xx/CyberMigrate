@@ -111,6 +111,7 @@ namespace CyberMigrate
             ComboBox_CurrentSystemStates.Clear();
             ComboBox_CurrentSystemStates.AddRange(
                 CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmFeatureDto.CMSystemId)
+                .OrderBy(s => s.MigrationOrder)
                 );
         }
 

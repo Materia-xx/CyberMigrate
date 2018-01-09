@@ -289,7 +289,9 @@ namespace CyberMigrate
 
                 // Add a set of default transition rules that match the current system states
                 int rulePriority = 1;
-                var systemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id).ToList();
+                var systemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id)
+                .OrderBy(s => s.MigrationOrder) // Default the order to the same as the system states migration
+                .ToList();
                 // Add all rules from the system in the same order as the system. The user can delete the unwanted ones and re-order them
                 foreach (var currentState in systemStates)
                 {

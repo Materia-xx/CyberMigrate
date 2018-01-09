@@ -48,6 +48,12 @@ namespace CyberMigrate.Configuration
                     Binding = new Binding(nameof(CMSystemStateDto.Priority))
                 });
             dataGridStates.Columns.Add(
+                 new DataGridTextColumn()
+                 {
+                     Header = nameof(CMSystemStateDto.MigrationOrder),
+                     Binding = new Binding(nameof(CMSystemStateDto.MigrationOrder))
+                 });
+            dataGridStates.Columns.Add(
                 new DataGridTextColumn()
                 {
                     Header = nameof(CMSystemStateDto.Name),
@@ -74,7 +80,10 @@ namespace CyberMigrate.Configuration
         {
             systemStates.CollectionChanged -= States_CollectionChanged;
             systemStates.Clear();
-            var cmSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id).ToList();
+
+            var cmSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id)
+                .OrderBy(s => s.MigrationOrder) // This is the order that system states are listed in the UI
+                .ToList();
             foreach (var systemState in cmSystemStates)
             {
                 systemStates.Add(systemState);

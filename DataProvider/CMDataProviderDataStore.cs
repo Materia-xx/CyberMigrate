@@ -33,14 +33,29 @@ namespace DataProvider
             var infoRecord = dataStoreInfoCollection.FindAll().FirstOrDefault();
             if (infoRecord == null)
             {
+                // Version 1 is the first supported schema.
+                SetDatabaseSchemaVersion(1);
+                infoRecord = dataStoreInfoCollection.FindAll().FirstOrDefault();
+            }
+            return infoRecord.DatabaseSchemaVersion;
+        }
+
+        public void SetDatabaseSchemaVersion(int version)
+        {
+            var infoRecord = dataStoreInfoCollection.FindAll().FirstOrDefault();
+            if (infoRecord == null)
+            {
                 infoRecord = new CMDataStoreInfoDto()
                 {
-                    // Version 1 is the first supported schema.
-                    DatabaseSchemaVersion = 1
+                    DatabaseSchemaVersion = version
                 };
                 dataStoreInfoCollection.Insert(infoRecord);
             }
-            return infoRecord.DatabaseSchemaVersion;
+            else
+            {
+                infoRecord.DatabaseSchemaVersion = version;
+                dataStoreInfoCollection.Update(infoRecord);
+            }
         }
 
         private LiteCollection<CMDataStoreInfoDto> dataStoreInfoCollection { get; set; }

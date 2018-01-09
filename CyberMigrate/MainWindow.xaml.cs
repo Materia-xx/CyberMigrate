@@ -75,7 +75,8 @@ namespace CyberMigrate
                 SetPlannedTVIToSelect_IfMatch(ref plannedSelectionTVI, attachedTag?.Dto, cmSystemTVI, cmSystem);
 
                 // Show all system states available in this system
-                var cmSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id);
+                var cmSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForSystem(cmSystem.Id)
+                    .OrderBy(s => s.MigrationOrder); // List the tree nodes in the same order that systems migrate to each other
 
                 foreach(var cmSystemState in cmSystemStates)
                 {
@@ -364,7 +365,10 @@ namespace CyberMigrate
         private void DataStorePathSet()
         {
             // Do any upgrades or maintenance against the db.
-            DBMaintenance.RunMaintenanceRoutines();
+            if (!DBMaintenance.RunMaintenanceRoutines())
+            {
+                this.Close();
+            }
 
             var registerError = TaskFactories.Init();
             if (!string.IsNullOrWhiteSpace(registerError))
