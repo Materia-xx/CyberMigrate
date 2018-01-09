@@ -47,9 +47,6 @@ namespace CyberMigrate
             // Everything past this point depends on the data store being set up already
             DataStorePathSet();
 
-            // Debugging function to clean out instanced tasks and features
-            DBMaintenance.RunMaintenanceRoutines();
-
             dataGridTasks.ItemsSource = filterResults;
 
             // Select the node that is hovered over when right clicking and before showing the context menu
@@ -366,6 +363,9 @@ namespace CyberMigrate
         /// </summary>
         private void DataStorePathSet()
         {
+            // Do any upgrades or maintenance against the db.
+            DBMaintenance.RunMaintenanceRoutines();
+
             var registerError = TaskFactories.Init();
             if (!string.IsNullOrWhiteSpace(registerError))
             {

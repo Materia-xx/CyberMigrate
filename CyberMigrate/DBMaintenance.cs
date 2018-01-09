@@ -6,8 +6,18 @@ namespace CyberMigrate
 {
     public static class DBMaintenance
     {
+        /// <summary>
+        /// The version that the code is currently at. It is expected that any data store
+        /// database be at this same version. If it is not, then it will need to go through an
+        /// upgrade phase.
+        /// </summary>
+        private static int CodeSchemaVersion = 1;
+
         public static void RunMaintenanceRoutines()
         {
+            // Gets the schema version that the database is currently at. If unknown defaults to the first supported version.
+            var databaseSchemaVersion = CMDataProvider.DataStore.Value.GetDatabaseSchemaVersion();
+
             //Upgrade_TaskDto();
             //Upgrade_FeatureDto();
             //Upgrade_TransitionRuleDto();

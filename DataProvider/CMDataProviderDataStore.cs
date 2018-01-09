@@ -1,5 +1,7 @@
-﻿using LiteDB;
+﻿using Dto;
+using LiteDB;
 using System;
+using System.Linq;
 
 namespace DataProvider
 {
@@ -26,8 +28,27 @@ namespace DataProvider
 
         public Lazy<CMFeatureVarStringsCRUD> CMFeatureVarStrings { get; private set; }
 
+        public int GetDatabaseSchemaVersion()
+        {
+            var infoRecord = dataStoreInfoCollection.FindAll().FirstOrDefault();
+            if (infoRecord == null)
+            {
+                infoRecord = new CMDataStoreInfoDto()
+                {
+                    // Version 1 is the first supported schema.
+                    DatabaseSchemaVersion = 1
+                };
+                dataStoreInfoCollection.Insert(infoRecord);
+            }
+            return infoRecord.DatabaseSchemaVersion;
+        }
+
+        private LiteCollection<CMDataStoreInfoDto> dataStoreInfoCollection { get; set; }
+
         public CMDataProviderDataStore(LiteDatabase dataStoreDatabase)
         {
+            dataStoreInfoCollection = dataStoreDatabase.GetCollection<CMDataStoreInfoDto>("DataStoreInfo");
+
             CMSystems = new Lazy<CMSystemsCRUD>(() =>
             {
                 return new CMSystemsCRUD(dataStoreDatabase, "Systems");
