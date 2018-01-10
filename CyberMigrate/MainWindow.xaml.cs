@@ -222,6 +222,9 @@ namespace CyberMigrate
             // Figure out which task states to show
             var filteredTaskStates = filterTaskStates.Where(lbi => lbi.IsSelected).Select(lbi => lbi.ObjectData);
 
+            // If there is a text filter
+            var stringFilter = txtStringFilter.Text;
+
             var filteredTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_Instances();
 
             // Show the results
@@ -268,6 +271,23 @@ namespace CyberMigrate
                 }
 
                 var taskTypeRef = taskTypesLookup[cmTask.CMTaskTypeId];
+
+                // Apply string filter if it is set
+                if (!string.IsNullOrWhiteSpace(stringFilter))
+                {
+                    if (
+                        featureRef.Name.IndexOf(stringFilter, StringComparison.OrdinalIgnoreCase) >= 0
+                        || cmTask.Title.IndexOf(stringFilter, StringComparison.OrdinalIgnoreCase) >= 0
+                        || systemRef.Name.IndexOf(stringFilter, StringComparison.OrdinalIgnoreCase) >= 0
+                        )
+                    {
+                        // String was found, keep this entry in the found results
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
 
                 var filterRow = new FilterResultItem()
                 {
@@ -611,6 +631,11 @@ namespace CyberMigrate
         }
 
         private void lstFilterByTaskState_UnChecked(object sender, RoutedEventArgs e)
+        {
+            ShowFilteredTasks();
+        }
+
+        private void txtStringFilter_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
             ShowFilteredTasks();
         }
