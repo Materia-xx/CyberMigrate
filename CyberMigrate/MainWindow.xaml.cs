@@ -22,6 +22,8 @@ namespace CyberMigrate
     {
         private ObservableCollection<FilterResultItem> filterResults = new ObservableCollection<FilterResultItem>();
 
+        private ObservableCollection<CheckBoxListItem<string>> filterTaskStates = new ObservableCollection<CheckBoxListItem<string>>();
+
         private class AllSystemsDto : IdBasedObject { }
 
         /// <summary>
@@ -48,11 +50,35 @@ namespace CyberMigrate
             DataStorePathSet();
 
             dataGridTasks.ItemsSource = filterResults;
+            lstFilterByTaskState.ItemsSource = filterTaskStates;
 
             // Select the node that is hovered over when right clicking and before showing the context menu
             treeFilter.PreviewMouseRightButtonDown += TreeViewExtensions.TreeView_PreviewMouseRightButtonDown_SelectNode;
+            RedrawFilterSection();
             RedrawFilterTreeView();
             RedrawMainMenu();
+        }
+
+        private void RedrawFilterSection()
+        {
+            // Refresh task states listed in the task state filter list box
+            filterTaskStates.Clear();
+
+            var allTaskStates = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll();
+            var distinctStates = new HashSet<string>(allTaskStates.Select(s => s.DisplayName));
+            foreach (var state in distinctStates.OrderBy(s => s))
+            {
+                // Don't default to listing Closed items
+                // mcbtodo: Save these filter prefs in the data store options instead of having the hardcoded "Closed" here.
+                if (state.Equals("Closed"))
+                {
+                    filterTaskStates.Add(new CheckBoxListItem<string>(state, false));
+                }
+                else
+                {
+                    filterTaskStates.Add(new CheckBoxListItem<string>(state, true));
+                }
+            }
         }
 
         private void RedrawFilterTreeView()
@@ -193,7 +219,9 @@ namespace CyberMigrate
             var taskStatesLookup = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll_AsLookup();
             var taskTypesLookup = CMDataProvider.DataStore.Value.CMTaskTypes.Value.GetAll_AsLookup();
 
-            // mcbtodo: add a way to query for just task instances that are open
+            // Figure out which task states to show
+            var filteredTaskStates = filterTaskStates.Where(lbi => lbi.IsSelected).Select(lbi => lbi.ObjectData);
+
             var filteredTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_Instances();
 
             // Show the results
@@ -232,6 +260,13 @@ namespace CyberMigrate
 
                 var taskSystemStateRef = systemStatesLookup[cmTask.CMSystemStateId];
                 var taskStateRef = taskStatesLookup[cmTask.CMTaskStateId];
+
+                // Filter to just tasks that have one of the states that are checked from the filter listbox
+                if (!filteredTaskStates.Contains(taskStateRef.DisplayName))
+                {
+                    continue;
+                }
+
                 var taskTypeRef = taskTypesLookup[cmTask.CMTaskTypeId];
 
                 var filterRow = new FilterResultItem()
@@ -568,6 +603,16 @@ namespace CyberMigrate
 
             var featureEditor = new FeatureEditor(cmFeature);
             featureEditor.Show();
+        }
+
+        private void lstFilterByTaskState_Checked(object sender, RoutedEventArgs e)
+        {
+            ShowFilteredTasks();
+        }
+
+        private void lstFilterByTaskState_UnChecked(object sender, RoutedEventArgs e)
+        {
+            ShowFilteredTasks();
         }
     }
 }

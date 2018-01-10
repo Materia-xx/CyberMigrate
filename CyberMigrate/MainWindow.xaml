@@ -15,14 +15,43 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="150"/>
+                <RowDefinition Height="5"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <TreeView x:Name="treeFilter" Grid.Column="0" />
+            <TreeView x:Name="treeFilter" Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" />
 
-            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
+            <GridSplitter Grid.Column="1" Grid.RowSpan="3"  HorizontalAlignment="Stretch" />
 
-            <DataGrid x:Name="dataGridTasks" Grid.Row="5" Grid.Column="2" AutoGenerateColumns="False" CanUserAddRows="False">
+            <Grid x:Name="gridFilterOptions" Grid.Column="2" Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="225"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Label x:Name="lblFilterTaskStates" Content="Task States"></Label>
+
+                <ListBox x:Name="lstFilterByTaskState" Grid.Column="0" Grid.Row="2">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox IsChecked="{Binding IsSelected}" Width="20" VerticalAlignment="Center" Checked="lstFilterByTaskState_Checked" Unchecked="lstFilterByTaskState_UnChecked" />
+                                <TextBlock Text="{Binding ObjectData}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+            
+            <GridSplitter Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" />
+            
+            <DataGrid x:Name="dataGridTasks" Grid.Row="2" Grid.Column="2" AutoGenerateColumns="False" CanUserAddRows="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Feature" Binding="{Binding FeatureName}" Width="150"></DataGridTextColumn>
                     <DataGridTextColumn Header="Task Title" Binding="{Binding TaskTitle}" Width="200"></DataGridTextColumn>

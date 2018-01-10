@@ -89,6 +89,10 @@ namespace Tasks.BuiltIn.FeatureDependency
 
             // An update to the task data may include changed path options that make it so we can now instance a dependant feature, so look for that now.
             FeatureDependency_ResolveFeatureVars(task, featureVars);
+
+            // mcbtodo: both this and the _Created function above need to call to UpdateTaskStatesForFeatureDependendies, but that function needs to be refactored a little first
+            // mcbtodo: The idea is that if an adhoc dependency is added, and the dependant feature is already in the correct state then this task should immediately be updated to
+            // mcbtodo: closed also. And if not close, it should be updated to WaitingForDependency.
         }
 
         internal static void FeatureDependency_CreateTaskDataInstance(CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance)

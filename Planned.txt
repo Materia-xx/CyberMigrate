@@ -18,10 +18,6 @@ Upcoming:
     - Add a way to quickly mark a task as complete via the filter results grid
 
     - Add more filter tools in the main UI
-        - Checkbox to Show closed items
-        - Checkbox to show hidden tasks 
-            a new concept for feature dependency tasks, which don't need work done by themselves, it's auto-calculated to can be hidden in the UI.
-            But the user may want to view it to reset the dependency details to another feature or just manually close it.
         - Textbox to search through titles, names and possibly task data and perform a customized search
 
     - Shows the tasks sorted in the way the design plan indicates
