@@ -46,7 +46,24 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <Label x:Name="lblChosenFeature" Content="Chosen Feature: " Grid.Row="0" Grid.Column="0" FontWeight="Bold"/>
-        <Label x:Name="lblChosenFeatureName" Grid.Row="0" Grid.Column="1"/>
+        <Grid x:Name="gridChosen" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="25"></RowDefinition>
+                <RowDefinition Height="25"></RowDefinition>
+                <RowDefinition Height="25"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <Label x:Name="lblChosenFeature" Content="Chosen Feature: " Grid.Row="0" Grid.Column="0" FontWeight="Bold"/>
+            <TextBlock x:Name="txtChosenFeatureName" Grid.Row="0" Grid.Column="1"/>
+
+            <Label x:Name="lblChosenTargetState" Content="Target State: " Grid.Row="1" Grid.Column="0" FontWeight="Bold"/>
+            <TextBlock x:Name="txtChosenTargetState" Grid.Row="1" Grid.Column="1"/>
+
+        </Grid>
     </Grid>
 </UserControl>

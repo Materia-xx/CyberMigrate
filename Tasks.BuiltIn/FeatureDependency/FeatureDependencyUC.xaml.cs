@@ -47,8 +47,7 @@ namespace Tasks.BuiltIn.FeatureDependency
 
             dataGridEditFeatureDependencySettings.Visibility = Visibility.Hidden;
             dataGridChooseFeatureDependency.Visibility = Visibility.Hidden;
-            lblChosenFeature.Visibility = Visibility.Hidden;
-            lblChosenFeatureName.Visibility = Visibility.Hidden;
+            gridChosen.Visibility = Visibility.Hidden;
 
             dataGridEditFeatureDependencySettings.ItemsSource = null;
             dataGridChooseFeatureDependency.ItemsSource = null;
@@ -85,11 +84,12 @@ namespace Tasks.BuiltIn.FeatureDependency
                 // Display for an instance that already has the choice made
                 else
                 {
-                    lblChosenFeature.Visibility = Visibility.Visible;
-                    lblChosenFeatureName.Visibility = Visibility.Visible;
+                    gridChosen.Visibility = Visibility.Visible;
 
                     cmTargetFeature = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(TaskData.InstancedCMFeatureId);
-                    lblChosenFeatureName.Content = cmTargetFeature.Name;
+                    var cmTargetSystemState = CMDataProvider.DataStore.Value.CMSystemStates.Value.Get(TaskData.InstancedTargetCMSystemStateId);
+                    txtChosenFeatureName.Text = cmTargetFeature.Name;
+                    txtChosenTargetState.Text = cmTargetSystemState.Name;
                 }
             }
         }
@@ -182,5 +182,6 @@ namespace Tasks.BuiltIn.FeatureDependency
         {
             UpdateTaskData();
         }
+
     }
 }
