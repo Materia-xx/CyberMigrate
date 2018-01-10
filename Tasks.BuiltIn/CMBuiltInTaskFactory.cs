@@ -39,6 +39,7 @@ namespace Tasks.BuiltIn
             switch (cmTaskType.Name)
             {
                 case nameof(BuildInTaskTypes.FeatureDependency):
+                    requiredStates.Add(nameof(FeatureDependencyTaskStateNames.WaitingOnChoice));
                     requiredStates.Add(nameof(FeatureDependencyTaskStateNames.WaitingOnDependency));
                     break;
                 case nameof(BuildInTaskTypes.Note):
@@ -96,6 +97,7 @@ namespace Tasks.BuiltIn
         {
             var featureDependencyTaskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get_ForName(nameof(BuildInTaskTypes.FeatureDependency));
             FeatureDependencyExtensions.FeatureDependency_TaskStates = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll_ForTaskType(featureDependencyTaskType.Id).ToList();
+            FeatureDependencyExtensions.FeatureDependency_TaskState_WaitingOnChoice = FeatureDependencyExtensions.FeatureDependency_TaskStates.First(s => s.InternalName.Equals(nameof(FeatureDependencyTaskStateNames.WaitingOnChoice)));
             FeatureDependencyExtensions.FeatureDependency_TaskState_WaitingOnDependency = FeatureDependencyExtensions.FeatureDependency_TaskStates.First(s => s.InternalName.Equals(nameof(FeatureDependencyTaskStateNames.WaitingOnDependency)));
             FeatureDependencyExtensions.FeatureDependency_TaskState_Closed = FeatureDependencyExtensions.FeatureDependency_TaskStates.First(s => s.InternalName.Equals(ReservedTaskStates.Closed));
 

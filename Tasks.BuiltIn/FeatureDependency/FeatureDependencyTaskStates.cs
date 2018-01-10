@@ -2,6 +2,7 @@
 {
     public enum FeatureDependencyTaskStateNames
     {
+        WaitingOnChoice,
         WaitingOnDependency
     }
 }

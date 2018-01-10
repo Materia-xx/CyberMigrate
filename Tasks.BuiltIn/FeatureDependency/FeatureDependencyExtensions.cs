@@ -24,6 +24,7 @@ namespace Tasks.BuiltIn.FeatureDependency
         private static FeatureDependencyTaskDataCRUD featureDependencyDataProvider;
 
         internal static List<CMTaskStateDto> FeatureDependency_TaskStates { get; set; }
+        internal static CMTaskStateDto FeatureDependency_TaskState_WaitingOnChoice { get; set; }
         internal static CMTaskStateDto FeatureDependency_TaskState_WaitingOnDependency { get; set; }
         internal static CMTaskStateDto FeatureDependency_TaskState_Closed { get; set; }
 
@@ -74,6 +75,8 @@ namespace Tasks.BuiltIn.FeatureDependency
 
             // When a new feature dependency task data shows up we want to look through all of its Path options to see if a feature can be instanced right away
             FeatureDependency_ResolveFeatureVars(task, featureVars);
+
+            UpdateTaskStatesForFeatureDependendies(taskData, null);
         }
 
         internal static void FeatureDependencyData_Updated(CMDataProviderRecordUpdatedEventArgs updatedRecordEventArgs)
@@ -90,9 +93,7 @@ namespace Tasks.BuiltIn.FeatureDependency
             // An update to the task data may include changed path options that make it so we can now instance a dependant feature, so look for that now.
             FeatureDependency_ResolveFeatureVars(task, featureVars);
 
-            // mcbtodo: both this and the _Created function above need to call to UpdateTaskStatesForFeatureDependendies, but that function needs to be refactored a little first
-            // mcbtodo: The idea is that if an adhoc dependency is added, and the dependant feature is already in the correct state then this task should immediately be updated to
-            // mcbtodo: closed also. And if not close, it should be updated to WaitingForDependency.
+            UpdateTaskStatesForFeatureDependendies(taskData, null);
         }
 
         internal static void FeatureDependency_CreateTaskDataInstance(CMTaskDto cmTaskTemplate, CMTaskDto cmTaskInstance)
@@ -160,28 +161,46 @@ namespace Tasks.BuiltIn.FeatureDependency
             // For each dependency data that was watching this feature
             foreach (var linkedTaskData in linkedTaskDatas)
             {
-                var cmTaskInstance = CMDataProvider.DataStore.Value.CMTasks.Value.Get(linkedTaskData.TaskId);
-                if (cmTaskInstance == null)
-                {
-                    // If the task this data links to is null then somehow the task was deleted without deleting the data,
-                    // Do so now
-                    FeatureDependencyDataProvider.Delete(linkedTaskData.Id);
-                    continue;
-                }
+                UpdateTaskStatesForFeatureDependendies(linkedTaskData, featureAfterDto);
+            }
+        }
 
-                // Figure out what the task (that is associated with the dependency data) state should be
-                var shouldBeState = featureAfterDto == null || linkedTaskData.InstancedTargetCMSystemStateId == featureAfterDto.CMSystemStateId ?
+        internal static void UpdateTaskStatesForFeatureDependendies(FeatureDependencyDto linkedTaskData, CMFeatureDto trackedFeature)
+        {
+            var cmTaskInstance = CMDataProvider.DataStore.Value.CMTasks.Value.Get(linkedTaskData.TaskId);
+            if (cmTaskInstance == null)
+            {
+                // If the task this data links to is null then somehow the task was deleted without deleting the data,
+                // Do so now
+                FeatureDependencyDataProvider.Delete(linkedTaskData.Id);
+                return;
+            }
+
+            if (trackedFeature == null && linkedTaskData.InstancedCMFeatureId != 0)
+            {
+                trackedFeature = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(linkedTaskData.InstancedCMFeatureId);
+            }
+
+            // Figure out what the task (that is associated with the dependency data) state should be
+            CMTaskStateDto shouldBeState = null;
+            if (linkedTaskData.InstancedCMFeatureId == 0)
+            {
+                shouldBeState = FeatureDependency_TaskState_WaitingOnChoice;
+            }
+            else
+            {
+                shouldBeState = trackedFeature == null || linkedTaskData.InstancedTargetCMSystemStateId == trackedFeature.CMSystemStateId ?
                     FeatureDependency_TaskState_Closed :
                     FeatureDependency_TaskState_WaitingOnDependency;
+            }
 
-                // Now check to see if the dependency task actually is in that state
-                if (cmTaskInstance.CMTaskStateId != shouldBeState.Id)
-                {
-                    // If it's not in the state it should be, then do the update so it is.
-                    // All of the checks to avoid doing an update are to avoid chain reactions with the CUD events
-                    cmTaskInstance.CMTaskStateId = shouldBeState.Id;
-                    CMDataProvider.DataStore.Value.CMTasks.Value.Update(cmTaskInstance);
-                }
+            // Now check to see if the dependency task actually is in that state
+            if (cmTaskInstance.CMTaskStateId != shouldBeState.Id)
+            {
+                // If it's not in the state it should be, then do the update so it is.
+                // All of the checks to avoid doing an update are to avoid chain reactions with the CUD events
+                cmTaskInstance.CMTaskStateId = shouldBeState.Id;
+                CMDataProvider.DataStore.Value.CMTasks.Value.Update(cmTaskInstance);
             }
         }
 
