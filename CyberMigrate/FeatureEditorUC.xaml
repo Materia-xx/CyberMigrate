@@ -14,10 +14,10 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="25" />
             <RowDefinition Height="25" />
-            <RowDefinition/>
+            <RowDefinition Height="150"/>
             <RowDefinition Height="5" />
             <RowDefinition Height="25" />
-            <RowDefinition/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Label x:Name="lblFeatureName" Content="Feature Name" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0" />
         <TextBox x:Name="txtFeatureName" Grid.Row="0" Grid.Column="1" LostFocus="txtFeatureName_LostFocus" />
@@ -33,6 +33,8 @@
             </DataGrid.Columns>
         </DataGrid>
 
+        <GridSplitter Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" />
+        
         <Label x:Name="lblTasks" Content="Tasks" HorizontalAlignment="Left" Grid.Row="4" Grid.Column="0" />
         <DataGrid x:Name="dataGridTasks" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" />
     </Grid>
