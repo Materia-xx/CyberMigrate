@@ -20,7 +20,7 @@ namespace CyberMigrate
         {
             this.Title = cmFeatureDto.Name;
 
-            var featureUC = new FeatureEditorUC(cmFeatureDto);
+            var featureUC = new FeatureEditorUC(cmFeatureDto, this);
             editorUIPanel.Children.Add(featureUC);
         }
     }

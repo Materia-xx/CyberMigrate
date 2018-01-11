@@ -19,6 +19,11 @@ namespace CyberMigrate
     {
         private CMFeatureDto cmFeatureDto;
 
+        /// <summary>
+        /// A ref to the window that is hosting this user control
+        /// </summary>
+        private Window parentWindow;
+
         private List<CMSystemStateDto> ComboBox_FeatureTemplateSystemStates { get; set; } = new List<CMSystemStateDto>();
 
         private List<CMTaskTypeDto> ComboBox_TaskTypes { get; set; } = new List<CMTaskTypeDto>();
@@ -43,10 +48,11 @@ namespace CyberMigrate
             public string Name { get; private set; }
         }
 
-        public FeatureEditorUC(CMFeatureDto cmFeature)
+        public FeatureEditorUC(CMFeatureDto cmFeature, Window parentWindow)
         {
             InitializeComponent();
             this.cmFeatureDto = cmFeature;
+            this.parentWindow = parentWindow;
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -571,6 +577,10 @@ namespace CyberMigrate
             }
 
             cmFeatureDto = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(cmFeatureDto.Id);
+            if (parentWindow != null)
+            {
+                parentWindow.Title = cmFeatureDto.Name;
+            }
         }
     }
 }

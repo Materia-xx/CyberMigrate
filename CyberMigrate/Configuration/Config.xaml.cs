@@ -407,7 +407,7 @@ namespace CyberMigrate
                     configUIPanel.Children.Add(systemConfigUc);
                     break;
                 case nameof(CMFeatureDto):
-                    var featureTemplateConfigUc = new FeatureEditorUC(attachedTag.Dto as CMFeatureDto);
+                    var featureTemplateConfigUc = new FeatureEditorUC(attachedTag.Dto as CMFeatureDto, null);
                     configUIPanel.Children.Add(featureTemplateConfigUc);
                     break;
                 case nameof(CMTaskTypeDto):
