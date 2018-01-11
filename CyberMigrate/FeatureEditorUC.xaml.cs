@@ -544,23 +544,13 @@ namespace CyberMigrate
             }
         }
 
-
         private void btnEditTask_Click(object sender, RoutedEventArgs e)
         {
-            var selectedRowIndex = dataGridTasks.SelectedIndex;
-            var cmTaskTemplates = (ObservableCollection<CMTaskDto>)dataGridTasks.ItemsSource;
-
-            if (cmTaskTemplates.Count() <= selectedRowIndex)
+            var cmTask = ((FrameworkElement)sender).DataContext as CMTaskDto;
+            if (cmTask == null || cmTask.Id == 0)
             {
-                // This means clicking on the button of a new row that has not yet been added into the database
-                MessageBox.Show("A task must be fully entered before the editor can be invoked.");
-                return;
-            }
-
-            var cmTask = cmTaskTemplates[selectedRowIndex];
-            if (cmTask.Id == 0)
-            {
-                // Also a new row not yet in the db, but in a further state than the above.
+                // Null: This means clicking on the button of a new row that has not yet been added into the database
+                // ==0:  Also a new row not yet in the db, but in a further state than the above.
                 MessageBox.Show("A task must be fully entered before the editor can be invoked.");
                 return;
             }

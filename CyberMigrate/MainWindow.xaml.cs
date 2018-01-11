@@ -590,15 +590,12 @@ namespace CyberMigrate
 
         private void btnViewTask_Click(object sender, RoutedEventArgs e)
         {
-            var selectedRowIndex = dataGridTasks.SelectedIndex;
-
-            if (filterResults.Count() <= selectedRowIndex)
+            var cmFilterData = ((FrameworkElement)sender).DataContext as FilterResultItem;
+            if (cmFilterData == null)
             {
-                // This means clicking on the button of a new row, but this shouldn't be possible so just ignore it.
                 return;
             }
 
-            var cmFilterData = filterResults[selectedRowIndex];
             var cmTask = CMDataProvider.DataStore.Value.CMTasks.Value.Get(cmFilterData.TaskId);
 
             var taskEditor = new TaskEditor(cmTask);
@@ -609,15 +606,12 @@ namespace CyberMigrate
 
         private void btnViewFeature_Click(object sender, RoutedEventArgs e)
         {
-            var selectedRowIndex = dataGridTasks.SelectedIndex;
-
-            if (filterResults.Count() <= selectedRowIndex)
+            var cmFilterData = ((FrameworkElement)sender).DataContext as FilterResultItem;
+            if (cmFilterData == null)
             {
-                // This means clicking on the button of a new row, but this shouldn't be possible so just ignore it.
                 return;
             }
 
-            var cmFilterData = filterResults[selectedRowIndex];
             var cmTask = CMDataProvider.DataStore.Value.CMTasks.Value.Get(cmFilterData.TaskId);
             var cmFeature = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(cmTask.CMFeatureId);
 
