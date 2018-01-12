@@ -1,5 +1,13 @@
 Upcoming:
 
+    - Add a button or something in the filtering section to restore the default sorting of tasks in the main form.
+
+    - In the dependency selector, where can choose the target state: Instead make it checkbox list where you can choose multiple target states.
+      Any one of which will satisfy the dependency. This will require updating the dto, adding a dbupdate function and changing the code that
+      determines if the task is closed, waitingForDependency, etc.
+
+    - Add the ability to add log messages to a note task, record the date that each entry was written.
+
     - To simulate the order that tasks must be completed in, within each system state add an order field that shows up and can be set in the feature editor.
       The program won’t enforce that one task is done before the other, but it should list them in this order in the feature editor 
       (list first by system state priority order, then by task order).

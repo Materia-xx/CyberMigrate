@@ -24,6 +24,8 @@ namespace CyberMigrate
 
         private ObservableCollection<CheckBoxListItem<string>> filterTaskStates = new ObservableCollection<CheckBoxListItem<string>>();
 
+        private ObservableCollection<CheckBoxListItem<string>> filterFeatureStates = new ObservableCollection<CheckBoxListItem<string>>();
+
         private class AllSystemsDto : IdBasedObject { }
 
         /// <summary>
@@ -51,6 +53,7 @@ namespace CyberMigrate
 
             dataGridTasks.ItemsSource = filterResults;
             lstFilterByTaskState.ItemsSource = filterTaskStates;
+            lstFilterByFeatureState.ItemsSource = filterFeatureStates;
 
             // Select the node that is hovered over when right clicking and before showing the context menu
             treeFilter.PreviewMouseRightButtonDown += TreeViewExtensions.TreeView_PreviewMouseRightButtonDown_SelectNode;
@@ -63,7 +66,6 @@ namespace CyberMigrate
         {
             // Refresh task states listed in the task state filter list box
             filterTaskStates.Clear();
-
             var allTaskStates = CMDataProvider.DataStore.Value.CMTaskStates.Value.GetAll();
             var distinctStates = new HashSet<string>(allTaskStates.Select(s => s.DisplayName));
             foreach (var state in distinctStates.OrderBy(s => s))
@@ -78,6 +80,17 @@ namespace CyberMigrate
                 {
                     filterTaskStates.Add(new CheckBoxListItem<string>(state, true));
                 }
+            }
+
+            // Refresh feature states listed in the filter list box
+            filterFeatureStates.Clear();
+            var internalSystem = CMDataProvider.DataStore.Value.CMSystems.Value.Get_InternalSystem();
+            var allFeatureStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll()
+                .Where(s => s.CMSystemId != internalSystem.Id); // Don't list the internal feature states in the UI
+            var distinctFeatureStates = new HashSet<string>(allFeatureStates.Select(s => s.Name));
+            foreach (var state in distinctFeatureStates.OrderBy(s => s))
+            {
+                filterFeatureStates.Add(new CheckBoxListItem<string>(state, true));
             }
         }
 
@@ -222,6 +235,9 @@ namespace CyberMigrate
             // Figure out which task states to show
             var filteredTaskStates = filterTaskStates.Where(lbi => lbi.IsSelected).Select(lbi => lbi.ObjectData);
 
+            // Figure out which feature states to show
+            var filteredFeatureStates = filterFeatureStates.Where(lbi => lbi.IsSelected).Select(lbi => lbi.ObjectData);
+
             // If there is a text filter
             var stringFilter = txtStringFilter.Text;
 
@@ -257,6 +273,12 @@ namespace CyberMigrate
                 bool taskIsInCurrentFeatureState = featureSystemStateRef.Id == cmTask.CMSystemStateId;
                 // Filter out tasks that are not in the current feature state
                 if (filterOnlyShowTasksInCurrentFeatureState && !taskIsInCurrentFeatureState)
+                {
+                    continue;
+                }
+
+                // Filter to just tasks that have one of the feature states that are checked from the filter states listbox
+                if (!filteredFeatureStates.Contains(featureSystemStateRef.Name))
                 {
                     continue;
                 }
@@ -625,6 +647,16 @@ namespace CyberMigrate
         }
 
         private void lstFilterByTaskState_UnChecked(object sender, RoutedEventArgs e)
+        {
+            ShowFilteredTasks();
+        }
+
+        private void lstFilterByFeatureState_Checked(object sender, RoutedEventArgs e)
+        {
+            ShowFilteredTasks();
+        }
+
+        private void lstFilterByFeatureState_UnChecked(object sender, RoutedEventArgs e)
         {
             ShowFilteredTasks();
         }
