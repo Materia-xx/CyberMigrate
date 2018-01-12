@@ -62,6 +62,7 @@
     <Compile Include="FeatureEditor.xaml.cs">
       <DependentUpon>FeatureEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FeatureEditorTaskRowDto.cs" />
     <Compile Include="FilterResultItem.cs" />
     <Compile Include="CheckBoxListItem.cs" />
     <Compile Include="TaskEditor.xaml.cs">

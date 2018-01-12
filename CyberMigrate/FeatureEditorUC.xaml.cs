@@ -1,4 +1,5 @@
 ﻿using DataProvider;
+using DataProvider.Events;
 using Dto;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,7 @@ namespace CyberMigrate
 
         private ObservableCollection<CMFeatureVarStringDto> featureVariables = new ObservableCollection<CMFeatureVarStringDto>();
 
-        private ObservableCollection<CMTaskDto> tasks = new ObservableCollection<CMTaskDto>();
+        private ObservableCollection<FeatureEditorTaskRowDto> tasks = new ObservableCollection<FeatureEditorTaskRowDto>();
 
         private class BoolBasedComboBoxEntry
         {
@@ -53,6 +54,28 @@ namespace CyberMigrate
             InitializeComponent();
             this.cmFeatureDto = cmFeature;
             this.parentWindow = parentWindow;
+
+            // Updating a task reloads the task list if the task state changes
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += Record_Updated_ReloadTaskList;
+        }
+
+        private void Record_Updated_ReloadTaskList(CMDataProviderRecordUpdatedEventArgs updatedRecordEventArgs)
+        {
+            if (tasks == null)
+            {
+                return;
+            }
+
+            var after = updatedRecordEventArgs.DtoAfter as CMTaskDto;
+            var before = updatedRecordEventArgs.DtoBefore as CMTaskDto;
+            // If the state of the task that is being updated is not changing then we don't need to reload the rows
+            // because the only reason to reload the rows is to get the row coloring to show up correctly at the time of the change
+            if (after?.CMTaskStateId == before?.CMTaskStateId)
+            {
+                return;
+            }
+
+            Reload_Tasks();
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -171,7 +194,7 @@ namespace CyberMigrate
                     Width = 200,
 
                     // Where to store the selected value
-                    SelectedValueBinding = new Binding(nameof(CMTaskDto.CMSystemStateId)),
+                    SelectedValueBinding = new Binding($"{nameof(FeatureEditorTaskRowDto.Task)}.{nameof(CMTaskDto.CMSystemStateId)}"),
 
                     // Instructions on how to interact with the "lookup" list
                     ItemsSource = ComboBox_FeatureTemplateSystemStates,
@@ -185,7 +208,7 @@ namespace CyberMigrate
                     Width = 200,
 
                     // Where to store the selected value
-                    SelectedValueBinding = new Binding(nameof(CMTaskDto.CMTaskTypeId)),
+                    SelectedValueBinding = new Binding($"{nameof(FeatureEditorTaskRowDto.Task)}.{nameof(CMTaskDto.CMTaskTypeId)}"),
 
                     // Instructions on how to interact with the "lookup" list
                     ItemsSource = ComboBox_TaskTypes,
@@ -197,7 +220,7 @@ namespace CyberMigrate
                 {
                     Header = nameof(CMTaskDto.Title),
                     Width = 400,
-                    Binding = new Binding(nameof(CMTaskDto.Title)),
+                    Binding = new Binding($"{nameof(FeatureEditorTaskRowDto.Task)}.{nameof(CMTaskDto.Title)}"),
                 });
 
             // A factory because each row will generate a button
@@ -230,7 +253,6 @@ namespace CyberMigrate
             dataGridFeatureVars.RowEditEnding += DataGridFeatureVariables_RowEditEnding;
         }
 
-
         private void Reload_FeatureStateTransitionRules()
         {
             featureStateTransitionRules.CollectionChanged -= FeatureStateTransitionRules_CollectionChanged;
@@ -248,9 +270,9 @@ namespace CyberMigrate
             tasks.CollectionChanged -= Tasks_CollectionChanged;
             tasks.Clear();
             var cmTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll_ForFeature(cmFeatureDto.Id).ToList();
-            foreach (var taskTemplate in cmTasks)
+            foreach (var taskDto in cmTasks)
             {
-                tasks.Add(taskTemplate);
+                tasks.Add(new FeatureEditorTaskRowDto(taskDto));
             }
             tasks.CollectionChanged += Tasks_CollectionChanged;
         }
@@ -267,7 +289,6 @@ namespace CyberMigrate
 
             featureVariables.CollectionChanged += FeatureVariables_CollectionChanged;
         }
-
 
         private void DataGridStateTransitionRules_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
@@ -323,19 +344,19 @@ namespace CyberMigrate
                 dataGridTasks.Items.Refresh();
                 dataGridTasks.RowEditEnding += DataGridTasks_RowEditEnding;
 
-                var gridTask = (CMTaskDto)dataGridTasks.SelectedItem;
+                var gridTask = (FeatureEditorTaskRowDto)dataGridTasks.SelectedItem;
 
                 // Update the task to be in the Template state if a task type is selected (and the editor is editing a feature template)
-                if (cmFeatureDto.IsTemplate && gridTask.CMTaskTypeId > 0)
+                if (cmFeatureDto.IsTemplate && gridTask.Task.CMTaskTypeId > 0)
                 {
-                    var selectedTaskType = ComboBox_TaskTypes.Single(t => t.Id == gridTask.CMTaskTypeId);
-                    gridTask.CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Template, selectedTaskType.Id).Id;
+                    var selectedTaskType = ComboBox_TaskTypes.Single(t => t.Id == gridTask.Task.CMTaskTypeId);
+                    gridTask.Task.CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Template, selectedTaskType.Id).Id;
                 }
 
                 // If the item already exists in the db
-                if (gridTask.Id > 0)
+                if (gridTask.Task.Id > 0)
                 {
-                    var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Update(gridTask);
+                    var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Update(gridTask.Task);
                     if (opResult.Errors.Any())
                     {
                         MessageBox.Show(opResult.ErrorsCombined);
@@ -350,7 +371,7 @@ namespace CyberMigrate
                     // If we are creating a task instance
                     if (!cmFeatureDto.IsTemplate)
                     {
-                        if (gridTask.CMTaskTypeId == 0)
+                        if (gridTask.Task.CMTaskTypeId == 0)
                         {
                             MessageBox.Show("The task type must be set.");
                             return;
@@ -358,13 +379,13 @@ namespace CyberMigrate
 
                         // All task instances must point back to the task template they were created from.
                         // Since ad-hoc tasks don't really have a template, we instead point it at a special internal ad-hoc task template.
-                        var adhocTaskTemplate = CMDataProvider.DataStore.Value.CMTasks.Value.Get_AdHocTemplate(gridTask.CMTaskTypeId);
+                        var adhocTaskTemplate = CMDataProvider.DataStore.Value.CMTasks.Value.Get_AdHocTemplate(gridTask.Task.CMTaskTypeId);
 
-                        gridTask.CMParentTaskTemplateId = adhocTaskTemplate.Id;
-                        gridTask.CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Instance, adhocTaskTemplate.CMTaskTypeId).Id;
+                        gridTask.Task.CMParentTaskTemplateId = adhocTaskTemplate.Id;
+                        gridTask.Task.CMTaskStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Instance, adhocTaskTemplate.CMTaskTypeId).Id;
                     }
 
-                    var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(gridTask);
+                    var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Insert(gridTask.Task);
                     if (opResult.Errors.Any())
                     {
                         MessageBox.Show(opResult.ErrorsCombined);
@@ -423,7 +444,6 @@ namespace CyberMigrate
             }
         }
 
-
         private void FeatureStateTransitionRules_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Remove)
@@ -469,13 +489,13 @@ namespace CyberMigrate
             {
                 foreach (var removedTask in e.OldItems)
                 {
-                    var gridTask = (CMTaskDto)removedTask;
+                    var gridTask = (FeatureEditorTaskRowDto)removedTask;
 
                     // This task may have never actually been added to the db because it was a new row that didn't yet meet the db requirements
                     // So make sure it has a valid id first before trying to delete it.
-                    if (gridTask.Id > 0)
+                    if (gridTask.Task.Id > 0)
                     {
-                        var deletingTask = CMDataProvider.DataStore.Value.CMTasks.Value.Get(gridTask.Id);
+                        var deletingTask = CMDataProvider.DataStore.Value.CMTasks.Value.Get(gridTask.Task.Id);
 
                         var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Delete(deletingTask.Id);
                         if (opResult.Errors.Any())
@@ -495,14 +515,14 @@ namespace CyberMigrate
             {
                 // The order of operations (I believe) is:
                 //  * A new row is added to the datagrid
-                //  * A new CMTaskDto is constructed and added to the observable collection.
+                //  * A new FeatureEditorTaskRowDto is constructed and added to the observable collection.
                 //    Note that at this point this Dto is not in a valid state to be entered into the db and an insert operation will fail.
                 // Therefore we do not do the insert attempt at this point. Instead it is handled in the row update code.
                 // However we do set defaults for things here that won't be available to set through the grid UI
                 foreach (var addedTask in e.NewItems)
                 {
-                    var gridTask = (CMTaskDto)addedTask;
-                    gridTask.CMFeatureId = cmFeatureDto.Id;
+                    var gridTask = (FeatureEditorTaskRowDto)addedTask;
+                    gridTask.Task.CMFeatureId = cmFeatureDto.Id;
                 }
             }
         }
@@ -552,8 +572,8 @@ namespace CyberMigrate
 
         private void btnEditTask_Click(object sender, RoutedEventArgs e)
         {
-            var cmTask = ((FrameworkElement)sender).DataContext as CMTaskDto;
-            if (cmTask == null || cmTask.Id == 0)
+            var cmTask = ((FrameworkElement)sender).DataContext as FeatureEditorTaskRowDto;
+            if (cmTask?.Task == null || cmTask.Task.Id == 0)
             {
                 // Null: This means clicking on the button of a new row that has not yet been added into the database
                 // ==0:  Also a new row not yet in the db, but in a further state than the above.
@@ -562,7 +582,7 @@ namespace CyberMigrate
             }
 
             // Currently we only allow 1 task editor template to be present at a time
-            var taskEditor = new TaskEditor(cmTask);
+            var taskEditor = new TaskEditor(cmTask.Task);
             taskEditor.ShowDialog();
         }
 

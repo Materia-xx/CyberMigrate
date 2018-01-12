@@ -36,6 +36,16 @@
         <GridSplitter Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" />
         
         <Label x:Name="lblTasks" Content="Tasks" HorizontalAlignment="Left" Grid.Row="4" Grid.Column="0" />
-        <DataGrid x:Name="dataGridTasks" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" />
+        <DataGrid x:Name="dataGridTasks" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsClosed}" Value="True">
+                            <Setter Property="Background" Value="LightGreen"></Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+        </DataGrid>
     </Grid>
 </UserControl>
