@@ -35,7 +35,7 @@ namespace Tasks.BuiltIn.FeatureDependency
         internal static FeatureDependencyDto ToInstance(this FeatureDependencyDto taskDataTemplate, int taskInstanceId)
         {
             // Cloning something that is not a task data template is not an implemented feature
-            if (taskDataTemplate.InstancedCMFeatureId != 0)
+            if (taskDataTemplate.PathOptionChosen)
             {
                 throw new NotImplementedException("Instancing task data from another task data instance is not implemented.");
             }
@@ -183,7 +183,7 @@ namespace Tasks.BuiltIn.FeatureDependency
 
             // Figure out what the task (that is associated with the dependency data) state should be
             CMTaskStateDto shouldBeState = null;
-            if (linkedTaskData.InstancedCMFeatureId == 0)
+            if (linkedTaskData.PathOptionChosen == false)
             {
                 shouldBeState = FeatureDependency_TaskState_WaitingOnChoice;
             }
@@ -213,9 +213,9 @@ namespace Tasks.BuiltIn.FeatureDependency
         {
             FeatureDependencyDto instanceTaskData = FeatureDependencyDataProvider.Get_ForTaskId(taskInstance.Id);
 
-            if (instanceTaskData.InstancedCMFeatureId > 0)
+            if (instanceTaskData.PathOptionChosen)
             {
-                // There is already a feature instance created and being tracked
+                // There is already a choice made
                 return;
             }
 
@@ -240,7 +240,8 @@ namespace Tasks.BuiltIn.FeatureDependency
                 }
                 else
                 {
-                    // If the feature var to look for is not yet present in the featurevars collection, then we don't do anything
+                    // If the feature var to look for is not yet present in the featurevars collection, then this option is skipped over. 
+                    // The order that feature vars are set in has an effect on which option is chosen.
                     var matchingFeatureVar = featureVars.FirstOrDefault(v => v.Name.Equals(pathOption.FeatureVarName, StringComparison.OrdinalIgnoreCase));
                     if (matchingFeatureVar != null && matchingFeatureVar.Value.Equals(pathOption.FeatureVarSetTo, StringComparison.OrdinalIgnoreCase))
                     {
@@ -250,15 +251,22 @@ namespace Tasks.BuiltIn.FeatureDependency
 
                 if (useThisOption)
                 {
-                    // The feature template referred to by this option
-                    var featureTemplate = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(pathOption.CMFeatureTemplateId);
+                    instanceTaskData.PathOptionChosen = true;
 
-                    var childFeatureVars = new List<CMFeatureVarStringDto>();
-                    var clonedFeatureInstance = featureTemplate.ToInstance(childFeatureVars);
+                    // If the path option leads to a feature template, then instance it
+                    if (pathOption.CMFeatureTemplateId > 0)
+                    {
+                        // The feature template referred to by this option
+                        var featureTemplate = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(pathOption.CMFeatureTemplateId);
 
-                    // Set the task data to represent the feature instance that was created
-                    instanceTaskData.InstancedCMFeatureId = clonedFeatureInstance.Id;
-                    instanceTaskData.InstancedTargetCMSystemStateId = pathOption.CMTargetSystemStateId;
+                        var childFeatureVars = new List<CMFeatureVarStringDto>();
+                        var clonedFeatureInstance = featureTemplate.ToInstance(childFeatureVars);
+
+                        // Set the task data to represent the feature instance that was created
+                        instanceTaskData.InstancedCMFeatureId = clonedFeatureInstance.Id;
+                        instanceTaskData.InstancedTargetCMSystemStateId = pathOption.CMTargetSystemStateId;
+                    }
+
                     var opUpdateTaskData = FeatureDependencyDataProvider.Update(instanceTaskData);
                     if (opUpdateTaskData.Errors.Any())
                     {

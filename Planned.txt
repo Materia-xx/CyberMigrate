@@ -1,5 +1,28 @@
 Upcoming:
 
+    - Add scrollbars in the notes task
+
+    - Having a feature editor open and then closing the main window keeps the app open ?
+      Maybe a warning during this condition
+
+    - Record the datetime of CUD events and be able to view the history of that. 
+      E.g. When did I close the task I’m currently looking at ? At what point did this feature move into the Complete state ?
+
+    - Add the current datetime as a featurevar and make a way to parse datetime string formatting within feature template/task template titles, etc
+      End goal being that a new feture can have the current date/time stamped into the title in the format desired
+
+    - Save the sizes of things like the filter tree view, filter checkbox lists, where the grid splitters are and be able to restore these after restarting the program
+
+    - Check all / check none checkbox in the top of the main form.
+      Turn off updates while checking all or none, then turn back on after it is done.
+
+    - Removing tasks from a feature doesn’t re-calculate the feature state. But it should.
+
+    - The idea of being able to select a color of a features tasks (and any spawned children features).
+      The selection would be before the feature is created. The new feature menu would show a dialog allowing the user to set the name and color before creation. 
+      The color would be remembered in the feature dto, any children spawned would inherit that color.. only the top level feature would provide the color choice dialog.
+      After a feature color is set it is immutable and the CRUD provider should check for this.
+
     - Add a button or something in the filtering section to restore the default sorting of tasks in the main form.
 
     - In the dependency selector, where can choose the target state: Instead make it checkbox list where you can choose multiple target states.

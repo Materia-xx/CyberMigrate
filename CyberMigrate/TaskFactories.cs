@@ -39,7 +39,8 @@ namespace CyberMigrate
                 {
                     var newTaskFactoryDto = new CMTaskFactoryDto()
                     {
-                        Name = taskFactory.Name
+                        Name = taskFactory.Name,
+                        Version = taskFactory.Version
                     };
 
                     var opResult = CMDataProvider.DataStore.Value.CMTaskFactories.Value.Insert(newTaskFactoryDto);

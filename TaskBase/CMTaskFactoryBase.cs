@@ -12,6 +12,12 @@ namespace TaskBase
         public abstract string Name { get; }
 
         /// <summary>
+        /// The version that this task library code is currently at. It is expected that any data store database that uses this task library
+        /// be at the same version. If it is not, then it will need to go through an upgrade phase.
+        /// </summary>
+        public abstract int Version { get; }
+
+        /// <summary>
         /// Gets a list of task states that the specified task type will set at any point.
         /// This list should not include the following reserved states, which are automatically added for all states.
         ///     * Closed  - Represents a task that is closed.

@@ -6,23 +6,22 @@ namespace CyberMigrate
 {
     public static class DBMaintenance
     {
-        /// <summary>
-        /// The version that the code is currently at. It is expected that any data store
-        /// database be at this same version. If it is not, then it will need to go through an
-        /// upgrade phase.
-        /// </summary>
-        private static int CodeSchemaVersion = 2;
-
-        private static int DatabaseSchemaVersion { get; set; }
-
         public static bool RunMaintenanceRoutines()
         {
             // Gets the schema version that the database is currently at. If unknown defaults to the first supported version.
-            DatabaseSchemaVersion = CMDataProvider.DataStore.Value.GetDatabaseSchemaVersion();
+            var databaseSchemaVersion = CMDataProvider.DataStore.Value.GetDatabaseSchemaVersion();
 
-            if (CodeSchemaVersion > DatabaseSchemaVersion)
+            if (databaseSchemaVersion < 2)
             {
                 if (!UpgradeSchemaTo_Version2())
+                {
+                    return false;
+                }
+            }
+
+            if (databaseSchemaVersion < 3)
+            {
+                if (!UpgradeSchemaTo_Version3())
                 {
                     return false;
                 }
@@ -67,6 +66,35 @@ namespace CyberMigrate
 
             // Set the db to now be version 2
             CMDataProvider.DataStore.Value.SetDatabaseSchemaVersion(2);
+            return true;
+        }
+
+        private static bool UpgradeSchemaTo_Version3()
+        {
+            var userResponse = MessageBox.Show("Upgrading database schema to version 3. Press OK to continue or cancel to quit.", "Upgrade to schema version 3", MessageBoxButton.OKCancel);
+            if (userResponse != MessageBoxResult.OK)
+            {
+                return false;
+            }
+
+            // Task factory version is a new thing in v3.
+            // Rewrite all of the task factory entries to have a default version of 0.
+            // Task factories should themselves take care of updating anything appropriate up from 0.
+            var allTaskFactories = CMDataProvider.DataStore.Value.CMTaskFactories.Value.GetAll();
+            foreach (var taskFactory in allTaskFactories)
+            {
+                taskFactory.Version = 0;
+
+                var opResult = CMDataProvider.DataStore.Value.CMTaskFactories.Value.Update(taskFactory);
+                if (opResult.Errors.Any())
+                {
+                    MessageBox.Show($"An unrecoverable database upgrade error has occurred:\r\n{opResult.ErrorsCombined}");
+                    return false;
+                }
+            }
+
+            // Set the db to now be version 3
+            CMDataProvider.DataStore.Value.SetDatabaseSchemaVersion(3);
             return true;
         }
 

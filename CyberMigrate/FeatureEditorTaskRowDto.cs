@@ -8,18 +8,18 @@ namespace CyberMigrate
     /// These are not on the base object because I don't want them serialized into the db.
     /// They are not extension methods because it seems like binding to that is more complex.
     /// </summary>
-    internal class FeatureEditorTaskRowDto
+    public class FeatureEditorTaskRowDto
     {
         private int closedStateId = 0;
 
         public CMTaskDto Task { get; private set; }
 
-        internal FeatureEditorTaskRowDto()
+        public FeatureEditorTaskRowDto()
         {
             this.Task = new CMTaskDto();
         }
 
-        internal FeatureEditorTaskRowDto(CMTaskDto cmTask)
+        public FeatureEditorTaskRowDto(CMTaskDto cmTask)
         {
             this.Task = cmTask;
         }
@@ -31,7 +31,14 @@ namespace CyberMigrate
         {
             get
             {
-                // Figure out what the id of the closed state is if we don't know it iyet
+                // Unknown task or task type, consider it un-closed
+                if (this.Task == null || this.Task.CMTaskTypeId == 0)
+                {
+                    return false;
+                }
+
+                // Figure out what the id of the closed state is if we don't know it yet
+                // mcbtodo: this hints that once the task type is set that it cannot be changed, validate this for real in the CRUD update
                 if (closedStateId == 0)
                 {
                     closedStateId = CMDataProvider.DataStore.Value.CMTaskStates.Value.Get_ForInternalName(ReservedTaskStates.Closed, this.Task.CMTaskTypeId).Id;

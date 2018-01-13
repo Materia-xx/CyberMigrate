@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildInTaskTypes.cs" />
+    <Compile Include="DBMaintenance.cs" />
     <Compile Include="FeatureDependency\FeatureDependencyExtensions.cs" />
     <Compile Include="FeatureDependency\FeatureDependencyPathOptionDto.cs" />
     <Compile Include="CMBuiltInTaskFactory.cs" />

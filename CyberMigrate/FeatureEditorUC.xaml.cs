@@ -56,10 +56,10 @@ namespace CyberMigrate
             this.parentWindow = parentWindow;
 
             // Updating a task reloads the task list if the task state changes
-            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += Record_Updated_ReloadTaskList;
+            CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += TaskRecord_Updated_ReloadTaskList;
         }
 
-        private void Record_Updated_ReloadTaskList(CMDataProviderRecordUpdatedEventArgs updatedRecordEventArgs)
+        private void TaskRecord_Updated_ReloadTaskList(CMDataProviderRecordUpdatedEventArgs updatedRecordEventArgs)
         {
             if (tasks == null)
             {

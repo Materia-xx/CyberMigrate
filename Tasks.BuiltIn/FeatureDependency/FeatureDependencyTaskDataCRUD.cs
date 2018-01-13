@@ -1,9 +1,6 @@
 ﻿using DataProvider;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Tasks.BuiltIn.FeatureDependency
 {
@@ -23,16 +20,6 @@ namespace Tasks.BuiltIn.FeatureDependency
         {
             foreach (var taskDataRow in dto.PathOptions)
             {
-                if (taskDataRow.CMFeatureTemplateId == 0)
-                {
-                    opResult.Errors.Add("Each row option in a feature dependency must be assigned to a valid feature.");
-                }
-
-                if (taskDataRow.CMTargetSystemStateId == 0)
-                {
-                    opResult.Errors.Add("Each row option in a feature dependency must be assigned to a valid sytem state.");
-                }
-
                 if (string.IsNullOrWhiteSpace(taskDataRow.FeatureVarName) && !string.IsNullOrWhiteSpace(taskDataRow.FeatureVarSetTo))
                 {
                     opResult.Errors.Add("Cannot set a feature var value to check for without specifying the feature var itself (within a feature dependency).");

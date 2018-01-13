@@ -62,13 +62,14 @@ namespace Tasks.BuiltIn.FeatureDependency
             // Display as a task instance
             else
             {
-                // If nothing is selected and there are no options to choose from then jump straight to the 
+                // If choice has been made and there are no options to choose from then jump straight to the 
                 // dialog to select a dependency.
-                if (TaskData.InstancedCMFeatureId == 0 && !TaskData.PathOptions.Any())
+                if (TaskData.PathOptionChosen == false && !TaskData.PathOptions.Any())
                 {
                     var featureSelectorUC = ShowFeatureSelectorWindow(0, 0, cmTask.IsTemplate);
                     if (featureSelectorUC.SelectionConfirmed)
                     {
+                        TaskData.PathOptionChosen = true;
                         TaskData.InstancedCMFeatureId = featureSelectorUC.SelectedFeatureId;
                         TaskData.InstancedTargetCMSystemStateId = featureSelectorUC.SelectedSystemStateId;
                         UpdateTaskData();
@@ -76,7 +77,7 @@ namespace Tasks.BuiltIn.FeatureDependency
                 }
 
                 // Display for an instance that does not yet have the choice made
-                if (TaskData.InstancedCMFeatureId == 0)
+                if (TaskData.PathOptionChosen == false)
                 {
                     dataGridChooseFeatureDependency.Visibility = Visibility.Visible;
                     dataGridChooseFeatureDependency.ItemsSource = TaskData.PathOptions;
@@ -86,10 +87,18 @@ namespace Tasks.BuiltIn.FeatureDependency
                 {
                     gridChosen.Visibility = Visibility.Visible;
 
-                    cmTargetFeature = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(TaskData.InstancedCMFeatureId);
-                    var cmTargetSystemState = CMDataProvider.DataStore.Value.CMSystemStates.Value.Get(TaskData.InstancedTargetCMSystemStateId);
-                    txtChosenFeatureName.Text = cmTargetFeature.Name;
-                    txtChosenTargetState.Text = cmTargetSystemState.Name;
+                    if (TaskData.InstancedCMFeatureId == 0)
+                    {
+                        txtChosenFeatureName.Text = "<None>";
+                        txtChosenTargetState.Text = "<None>";
+                    }
+                    else
+                    {
+                        cmTargetFeature = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(TaskData.InstancedCMFeatureId);
+                        var cmTargetSystemState = CMDataProvider.DataStore.Value.CMSystemStates.Value.Get(TaskData.InstancedTargetCMSystemStateId);
+                        txtChosenFeatureName.Text = cmTargetFeature.Name;
+                        txtChosenTargetState.Text = cmTargetSystemState.Name;
+                    }
                 }
             }
         }
@@ -168,7 +177,12 @@ namespace Tasks.BuiltIn.FeatureDependency
         {
             if (TaskData.Id == 0)
             {
-                FeatureDependencyExtensions.FeatureDependencyDataProvider.Insert(TaskData);
+                var opResult = FeatureDependencyExtensions.FeatureDependencyDataProvider.Insert(TaskData);
+                if (opResult.Errors.Any())
+                {
+                    MessageBox.Show(opResult.ErrorsCombined);
+                    return;
+                }
                 // Re-get so the db id is assigned
                 TaskData = FeatureDependencyExtensions.FeatureDependencyDataProvider.Get_ForTaskId(cmTask.Id);
             }

@@ -10,6 +10,12 @@ namespace Tasks.BuiltIn.FeatureDependency
     public class FeatureDependencyDto : CMTaskDataDtoBase
     {
         /// <summary>
+        /// Indicates if a path option has been chosen.
+        /// If set to true and <see cref="InstancedCMFeatureId"/> is zero it means that a choice that led to no feature was chosen.
+        /// </summary>
+        public bool PathOptionChosen { get; set; }
+
+        /// <summary>
         /// Represents the feature dependency instance that was chosen from PathOptions.
         /// Will be set to 0 if a choice has not yet been made.
         /// </summary>
