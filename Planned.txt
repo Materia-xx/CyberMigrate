@@ -1,7 +1,5 @@
 Upcoming:
 
-    - Add scrollbars in the notes task
-
     - Having a feature editor open and then closing the main window keeps the app open ?
       Maybe a warning during this condition
 
