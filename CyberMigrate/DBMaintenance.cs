@@ -1,4 +1,6 @@
 ﻿using DataProvider;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 
@@ -6,35 +8,123 @@ namespace CyberMigrate
 {
     public static class DBMaintenance
     {
+        private static Dictionary<int, Func<bool>> UpgradeFunctions = new Dictionary<int, Func<bool>>();
+
+        private static void AssignUpgradeFunctions()
+        {
+            // v2 - Adds MigrationOrder to system states. To differiantiate from the state Priority.
+            UpgradeFunctions[2] = () =>
+            {
+                // Rewrite all system states to the db so they get the default MigrationOrder property set in the BSON data
+                var allSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll();
+                foreach (var systemState in allSystemStates)
+                {
+                    systemState.MigrationOrder = systemState.Priority;
+
+                    var opResult = CMDataProvider.DataStore.Value.CMSystemStates.Value.Update(systemState);
+                    if (opResult.Errors.Any())
+                    {
+                        MessageBox.Show($"An unrecoverable database upgrade error has occurred:\r\n{opResult.ErrorsCombined}");
+                        return false;
+                    }
+                }
+
+                return true;
+            };
+
+            // v3 - Adds task factory version so task factories can implement database upgrades also
+            UpgradeFunctions[3] = () =>
+            {
+                // Rewrite all of the task factory entries to have a default version of 0.
+                // Task factories should themselves take care of updating anything appropriate up from 0.
+                var allTaskFactories = CMDataProvider.DataStore.Value.CMTaskFactories.Value.GetAll();
+                foreach (var taskFactory in allTaskFactories)
+                {
+                    taskFactory.Version = 0;
+
+                    var opResult = CMDataProvider.DataStore.Value.CMTaskFactories.Value.Update(taskFactory);
+                    if (opResult.Errors.Any())
+                    {
+                        MessageBox.Show($"An unrecoverable database upgrade error has occurred:\r\n{opResult.ErrorsCombined}");
+                        return false;
+                    }
+                }
+
+                return true;
+            };
+
+            // v4 - Adds color of task backgrounds to the feature dto
+            UpgradeFunctions[4] = () =>
+            {
+                // Give every feature a default color of an empty string (default grid color)
+                var allFeatures = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll();
+                foreach (var feature in allFeatures)
+                {
+                    feature.TasksBackgroundColor = null;
+                    var opResult = CMDataProvider.DataStore.Value.CMFeatures.Value.Update(feature);
+                    if (opResult.Errors.Any())
+                    {
+                        MessageBox.Show($"An unrecoverable database upgrade error has occurred:\r\n{opResult.ErrorsCombined}");
+                        return false;
+                    }
+                }
+
+                return true;
+            };
+
+            // v5 - Adds task ExecutionOrder to hint at the order that tasks should be completed in within their system state
+            UpgradeFunctions[5] = () =>
+            {
+                // Set all current tasks ExecutionOrder to 0 to update the bson data. They'll need to manually be adjusted in the UI afterwards.
+                var allTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll();
+                foreach (var cmTask in allTasks)
+                {
+                    cmTask.ExecutionOrder = 0;
+                    var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Update(cmTask);
+                    if (opResult.Errors.Any())
+                    {
+                        MessageBox.Show($"An unrecoverable database upgrade error has occurred:\r\n{opResult.ErrorsCombined}");
+                        return false;
+                    }
+                }
+
+                return true;
+            };
+        }
+
         public static bool RunMaintenanceRoutines()
         {
+            AssignUpgradeFunctions();
+
             // Gets the schema version that the database is currently at. If unknown defaults to the first supported version.
             var databaseSchemaVersion = CMDataProvider.DataStore.Value.GetDatabaseSchemaVersion();
 
-            if (databaseSchemaVersion < 2)
+            // Get a list of all upgrade functions available
+            var allUpgradeVersions = UpgradeFunctions.Keys.OrderBy(v => v);
+
+            foreach (var upgradeVersion in allUpgradeVersions)
             {
-                if (!UpgradeSchemaTo_Version2())
+                // If the db is not yet at this version, the prompt and do the upgrade
+                if (databaseSchemaVersion < upgradeVersion)
                 {
-                    return false;
+                    var userResponse = MessageBox.Show($"Upgrading database schema to version {upgradeVersion}. Press OK to continue or cancel to quit.", $"Upgrade to schema version {upgradeVersion}", MessageBoxButton.OKCancel);
+                    if (userResponse != MessageBoxResult.OK)
+                    {
+                        return false;
+                    }
+
+                    // Do the upgrade
+                    bool upgradeSuccess = UpgradeFunctions[upgradeVersion]();
+                    if (!upgradeSuccess)
+                    {
+                        return false;
+                    }
+
+                    // Set the db to now be the upgraded version
+                    CMDataProvider.DataStore.Value.SetDatabaseSchemaVersion(upgradeVersion);
+                    databaseSchemaVersion = CMDataProvider.DataStore.Value.GetDatabaseSchemaVersion();
                 }
             }
-
-            if (databaseSchemaVersion < 3)
-            {
-                if (!UpgradeSchemaTo_Version3())
-                {
-                    return false;
-                }
-            }
-
-            if (databaseSchemaVersion < 4)
-            {
-                if (!UpgradeSchemaTo_Version4())
-                {
-                    return false;
-                }
-            }
-
 
             //Upgrade_TaskDto();
             //Upgrade_FeatureDto();
@@ -51,88 +141,7 @@ namespace CyberMigrate
             return true;
         }
 
-        private static bool UpgradeSchemaTo_Version2()
-        {
-            var userResponse = MessageBox.Show("Upgrading database schema to version 2. Press OK to continue or cancel to quit.", "Upgrade to schema version 2", MessageBoxButton.OKCancel);
-            if (userResponse != MessageBoxResult.OK)
-            {
-                return false;
-            }
-
-            // Rewrite all system states to the db so they get the default MigrationOrder property set in the BSON data
-            var allSystemStates = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll();
-            foreach (var systemState in allSystemStates)
-            {
-                systemState.MigrationOrder = systemState.Priority;
-
-                var opResult = CMDataProvider.DataStore.Value.CMSystemStates.Value.Update(systemState);
-                if (opResult.Errors.Any())
-                {
-                    MessageBox.Show($"An unrecoverable database upgrade error has occurred:\r\n{opResult.ErrorsCombined}");
-                    return false;
-                }
-            }
-
-            // Set the db to now be version 2
-            CMDataProvider.DataStore.Value.SetDatabaseSchemaVersion(2);
-            return true;
-        }
-
-        private static bool UpgradeSchemaTo_Version3()
-        {
-            var userResponse = MessageBox.Show("Upgrading database schema to version 3. Press OK to continue or cancel to quit.", "Upgrade to schema version 3", MessageBoxButton.OKCancel);
-            if (userResponse != MessageBoxResult.OK)
-            {
-                return false;
-            }
-
-            // Task factory version is a new thing in v3.
-            // Rewrite all of the task factory entries to have a default version of 0.
-            // Task factories should themselves take care of updating anything appropriate up from 0.
-            var allTaskFactories = CMDataProvider.DataStore.Value.CMTaskFactories.Value.GetAll();
-            foreach (var taskFactory in allTaskFactories)
-            {
-                taskFactory.Version = 0;
-
-                var opResult = CMDataProvider.DataStore.Value.CMTaskFactories.Value.Update(taskFactory);
-                if (opResult.Errors.Any())
-                {
-                    MessageBox.Show($"An unrecoverable database upgrade error has occurred:\r\n{opResult.ErrorsCombined}");
-                    return false;
-                }
-            }
-
-            // Set the db to now be version 3
-            CMDataProvider.DataStore.Value.SetDatabaseSchemaVersion(3);
-            return true;
-        }
-
-        private static bool UpgradeSchemaTo_Version4()
-        {
-            var userResponse = MessageBox.Show("Upgrading database schema to version 4. Press OK to continue or cancel to quit.", "Upgrade to schema version 4", MessageBoxButton.OKCancel);
-            if (userResponse != MessageBoxResult.OK)
-            {
-                return false;
-            }
-
-            // v4 - Adds color of task backgrounds to the feature dto
-
-            // Give every feature a default color of an empty string (default grid color)
-            var allFeatures = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll();
-            foreach (var feature in allFeatures)
-            {
-                feature.TasksBackgroundColor = null;
-                var opResult = CMDataProvider.DataStore.Value.CMFeatures.Value.Update(feature);
-                if (opResult.Errors.Any())
-                {
-                    MessageBox.Show($"An unrecoverable database upgrade error has occurred:\r\n{opResult.ErrorsCombined}");
-                    return false;
-                }
-            }
-
-            CMDataProvider.DataStore.Value.SetDatabaseSchemaVersion(4);
-            return true;
-        }
+        // -------------------------------------------
 
         public static void Debug_DeleteOptions()
         {
@@ -153,88 +162,6 @@ namespace CyberMigrate
             foreach (var state in allStates)
             {
                 CMDataProvider.DataStore.Value.CMTaskStates.Value.Delete(state.Id);
-            }
-        }
-
-        private static void Upgrade_TransitionRuleDto()
-        {
-            MessageBox.Show("Press OK upgrade transition rule Dto records in the database, and delete currently invalid records.");
-
-            var allRules = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.GetAll();
-            foreach (var cmRule in allRules)
-            {
-                //cmRule.CMSystemStateId = cmRule.ToCMSystemStateId;
-
-                var opResult = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.Update(cmRule);
-                if (opResult.Errors.Any())
-                {
-                    var opDelResult = CMDataProvider.DataStore.Value.CMFeatureStateTransitionRules.Value.Delete(cmRule.Id);
-                    if (opDelResult.Errors.Any())
-                    {
-                        MessageBox.Show(opDelResult.ErrorsCombined);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Updates the BSON data stored in the db to match the current properties available in the Dto
-        /// Run this after the Dto has been changed
-        /// </summary>
-        private static void Upgrade_TaskDto()
-        {
-            MessageBox.Show("Press OK upgrade task Dto records in the database, and delete currently invalid records.");
-
-            var allTasks = CMDataProvider.DataStore.Value.CMTasks.Value.GetAll();
-            foreach (var cmTask in allTasks)
-            {
-                var opResult = CMDataProvider.DataStore.Value.CMTasks.Value.Update(cmTask);
-                if (opResult.Errors.Any())
-                {
-                    var opDelResult = CMDataProvider.DataStore.Value.CMTasks.Value.Delete(cmTask.Id);
-                    if (opDelResult.Errors.Any())
-                    {
-                        MessageBox.Show(opDelResult.ErrorsCombined);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Updates the BSON data stored in the db to match the current properties available in the Dto
-        /// Run this after the Dto has been changed
-        /// </summary>
-        private static void Upgrade_FeatureDto()
-        {
-            MessageBox.Show("Press OK upgrade feature Dto records in the database, and delete currently invalid records.");
-
-            var allFeatures = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll();
-            foreach (var cmFeature in allFeatures)
-            {
-                var opResult = CMDataProvider.DataStore.Value.CMFeatures.Value.Update(cmFeature);
-                if (opResult.Errors.Any())
-                {
-                    var opDelResult = CMDataProvider.DataStore.Value.CMFeatures.Value.Delete(cmFeature.Id);
-                    if (opDelResult.Errors.Any())
-                    {
-                        MessageBox.Show(opDelResult.ErrorsCombined);
-                    }
-                }
-            }
-        }
-
-        private static void Upgrade_SystemDto()
-        {
-            MessageBox.Show("Press OK upgrade system Dto records in the database.");
-
-            var allSystems = CMDataProvider.DataStore.Value.CMSystems.Value.GetAll();
-            foreach (var cmSystem in allSystems)
-            {
-                var opResult = CMDataProvider.DataStore.Value.CMSystems.Value.Update(cmSystem);
-                if (opResult.Errors.Any())
-                {
-                    MessageBox.Show(opResult.ErrorsCombined);
-                }
             }
         }
 

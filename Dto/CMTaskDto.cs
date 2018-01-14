@@ -43,5 +43,10 @@
         /// The title of the task
         /// </summary>
         public string Title { get; set; }
+
+        /// <summary>
+        /// The order that the task should be executed in, relative to other tasks in the same feature and system state.
+        /// </summary>
+        public int ExecutionOrder { get; set; }
     }
 }

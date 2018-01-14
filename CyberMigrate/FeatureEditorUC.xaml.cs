@@ -202,6 +202,13 @@ namespace CyberMigrate
                     DisplayMemberPath = nameof(CMSystemStateDto.Name),
                 });
             dataGridTasks.Columns.Add(
+                new DataGridTextColumn()
+                {
+                    Header = "Order",
+                    Width = 50,
+                    Binding = new Binding($"{nameof(FeatureEditorTaskRowDto.Task)}.{nameof(CMTaskDto.ExecutionOrder)}"),
+                });
+            dataGridTasks.Columns.Add(
                 new DataGridComboBoxColumn()
                 {
                     Header = "Task Type",

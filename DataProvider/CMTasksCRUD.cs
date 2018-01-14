@@ -77,7 +77,8 @@ namespace DataProvider
             var systemStatesLookup = CMDataProvider.DataStore.Value.CMSystemStates.Value.GetAll_ForFeatureTemplate(cmFeatureTemplateId)
                 .ToDictionary(s => s.Id, s => s);
 
-            return results.OrderBy(t => systemStatesLookup[t.CMSystemStateId].Priority);
+            return results.OrderBy(t => systemStatesLookup[t.CMSystemStateId].Priority)
+                    .ThenBy(t => t.ExecutionOrder);
         }
 
         /// <summary>

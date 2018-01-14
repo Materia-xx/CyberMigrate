@@ -1,5 +1,15 @@
 Upcoming:
 
+    - To simulate the order that tasks must be completed in, within each system state add an order field that shows up and can be set in the feature editor.
+      The program won’t enforce that one task is done before the other, but it should list them in this order in the feature editor 
+      (list first by system state priority order, then by task order).
+
+    - Add the ability to add log messages to a note task, record the date that each entry was written.
+
+    - Add “Feature Overview”, a multi line extended version of the title.
+
+    - Change the text on the button that currently says “Edit Task” to be “Create Task Data” if the task data has not yet been created.
+
     - Having a feature editor open and then closing the main window keeps the app open ?
       Maybe a warning during this condition
 
@@ -18,16 +28,6 @@ Upcoming:
     - In the dependency selector, where can choose the target state: Instead make it checkbox list where you can choose multiple target states.
       Any one of which will satisfy the dependency. This will require updating the dto, adding a dbupdate function and changing the code that
       determines if the task is closed, waitingForDependency, etc.
-
-    - Add the ability to add log messages to a note task, record the date that each entry was written.
-
-    - To simulate the order that tasks must be completed in, within each system state add an order field that shows up and can be set in the feature editor.
-      The program won’t enforce that one task is done before the other, but it should list them in this order in the feature editor 
-      (list first by system state priority order, then by task order).
-
-    - Add “Feature Overview”, a multi line extended version of the title.
-
-    - Change the text on the button that currently says “Edit Task” to be “Create Task Data” if the task data has not yet been created.
 
     - When clicking the edit button on an un-entered task row that has all the proper data,
       see if it is easy to do the insert first so it doesn’t come up with the message: A row must first be fully entered
