@@ -33,5 +33,11 @@
         /// The name of the feature template
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// The background color for tasks shown for this feature.
+        /// Any child features will inherit this color as well.
+        /// </summary>
+        public string TasksBackgroundColor { get; set; }
     }
 }

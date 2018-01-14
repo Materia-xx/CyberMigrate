@@ -27,6 +27,15 @@ namespace CyberMigrate
                 }
             }
 
+            if (databaseSchemaVersion < 4)
+            {
+                if (!UpgradeSchemaTo_Version4())
+                {
+                    return false;
+                }
+            }
+
+
             //Upgrade_TaskDto();
             //Upgrade_FeatureDto();
             //Upgrade_TransitionRuleDto();
@@ -95,6 +104,33 @@ namespace CyberMigrate
 
             // Set the db to now be version 3
             CMDataProvider.DataStore.Value.SetDatabaseSchemaVersion(3);
+            return true;
+        }
+
+        private static bool UpgradeSchemaTo_Version4()
+        {
+            var userResponse = MessageBox.Show("Upgrading database schema to version 4. Press OK to continue or cancel to quit.", "Upgrade to schema version 4", MessageBoxButton.OKCancel);
+            if (userResponse != MessageBoxResult.OK)
+            {
+                return false;
+            }
+
+            // v4 - Adds color of task backgrounds to the feature dto
+
+            // Give every feature a default color of an empty string (default grid color)
+            var allFeatures = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll();
+            foreach (var feature in allFeatures)
+            {
+                feature.TasksBackgroundColor = null;
+                var opResult = CMDataProvider.DataStore.Value.CMFeatures.Value.Update(feature);
+                if (opResult.Errors.Any())
+                {
+                    MessageBox.Show($"An unrecoverable database upgrade error has occurred:\r\n{opResult.ErrorsCombined}");
+                    return false;
+                }
+            }
+
+            CMDataProvider.DataStore.Value.SetDatabaseSchemaVersion(4);
             return true;
         }
 

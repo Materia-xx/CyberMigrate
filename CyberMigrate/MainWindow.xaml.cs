@@ -323,6 +323,7 @@ namespace CyberMigrate
                     SystemName = systemRef.Name,
                     TaskSystemStateName = taskSystemStateRef.Name,
                     FeatureSystemStateName = featureSystemStateRef.Name,
+                    TaskRowBackgroundColor = featureRef.TasksBackgroundColor,
                 };
 
                 unsortedResults.Add(filterRow);
@@ -385,9 +386,17 @@ namespace CyberMigrate
                 addNewFeature.Items.Add(newFeatureSubMenu);
                 newFeatureSubMenu.Click += (sender, e) =>
                 {
-                    var newFeature = cmFeatureTemplate.ToInstance(new List<CMFeatureVarStringDto>());
-                    ShowFilteredTasks();
-                    new FeatureEditor(newFeature).Show();
+                    var newFeatureDialog = new FeatureCreator(cmFeatureTemplate);
+                    newFeatureDialog.ShowDialog();
+
+                    var newFeature = newFeatureDialog.CreatedFeature;
+
+                    if (newFeature != null)
+                    {
+                        // Show any new tasks after the feature has been created
+                        ShowFilteredTasks();
+                        new FeatureEditor(newFeature).Show();
+                    }
                 };
             }
 

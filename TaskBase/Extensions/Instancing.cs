@@ -58,7 +58,8 @@ namespace TaskBase.Extensions
             {
                 CMParentFeatureTemplateId = featureTemplate.Id,
                 CMSystemId = featureTemplate.CMSystemId,
-                Name = featureTemplate.Name
+                Name = featureTemplate.Name,
+                TasksBackgroundColor = featureTemplate.TasksBackgroundColor
             };
 
             // Calculate a default feature state, which is needed to insert into the db

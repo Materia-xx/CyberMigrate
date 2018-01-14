@@ -74,6 +74,17 @@
             <GridSplitter Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" />
             
             <DataGrid x:Name="dataGridTasks" Grid.Row="2" Grid.Column="2" AutoGenerateColumns="False" CanUserAddRows="False">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Background" Value="{Binding TaskRowBackgroundColor}"></Setter>
+                        
+                        <!--<Style.Triggers>
+                            <DataTrigger Binding="{Binding IsClosed}" Value="True">
+                                
+                            </DataTrigger>
+                        </Style.Triggers>-->
+                    </Style>
+                </DataGrid.RowStyle>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Feature" Binding="{Binding FeatureName}" Width="150"></DataGridTextColumn>
                     <DataGridTextColumn Header="Task Title" Binding="{Binding TaskTitle}" Width="200"></DataGridTextColumn>

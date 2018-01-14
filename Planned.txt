@@ -13,11 +13,6 @@ Upcoming:
 
     - Removing tasks from a feature doesn’t re-calculate the feature state. But it should.
 
-    - The idea of being able to select a color of a features tasks (and any spawned children features).
-      The selection would be before the feature is created. The new feature menu would show a dialog allowing the user to set the name and color before creation. 
-      The color would be remembered in the feature dto, any children spawned would inherit that color.. only the top level feature would provide the color choice dialog.
-      After a feature color is set it is immutable and the CRUD provider should check for this.
-
     - Add a button or something in the filtering section to restore the default sorting of tasks in the main form.
 
     - In the dependency selector, where can choose the target state: Instead make it checkbox list where you can choose multiple target states.

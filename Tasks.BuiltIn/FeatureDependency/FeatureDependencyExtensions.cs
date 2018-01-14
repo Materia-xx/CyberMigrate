@@ -259,6 +259,9 @@ namespace Tasks.BuiltIn.FeatureDependency
                         // The feature template referred to by this option
                         var featureTemplate = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(pathOption.CMFeatureTemplateId);
 
+                        // Make it so the child feature inherits the color from the parent
+                        featureTemplate.TasksBackgroundColor = featureInstance.TasksBackgroundColor;
+
                         var childFeatureVars = new List<CMFeatureVarStringDto>();
                         var clonedFeatureInstance = featureTemplate.ToInstance(childFeatureVars);
 

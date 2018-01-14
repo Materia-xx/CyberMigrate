@@ -56,5 +56,10 @@ namespace CyberMigrate
         /// The current system state that the feature is in
         /// </summary>
         public string FeatureSystemStateName { get; set; }
+
+        /// <summary>
+        /// The background color of task rows
+        /// </summary>
+        public string TaskRowBackgroundColor { get; set; }
     }
 }
