@@ -30,9 +30,15 @@
         }
 
         /// <summary>
-        /// The name of the feature template
+        /// The name of the feature template/instance
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// A description of the feature that gives more details than the title.
+        /// Not meant for listing tasks though.
+        /// </summary>
+        public string Description { get; set; }
 
         /// <summary>
         /// The background color for tasks shown for this feature.

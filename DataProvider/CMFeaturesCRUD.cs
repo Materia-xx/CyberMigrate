@@ -215,7 +215,7 @@ namespace DataProvider
         {
             var opResult = new CMCUDResult();
             var dbEntry = Get(cmFeatureId);
-            if (dbEntry.Name.Equals(name, System.StringComparison.Ordinal))
+            if (dbEntry.Name == name)
             {
                 // Nothing changed, no update to the name is needed
                 return opResult;
@@ -223,6 +223,22 @@ namespace DataProvider
 
             // Update just the name
             dbEntry.Name = name;
+            return Update(dbEntry);
+        }
+
+        public CMCUDResult UpdateIfNeeded_Description(int cmFeatureId, string description)
+        {
+            var opResult = new CMCUDResult();
+            var dbEntry = Get(cmFeatureId);
+
+            if (dbEntry.Description == description)
+            {
+                // Nothing changed, no update to the description is needed
+                return opResult;
+            }
+
+            // Update just the name
+            dbEntry.Description = description;
             return Update(dbEntry);
         }
 

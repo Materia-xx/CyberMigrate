@@ -90,6 +90,25 @@ namespace CyberMigrate
 
                 return true;
             };
+
+            // v6 - Adds feature Description so features can be described in more detail
+            UpgradeFunctions[6] = () =>
+            {
+                // Set the BSON data to exist for each record for the Description field
+                var allFeatures = CMDataProvider.DataStore.Value.CMFeatures.Value.GetAll();
+                foreach (var feature in allFeatures)
+                {
+                    feature.Description = null;
+                    var opResult = CMDataProvider.DataStore.Value.CMFeatures.Value.Update(feature);
+                    if (opResult.Errors.Any())
+                    {
+                        MessageBox.Show($"An unrecoverable database upgrade error has occurred:\r\n{opResult.ErrorsCombined}");
+                        return false;
+                    }
+                }
+
+                return true;
+            };
         }
 
         public static bool RunMaintenanceRoutines()
@@ -125,11 +144,6 @@ namespace CyberMigrate
                     databaseSchemaVersion = CMDataProvider.DataStore.Value.GetDatabaseSchemaVersion();
                 }
             }
-
-            //Upgrade_TaskDto();
-            //Upgrade_FeatureDto();
-            //Upgrade_TransitionRuleDto();
-            //Upgrade_SystemDto();
 
             // mcbtodo: These are only cleanup routines I'm using to clean up the db during dev and won't be needed in the released version
             //Debug_DeleteTasksNotInAFeature();

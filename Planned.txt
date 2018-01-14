@@ -1,12 +1,6 @@
 Upcoming:
 
-    - To simulate the order that tasks must be completed in, within each system state add an order field that shows up and can be set in the feature editor.
-      The program won’t enforce that one task is done before the other, but it should list them in this order in the feature editor 
-      (list first by system state priority order, then by task order).
-
     - Add the ability to add log messages to a note task, record the date that each entry was written.
-
-    - Add “Feature Overview”, a multi line extended version of the title.
 
     - Change the text on the button that currently says “Edit Task” to be “Create Task Data” if the task data has not yet been created.
 

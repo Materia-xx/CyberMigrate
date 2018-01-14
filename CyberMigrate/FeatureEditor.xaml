@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:CyberMigrate"
         mc:Ignorable="d"
         Title="FeatureEditor" Width="1024" Height="768" Loaded="Window_Loaded">
-    <DockPanel x:Name="editorUIPanel">
+    <DockPanel x:Name="editorUIPanel" Margin="5">
         
     </DockPanel>
 </Window>

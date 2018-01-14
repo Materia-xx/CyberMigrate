@@ -81,6 +81,7 @@ namespace CyberMigrate
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             txtFeatureName.Text = cmFeatureDto.Name;
+            txtFeatureDescription.Text = cmFeatureDto.Description;
 
             // Load different parts depending on if it is a feature instance or template
             if (cmFeatureDto.IsTemplate)
@@ -608,6 +609,19 @@ namespace CyberMigrate
             {
                 parentWindow.Title = cmFeatureDto.Name;
             }
+        }
+
+        private void txtFeatureDescription_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var opResult = CMDataProvider.DataStore.Value.CMFeatures.Value.UpdateIfNeeded_Description(cmFeatureDto.Id, txtFeatureDescription.Text);
+            if (opResult.Errors.Any())
+            {
+                MessageBox.Show(opResult.ErrorsCombined);
+                txtFeatureDescription.Text = cmFeatureDto.Description;
+                return;
+            }
+
+            cmFeatureDto = CMDataProvider.DataStore.Value.CMFeatures.Value.Get(cmFeatureDto.Id);
         }
     }
 }
