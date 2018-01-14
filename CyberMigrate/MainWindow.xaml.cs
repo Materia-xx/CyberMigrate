@@ -665,5 +665,49 @@ namespace CyberMigrate
         {
             ShowFilteredTasks();
         }
+
+        private void chkFilterTaskStates_Checked(object sender, RoutedEventArgs e)
+        {
+            foreach (var taskState in filterTaskStates)
+            {
+                taskState.IsSelected = true;
+            }
+            lstFilterByTaskState.ItemsSource = null;
+            lstFilterByTaskState.ItemsSource = filterTaskStates;
+            ShowFilteredTasks();
+        }
+
+        private void chkFilterTaskStates_Unchecked(object sender, RoutedEventArgs e)
+        {
+            foreach (var taskState in filterTaskStates)
+            {
+                taskState.IsSelected = false;
+            }
+            lstFilterByTaskState.ItemsSource = null;
+            lstFilterByTaskState.ItemsSource = filterTaskStates;
+            ShowFilteredTasks();
+        }
+
+        private void chkFilterFeatureStates_Checked(object sender, RoutedEventArgs e)
+        {
+            foreach (var featureState in filterFeatureStates)
+            {
+                featureState.IsSelected = true;
+            }
+            lstFilterByFeatureState.ItemsSource = null;
+            lstFilterByFeatureState.ItemsSource = filterFeatureStates;
+            ShowFilteredTasks();
+        }
+
+        private void chkFilterFeatureStates_Unchecked(object sender, RoutedEventArgs e)
+        {
+            foreach (var featureState in filterFeatureStates)
+            {
+                featureState.IsSelected = false;
+            }
+            lstFilterByFeatureState.ItemsSource = null;
+            lstFilterByFeatureState.ItemsSource = filterFeatureStates;
+            ShowFilteredTasks();
+        }
     }
 }

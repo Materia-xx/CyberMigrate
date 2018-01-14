@@ -11,9 +11,6 @@ Upcoming:
 
     - Save the sizes of things like the filter tree view, filter checkbox lists, where the grid splitters are and be able to restore these after restarting the program
 
-    - Check all / check none checkbox in the top of the main form.
-      Turn off updates while checking all or none, then turn back on after it is done.
-
     - Removing tasks from a feature doesn’t re-calculate the feature state. But it should.
 
     - The idea of being able to select a color of a features tasks (and any spawned children features).

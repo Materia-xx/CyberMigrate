@@ -43,8 +43,7 @@
                 <GridSplitter Grid.Column="3" Grid.RowSpan="2" HorizontalAlignment="Stretch" />
                 <GridSplitter Grid.Column="5" Grid.RowSpan="2" HorizontalAlignment="Stretch" />
                 
-                <Label x:Name="lblFilterTaskStates" Content="Task States"></Label>
-
+                <CheckBox x:Name="chkFilterTaskStates" Content="Task States" Margin="7,5,0,0" Checked="chkFilterTaskStates_Checked" Unchecked="chkFilterTaskStates_Unchecked"></CheckBox>
                 <ListBox x:Name="lstFilterByTaskState" Grid.Column="0" Grid.Row="2">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
@@ -56,8 +55,7 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
 
-                <Label x:Name="lblFilterFeatureStates" Content="Feature States" Grid.Column="2"></Label>
-
+                <CheckBox x:Name="chkFilterFeatureStates" Content="Feature States" Margin="7,5,0,0" Grid.Column="2" Checked="chkFilterFeatureStates_Checked" Unchecked="chkFilterFeatureStates_Unchecked"></CheckBox>
                 <ListBox x:Name="lstFilterByFeatureState" Grid.Column="2" Grid.Row="2">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
