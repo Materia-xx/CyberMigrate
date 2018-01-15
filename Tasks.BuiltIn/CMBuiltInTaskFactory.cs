@@ -102,6 +102,19 @@ namespace Tasks.BuiltIn
             }
         }
 
+        public override bool HasTaskData(CMTaskTypeDto cmTaskType, CMTaskDto cmTask)
+        {
+            switch (cmTaskType.Name)
+            {
+                case nameof(BuildInTaskTypes.FeatureDependency):
+                    return FeatureDependencyExtensions.FeatureDependencyDataProvider.Get_ForTaskId(cmTask.Id) != null;
+                case nameof(BuildInTaskTypes.Note):
+                    return NoteExtensions.NoteDataProvider.Get_ForTaskId(cmTask.Id) != null;
+            }
+
+            return false;
+        }
+
         public override void Initialize()
         {
             if (!DBMaintenance.RunMaintenanceRoutines())
@@ -218,5 +231,6 @@ namespace Tasks.BuiltIn
                 }
             }
         }
+
     }
 }

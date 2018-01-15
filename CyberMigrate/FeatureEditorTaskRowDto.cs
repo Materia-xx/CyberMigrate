@@ -1,5 +1,6 @@
 ﻿using DataProvider;
 using Dto;
+using TaskBase;
 
 namespace CyberMigrate
 {
@@ -45,6 +46,32 @@ namespace CyberMigrate
                 }
 
                 return this.Task.CMTaskStateId == closedStateId;
+            }
+        }
+
+        public string EditTaskDataButtonText
+        {
+            get
+            {
+                bool hasTaskData = false;
+                if (this.Task == null || this.Task.CMTaskTypeId == 0)
+                {
+                    // Unknown task or task type, consider it to have no task data yet
+                }
+                else
+                {
+                    var cmTaskType = CMDataProvider.DataStore.Value.CMTaskTypes.Value.Get(Task.CMTaskTypeId);
+                    hasTaskData = TaskFactoriesCatalog.Instance.HasTaskData(cmTaskType, Task);
+                }
+
+                if (hasTaskData)
+                {
+                    return "View";
+                }
+                else
+                {
+                    return "Create Task Data";
+                }
             }
         }
 

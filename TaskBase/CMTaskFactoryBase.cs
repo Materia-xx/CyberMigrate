@@ -55,6 +55,13 @@ namespace TaskBase
         }
 
         /// <summary>
+        /// Called when the program needs to determine if task data exists already for a task or not
+        /// </summary>
+        /// <param name="cmTask"></param>
+        /// <returns></returns>
+        public abstract bool HasTaskData(CMTaskTypeDto cmTaskType, CMTaskDto cmTask);
+
+        /// <summary>
         /// Called when instancing a task. A <see cref="CMTaskDto"/> will have already been created and is passed in.
         /// The task factory should create any task data for this new task and take care of updating the database.
         /// </summary>

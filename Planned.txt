@@ -33,5 +33,3 @@ Upcoming:
     - Add a way to quickly mark a task as complete via the filter results grid
 
     - Shows the tasks sorted in the way the design plan indicates
-
-    - Update the program so that when a task state is updated that it also updates any open task dialog with the correct state.

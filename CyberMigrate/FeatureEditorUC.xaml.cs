@@ -233,7 +233,9 @@ namespace CyberMigrate
 
             // A factory because each row will generate a button
             var editButtonFactory = new FrameworkElementFactory(typeof(Button));
-            editButtonFactory.SetValue(Button.ContentProperty, "Edit");
+            editButtonFactory.SetValue(Button.ContentProperty,
+                new Binding($"{nameof(FeatureEditorTaskRowDto.EditTaskDataButtonText)}"));
+
             editButtonFactory.AddHandler(Button.ClickEvent, new RoutedEventHandler(btnEditTask_Click));
             dataGridTasks.Columns.Add(new DataGridTemplateColumn
             {
@@ -592,6 +594,8 @@ namespace CyberMigrate
             // Currently we only allow 1 task editor template to be present at a time
             var taskEditor = new TaskEditor(cmTask.Task);
             taskEditor.ShowDialog();
+            // Reload the task rows. Without this the buttons won't refresh their text.
+            Reload_Tasks();
         }
 
         private void txtFeatureName_LostFocus(object sender, RoutedEventArgs e)

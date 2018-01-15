@@ -129,5 +129,11 @@ namespace TaskBase
             var taskFactory = GetTaskFactory(cmTaskType.Name);
             taskFactory.CreateTaskDataInstance(cmTaskType, cmTaskTemplate, cmTaskInstance);
         }
+
+        public bool HasTaskData(CMTaskTypeDto cmTaskType, CMTaskDto cmTask)
+        {
+            var taskFactory = GetTaskFactory(cmTaskType.Name);
+            return taskFactory.HasTaskData(cmTaskType, cmTask);
+        }
     }
 }
