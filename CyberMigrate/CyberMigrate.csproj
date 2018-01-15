@@ -76,7 +76,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="DBMaintenance.cs" />
+    <Compile Include="Extensions\DataGridExtensions.cs" />
+    <Compile Include="Extensions\GridExtensions.cs" />
     <Compile Include="Extensions\TreeViewExtensions.cs" />
+    <Compile Include="Extensions\WindowExtensions.cs" />
     <Compile Include="FeatureCreator.xaml.cs">
       <DependentUpon>FeatureCreator.xaml</DependentUpon>
     </Compile>

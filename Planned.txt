@@ -2,8 +2,6 @@ Upcoming:
 
     - Add the ability to add log messages to a note task, record the date that each entry was written.
 
-    - Change the text on the button that currently says “Edit Task” to be “Create Task Data” if the task data has not yet been created.
-
     - Having a feature editor open and then closing the main window keeps the app open ?
       Maybe a warning during this condition
 
@@ -12,8 +10,6 @@ Upcoming:
 
     - Add the current datetime as a featurevar and make a way to parse datetime string formatting within feature template/task template titles, etc
       End goal being that a new feture can have the current date/time stamped into the title in the format desired
-
-    - Save the sizes of things like the filter tree view, filter checkbox lists, where the grid splitters are and be able to restore these after restarting the program
 
     - Removing tasks from a feature doesn’t re-calculate the feature state. But it should.
 

@@ -28,6 +28,9 @@ namespace DataProvider
 
         public Lazy<CMFeatureVarStringsCRUD> CMFeatureVarStrings { get; private set; }
 
+        // This is kept in the datastore just in case a task wants to also store dimension info
+        public Lazy<CMDimensionInfoCRUD> CMDimensionInfos { get; private set; }
+
         public int GetDatabaseSchemaVersion()
         {
             var infoRecord = dataStoreInfoCollection.FindAll().FirstOrDefault();
@@ -107,6 +110,11 @@ namespace DataProvider
             CMFeatureVarStrings = new Lazy<CMFeatureVarStringsCRUD>(() =>
             {
                 return new CMFeatureVarStringsCRUD(dataStoreDatabase, "FeatureVarStrings");
+            });
+
+            CMDimensionInfos = new Lazy<CMDimensionInfoCRUD>(() =>
+            {
+                return new CMDimensionInfoCRUD(dataStoreDatabase, "DimensionInfos");
             });
         }
     }

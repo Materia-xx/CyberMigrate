@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CMDataStoreInfoDto.cs" />
+    <Compile Include="CMDimensionInfoDto.cs" />
     <Compile Include="CMFeatureVarStringDto.cs" />
     <Compile Include="CMTaskDataDtoBase.cs" />
     <Compile Include="CMTaskStateDto.cs" />

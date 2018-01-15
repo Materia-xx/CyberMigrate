@@ -60,6 +60,28 @@ namespace CyberMigrate
             RedrawFilterSection();
             RedrawFilterTreeView();
             RedrawMainMenu();
+            LoadDimensions();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            SaveDimensions();
+        }
+
+        private void LoadDimensions()
+        {
+            this.LoadWindowDimensions("Main_Window");
+            gridMain.LoadGridDimensions("Main_Grid");
+            gridFilterOptions.LoadGridDimensions("Main_GridFilterOptions");
+            dataGridTasks.LoadDataGridDimensions("Main_GridTasks");
+        }
+
+        private void SaveDimensions()
+        {
+            this.SaveWindowDimensions("Main_Window");
+            gridMain.SaveGridDimensions("Main_Grid");
+            gridFilterOptions.SaveGridDimensions("Main_GridFilterOptions");
+            dataGridTasks.SaveDataGridDimensions("Main_GridTasks");
         }
 
         private void RedrawFilterSection()
