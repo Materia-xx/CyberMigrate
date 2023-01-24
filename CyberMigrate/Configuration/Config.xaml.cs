@@ -1,6 +1,7 @@
 ﻿using CyberMigrate.Configuration;
 using CyberMigrate.Extensions;
 using DataProvider;
+using DataProvider.ProgramConfig;
 using Dto;
 using System;
 using System.Linq;
@@ -28,19 +29,12 @@ namespace CyberMigrate
             // Select the node that is hovered over when right clicking and before showing the context menu
             treeConfig.PreviewMouseRightButtonDown += TreeViewExtensions.TreeView_PreviewMouseRightButtonDown_SelectNode;
             ReLoadTreeConfiguration();
-
-            CMDataProvider.Master.Value.OnRecordCreated += Options_CUD;
-            CMDataProvider.Master.Value.OnRecordUpdated += Options_CUD;
-
             SubscribeToDataStoreCUDEvents();
         }
 
         private void Window_Unloaded(object sender, RoutedEventArgs e)
         {
             // Unsubscribe any events
-            CMDataProvider.Master.Value.OnRecordCreated -= Options_CUD;
-            CMDataProvider.Master.Value.OnRecordUpdated -= Options_CUD;
-
             if (DataStoreCUDEventsSubscribedTo)
             {
                 DataStoreCUDEventsSubscribedTo = false;
@@ -63,7 +57,7 @@ namespace CyberMigrate
 
             // Record updates that should refresh the configuration tree if the data store has been set up
             // If the data store path hasn't been set yet, then this is as far as we can go
-            if (!string.IsNullOrWhiteSpace(CMDataProvider.Master.Value.GetOptions().DataStorePath))
+            if (!string.IsNullOrWhiteSpace(CMProgramConfig.ReadLocalAppData()?.DataStorePath))
             {
                 DataStoreCUDEventsSubscribedTo = true;
                 CMDataProvider.DataStore.Value.CMSystems.Value.OnRecordCreated += Record_CUD_TreeConfgRefreshNeeded;
@@ -105,7 +99,7 @@ namespace CyberMigrate
             treeConfig.Items.Add(dataStoreTVI);
 
             // If the data store path hasn't been set yet, then this is as far as we can go
-            if (string.IsNullOrWhiteSpace(CMDataProvider.Master.Value.GetOptions().DataStorePath))
+            if (string.IsNullOrWhiteSpace(CMProgramConfig.ReadLocalAppData()?.DataStorePath))
             {
                 dataStoreTVI.IsSelected = true;
                 return;

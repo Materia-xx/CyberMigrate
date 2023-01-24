@@ -145,22 +145,10 @@ namespace CyberMigrate
                 }
             }
 
-            // mcbtodo: These are only cleanup routines I'm using to clean up the db during dev and won't be needed in the released version
-            //Debug_DeleteTasksNotInAFeature();
-            //Debug_DeleteInvalidFeatureTransitionRules();
-            //Debug_DeleteAllTaskAndFeatureInstances();
-            //Debug_DeleteAllTaskTypesAndStates();
-            //Debug_DeleteOptions();
-
             return true;
         }
 
         // -------------------------------------------
-
-        public static void Debug_DeleteOptions()
-        {
-            CMDataProvider.Master.Value.DeleteOptions();
-        }
 
         // Remove all task types and states, the program should load new ones from the tasks and defaults. 
         // Also wipes out user defined states if possible

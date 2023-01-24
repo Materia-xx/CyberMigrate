@@ -1,6 +1,8 @@
-﻿using CyberMigrate.Extensions;
+﻿using CyberMigrate.Configuration;
+using CyberMigrate.Extensions;
 using DataProvider;
 using DataProvider.Events;
+using DataProvider.ProgramConfig;
 using Dto;
 using System;
 using System.Collections.Generic;
@@ -44,6 +46,10 @@ namespace CyberMigrate
             if (!DataStoreOptionConfigured())
             {
                 ShowConfigurationUI();
+                if (DataStoreOptionConfigured())
+                {
+                    DataStorePathSet();
+                }
                 RedrawMainMenu();
                 return;
             }
@@ -553,22 +559,6 @@ namespace CyberMigrate
             CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordCreated += Record_CUD_RefreshFilteredTasks;
             CMDataProvider.DataStore.Value.CMTasks.Value.OnRecordUpdated += Record_CUD_RefreshFilteredTasks;
             CMDataProvider.DataStore.Value.CMTasks.Value.OnBeforeRecordDeleted += Record_CUD_RefreshFilteredTasks;
-
-            // Reload the datastore when the options are updated
-            CMDataProvider.Master.Value.OnRecordCreated += Record_CUD_OptionsUpdated;
-            CMDataProvider.Master.Value.OnRecordUpdated += Record_CUD_OptionsUpdated;
-        }
-
-        /// <summary>
-        /// Triggered when the options are updated
-        /// </summary>
-        /// <param name="recordEventArgs"></param>
-        private void Record_CUD_OptionsUpdated(object recordEventArgs)
-        {
-            if (DataStoreOptionConfigured())
-            {
-                DataStorePathSet();
-            }
         }
 
         private void Record_CUD_RefreshFilteredTasks(object recordEventArgs)
@@ -615,8 +605,8 @@ namespace CyberMigrate
 
         private bool DataStoreOptionConfigured()
         {
-            var options = CMDataProvider.Master.Value.GetOptions();
-            if (!Directory.Exists(options.DataStorePath))
+            var options = CMProgramConfig.ReadLocalAppData();
+            if (string.IsNullOrWhiteSpace(options?.DataStorePath) || !Directory.Exists(options.DataStorePath))
             {
                 return false;
             }

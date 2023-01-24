@@ -1,7 +1,6 @@
-﻿using DataProvider;
+﻿using DataProvider.ProgramConfig;
 using Dto;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -26,8 +25,8 @@ namespace CyberMigrate.Configuration
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            var options = CMDataProvider.Master.Value.GetOptions();
-            txtStorePath.Text = options.DataStorePath;
+            var options = CMProgramConfig.ReadLocalAppData();
+            txtStorePath.Text = options?.DataStorePath;
         }
 
         private void btnApply_Click(object sender, RoutedEventArgs e)
@@ -38,15 +37,12 @@ namespace CyberMigrate.Configuration
                 return;
             }
 
-            var options = CMDataProvider.Master.Value.GetOptions();
-            options.DataStorePath = txtStorePath.Text;
-
-            var opResult = CMDataProvider.Master.Value.UpdateOptions(options);
-            if (opResult.Errors.Any())
+            var options = new CMOptionsDto()
             {
-                MessageBox.Show(opResult.ErrorsCombined);
-                return;
-            }
+                DataStorePath = txtStorePath.Text
+            };
+
+            CMProgramConfig.WriteLocalAppData(options);
         }
     }
 }
