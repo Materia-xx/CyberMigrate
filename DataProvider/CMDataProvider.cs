@@ -1,7 +1,6 @@
-﻿using Dto;
+﻿using DataProvider.ProgramConfig;
 using LiteDB;
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace DataProvider
@@ -22,7 +21,7 @@ namespace DataProvider
             {
                 if (dataStoreDatabase == null)
                 {
-                    var options = Master.Value.GetOptions();
+                    var options = CMProgramConfig.ReadLocalAppData();
 
                     var dataStoreDbPath = Path.Combine(options.DataStorePath, "CyberMigrate.db");
                     dataStoreDatabase = new LiteDatabase(dataStoreDbPath);
@@ -32,18 +31,10 @@ namespace DataProvider
         }
         private static LiteDatabase dataStoreDatabase;
 
-        public static Lazy<CMDataProviderMaster> Master = new Lazy<CMDataProviderMaster>(() =>
-        {
-            var programDbPath = Path.Combine(ProgramExeFolder, "CyberMigrateMaster.db");
-            var masterDatabase = new LiteDatabase(programDbPath);
-
-            return new CMDataProviderMaster(masterDatabase);
-        });
-
         public static Lazy<CMDataProviderDataStore> DataStore = new Lazy<CMDataProviderDataStore>(() =>
         {
             // Note this assumes that the data store path is already set up. The program should not access this field until it verifies this is the case.
-            var options = Master.Value.GetOptions();
+            var options = CMProgramConfig.ReadLocalAppData();
             return new CMDataProviderDataStore(DataStoreDatabase);
         });
     }

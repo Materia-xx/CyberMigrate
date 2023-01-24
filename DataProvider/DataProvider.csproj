@@ -33,6 +33,9 @@
     <Reference Include="LiteDB, Version=4.1.0.0, Culture=neutral, PublicKeyToken=4ee40123013c9f27, processorArchitecture=MSIL">
       <HintPath>..\packages\LiteDB.4.1.0\lib\net40\LiteDB.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -46,7 +49,6 @@
     <Compile Include="CMCUDResult.cs" />
     <Compile Include="CMDataProviderDataStore.cs" />
     <Compile Include="CMDataProviderCRUDBase.cs" />
-    <Compile Include="CMDataProviderMaster.cs" />
     <Compile Include="CMDimensionInfoCRUD.cs" />
     <Compile Include="CMFeatureVarStringsCRUD.cs" />
     <Compile Include="CMTaskDataCRUD.cs" />
@@ -63,6 +65,8 @@
     <Compile Include="Events\CMDataProviderRecordDeletedEventArgs.cs" />
     <Compile Include="Events\CMDataProviderRecordUpdatedEventArgs.cs" />
     <Compile Include="Events\CMDataProviderRecordCreatedEventArgs.cs" />
+    <Compile Include="Globals\CMJsonSerializer.cs" />
+    <Compile Include="ProgramConfig\CMProgramConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReservedTaskStates.cs" />
   </ItemGroup>
